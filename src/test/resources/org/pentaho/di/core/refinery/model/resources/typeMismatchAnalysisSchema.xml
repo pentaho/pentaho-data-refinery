@@ -1,0 +1,62 @@
+<Schema name="GettingStartedManual">
+  <Dimension name="Geography">
+    <Hierarchy hasAll="true">
+      <Table name="SALES_DATA"/>
+      <Level name="TERRITORY" uniqueMembers="false" column="TERRITORY" type="String">
+        <Annotations>
+          <Annotation name="Geo.Role">territory</Annotation>
+          <Annotation name="Data.Role">Geography</Annotation>
+        </Annotations>
+      </Level>
+      <Level name="COUNTRY" uniqueMembers="false" column="COUNTRY" type="String">
+        <Annotations>
+          <Annotation name="Geo.Role">country</Annotation>
+          <Annotation name="Data.Role">Geography</Annotation>
+        </Annotations>
+      </Level>
+      <Level name="STATE" uniqueMembers="false" column="STATE" type="String">
+        <Annotations>
+          <Annotation name="Geo.RequiredParents">country</Annotation>
+          <Annotation name="Geo.Role">state</Annotation>
+          <Annotation name="Data.Role">Geography</Annotation>
+        </Annotations>
+      </Level>
+      <Level name="CITY" uniqueMembers="false" column="CITY" type="String">
+        <Annotations>
+          <Annotation name="Geo.RequiredParents">country,state</Annotation>
+          <Annotation name="Geo.Role">city</Annotation>
+          <Annotation name="Data.Role">Geography</Annotation>
+        </Annotations>
+      </Level>
+      <Level name="POSTALCODE" uniqueMembers="false" column="POSTALCODE" type="Numeric">
+        <Annotations>
+          <Annotation name="Geo.RequiredParents">country</Annotation>
+          <Annotation name="Geo.Role">postal_code</Annotation>
+          <Annotation name="Data.Role">Geography</Annotation>
+        </Annotations>
+      </Level>
+    </Hierarchy>
+  </Dimension>
+  <Dimension name="ORDERDATE">
+    <Hierarchy hasAll="true">
+      <Table name="SALES_DATA"/>
+      <Level name="ORDERDATE" uniqueMembers="false" column="ORDERDATE" type="String">
+      </Level>
+    </Hierarchy>
+  </Dimension>
+  <Dimension name="ORDERNUMBER">
+    <Hierarchy hasAll="true">
+      <Table name="SALES_DATA"/>
+      <Level name="ORDERNUMBER" uniqueMembers="false" column="ORDERNUMBER" type="Numeric">
+      </Level>
+    </Hierarchy>
+  </Dimension>
+  <Cube name="GettingStartedManual">
+    <Table name="SALES_DATA"/>
+    <DimensionUsage name="Geography" source="Geography"/>
+    <DimensionUsage name="ORDERDATE" source="ORDERDATE"/>
+    <DimensionUsage name="ORDERNUMBER" source="ORDERNUMBER"/>
+    <Measure name="QUANTITYORDERED" column="QUANTITYORDERED" aggregator="sum" formatString="#"/>
+    <Measure name="SALES" column="SALES" aggregator="sum" formatString="#"/>
+  </Cube>
+</Schema>

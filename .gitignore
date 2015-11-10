@@ -1,0 +1,13 @@
+*.iml
+*.class
+.classpath
+.project
+.settings
+target
+rebel.xml
+test-lib/
+dev-lib/
+obf-lib/
+bin/
+dist/
+lib/
