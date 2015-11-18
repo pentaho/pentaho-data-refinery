@@ -10,6 +10,9 @@
   <groupId>pentaho</groupId>
   <artifactId>data-refinery-pdi-plugin</artifactId>
   <version>6.1-SNAPSHOT</version>
+
+  <packaging>bundle</packaging>
+
   <name>Pentaho Community Edition Project: ${project.artifactId}</name>
   <description>
     Provides PDI job enteries for building and publishing analytic data models.
@@ -41,6 +44,7 @@
     <dependency.mockito.revision>1.8.4</dependency.mockito.revision>
     <dependency.h2.revision>1.0.78</dependency.h2.revision>
     <dependency.jackson.revision>1.9.2</dependency.jackson.revision>
+    <plugin.org.apache.felix.maven-bundle-plugin.version>2.3.7</plugin.org.apache.felix.maven-bundle-plugin.version>
   </properties>
   <dependencies>
     <dependency>
@@ -190,6 +194,28 @@
           </execution>
         </executions>
       </plugin>
+
+      <plugin>
+        <groupId>org.apache.felix</groupId>
+        <artifactId>maven-bundle-plugin</artifactId>
+        <version>${plugin.org.apache.felix.maven-bundle-plugin.version}</version>
+        <extensions>true</extensions>
+        <configuration>
+          <instructions>
+            <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
+            <Bundle-Version>${project.version}</Bundle-Version>
+            <Import-Package>
+              !com.sun.jersey.api.json;version="[1.16,2)",
+              !org.codehaus.jackson.jaxrs,
+              !javax.ws.rs.ext,
+              *
+            </Import-Package>
+            <DynamicImport-Package>*</DynamicImport-Package>
+            <Export-Package></Export-Package>
+          </instructions>
+        </configuration>
+      </plugin>
+
     </plugins>
   </build>
 </project>
