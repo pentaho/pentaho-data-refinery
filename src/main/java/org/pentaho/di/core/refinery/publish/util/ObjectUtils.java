@@ -1,6 +1,7 @@
 package org.pentaho.di.core.refinery.publish.util;
 
 import com.thoughtworks.xstream.XStream;
+import com.thoughtworks.xstream.io.xml.DomDriver;
 
 import org.springframework.stereotype.Component;
 
@@ -12,8 +13,12 @@ import java.util.logging.Logger;
 @Component
 public class ObjectUtils {
 
-  private static XStream xStream = new XStream();
+  private static XStream xStream = new XStream(new DomDriver());
   private static Logger logger = Logger.getLogger( ObjectUtils.class.getName() );
+
+  static {
+     xStream.setClassLoader( ObjectUtils.class.getClassLoader() );
+  }
 
   @SuppressWarnings( "unchecked" )
   public static <T> T deepClone( T object ) {
