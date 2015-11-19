@@ -24,29 +24,49 @@
             http://www.pentaho.com/xml/schemas/pentaho-blueprint http://www.pentaho.com/xml/schemas/pentaho-blueprint.xsd"
            default-timeout="20000">
 
-    <bean id="ModelAnnotation_StepData" class="org.pentaho.di.trans.steps.annotation.ModelAnnotationData" scope="prototype"/>
+  <bean id="ModelAnnotation_StepData" class="org.pentaho.di.trans.steps.annotation.ModelAnnotationData" scope="prototype"/>
 
-    <bean id="ModelAnnotation_StepMeta" class="org.pentaho.di.trans.steps.annotation.ModelAnnotationMeta" scope="prototype">
-        <pen:di-plugin type="org.pentaho.di.core.plugins.StepPluginType">
+  <bean id="ModelAnnotation_StepMeta" class="org.pentaho.di.trans.steps.annotation.ModelAnnotationMeta" scope="prototype">
+      <pen:di-plugin type="org.pentaho.di.core.plugins.StepPluginType">
 
-            <pen:di-plugin-mapping class="org.pentaho.di.trans.step.StepDataInterface" ref="ModelAnnotation_StepData"/>
-        </pen:di-plugin>
-    </bean>
-
-    <bean id="SharedDimension_StepMeta" class="org.pentaho.di.trans.steps.annotation.SharedDimensionMeta" scope="prototype">
-        <pen:di-plugin type="org.pentaho.di.core.plugins.StepPluginType">
           <pen:di-plugin-mapping class="org.pentaho.di.trans.step.StepDataInterface" ref="ModelAnnotation_StepData"/>
-        </pen:di-plugin>
-    </bean>
-
-    <bean id="BuildModel_JobEntry" class="org.pentaho.di.job.entries.build.JobEntryBuildModel" scope="prototype">
-      <pen:di-plugin type="org.pentaho.di.core.plugins.JobEntryPluginType">
       </pen:di-plugin>
-    </bean>
+  </bean>
 
-    <bean id="PublishModel_JobEntry" class="org.pentaho.di.job.entries.publish.JobEntryDatasourcePublish" scope="prototype">
-      <pen:di-plugin type="org.pentaho.di.core.plugins.JobEntryPluginType">
+  <bean id="SharedDimension_StepMeta" class="org.pentaho.di.trans.steps.annotation.SharedDimensionMeta" scope="prototype">
+      <pen:di-plugin type="org.pentaho.di.core.plugins.StepPluginType">
+        <pen:di-plugin-mapping class="org.pentaho.di.trans.step.StepDataInterface" ref="ModelAnnotation_StepData"/>
       </pen:di-plugin>
-    </bean>
+  </bean>
+
+  <bean id="BuildModel_JobEntry" class="org.pentaho.di.job.entries.build.JobEntryBuildModel" scope="prototype">
+    <pen:di-plugin type="org.pentaho.di.core.plugins.JobEntryPluginType">
+    </pen:di-plugin>
+  </bean>
+
+  <bean id="PublishModel_JobEntry" class="org.pentaho.di.job.entries.publish.JobEntryDatasourcePublish" scope="prototype">
+    <pen:di-plugin type="org.pentaho.di.core.plugins.JobEntryPluginType">
+    </pen:di-plugin>
+  </bean>
+
+  <bean id="dataRefineryTransFinished" scope="singleton" class="org.pentaho.di.core.refinery.extension.DataRefineryTransFinishListener"/>
+  <bean id="dataRefineryTransFinishedPlugin" scope="singleton" class="org.pentaho.di.osgi.OSGIPlugin">
+    <property name="mainType" value="org.pentaho.di.core.extension.ExtensionPointInterface"/>
+    <property name="name" value="TransformationFinish"/>
+    <property name="ID" value="DataRefineryTransFinishListener"/>
+    <property name="description" value="Waits for the transformation to finish"/>
+    <property name="pluginTypeInterface" value="org.pentaho.di.core.extension.ExtensionPointPluginType"/>
+    <property name="category" value="Data Refinery"/>
+    <property name="classToBeanMap">
+      <map>
+        <entry key="org.pentaho.di.core.extension.ExtensionPointInterface" value="dataRefineryTransFinished"/>
+      </map>
+    </property>
+  </bean>
+  <service id="dataRefineryTransFinishedPluginService" interface="org.pentaho.di.core.plugins.PluginInterface" ref="dataRefineryTransFinishedPlugin">
+    <service-properties>
+      <entry key="PluginType" value="org.pentaho.di.core.extension.ExtensionPointPluginType"/>
+    </service-properties>
+  </service>
 
 </blueprint>

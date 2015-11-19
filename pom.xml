@@ -207,7 +207,6 @@
             <Import-Package>
               !com.sun.jersey.api.json;version="[1.16,2)",
               !org.codehaus.jackson.jaxrs,
-              !javax.ws.rs.ext,
               org.pentaho.di.osgi,
               org.pentaho.di.core.plugins,
               *
