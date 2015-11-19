@@ -134,6 +134,14 @@
     </dependency>
 
     <dependency>
+      <groupId>org.eclipse.core</groupId>
+      <artifactId>commands</artifactId>
+      <version>3.3.0-I20070605-0010</version>
+      <scope>compile</scope>
+    </dependency>
+
+
+    <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
       <version>${dependency.junit.revision}</version>

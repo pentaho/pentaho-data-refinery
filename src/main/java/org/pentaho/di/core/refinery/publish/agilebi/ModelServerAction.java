@@ -22,6 +22,7 @@
 
 package org.pentaho.di.core.refinery.publish.agilebi;
 
+import org.pentaho.database.IDatabaseDialect;
 import org.pentaho.database.model.IDatabaseType;
 import org.pentaho.database.service.DatabaseDialectService;
 import org.pentaho.database.util.DatabaseTypeHelper;
@@ -64,9 +65,18 @@ public class ModelServerAction {
   }
 
   protected IDatabaseType getDatabaseType( DatabaseInterface databaseInterface ) {
-    DatabaseDialectService dds = new DatabaseDialectService();
-    DatabaseTypeHelper dth = new DatabaseTypeHelper( dds.getDatabaseTypes() );
-    return dth.getDatabaseTypeByShortName( databaseInterface.getPluginId() );
+    ClassLoader orig = Thread.currentThread().getContextClassLoader();
+    IDatabaseType dbType = null;
+    try {
+      Thread.currentThread().setContextClassLoader( IDatabaseDialect.class.getClassLoader() );
+
+      DatabaseDialectService dds = new DatabaseDialectService();
+      DatabaseTypeHelper dth = new DatabaseTypeHelper( dds.getDatabaseTypes() );
+      dbType = dth.getDatabaseTypeByShortName( databaseInterface.getPluginId() );
+    } finally {
+      Thread.currentThread().setContextClassLoader( orig );
+      return dbType;
+    }
   }
 
   protected ClientResponse httpPut( final Builder builder ) {
