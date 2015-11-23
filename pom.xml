@@ -217,6 +217,7 @@
               !org.codehaus.jackson.jaxrs,
               org.pentaho.di.osgi,
               org.pentaho.di.core.plugins,
+              org.pentaho.di.core.extension,
               *
             </Import-Package>
             <DynamicImport-Package>*</DynamicImport-Package>

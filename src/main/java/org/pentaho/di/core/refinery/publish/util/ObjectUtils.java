@@ -3,14 +3,11 @@ package org.pentaho.di.core.refinery.publish.util;
 import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.io.xml.DomDriver;
 
-import org.springframework.stereotype.Component;
-
 import java.util.logging.Logger;
 
 /**
  * @author Rowell Belen
  */
-@Component
 public class ObjectUtils {
 
   private static XStream xStream = new XStream(new DomDriver());

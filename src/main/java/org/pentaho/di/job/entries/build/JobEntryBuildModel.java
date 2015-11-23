@@ -28,8 +28,6 @@ import org.pentaho.agilebi.modeler.models.annotations.ModelAnnotationGroup;
 import org.pentaho.agilebi.modeler.util.TableModelerSource;
 import org.pentaho.di.cluster.SlaveServer;
 import org.pentaho.di.core.Const;
-import static org.pentaho.di.core.Const.nullToEmpty;
-import org.pentaho.di.core.Props;
 import org.pentaho.di.core.ProvidesDatabaseConnectionInformation;
 import org.pentaho.di.core.Result;
 import org.pentaho.di.core.database.DatabaseMeta;
@@ -67,6 +65,8 @@ import org.w3c.dom.Node;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+
+import static org.pentaho.di.core.Const.nullToEmpty;
 
 @org.pentaho.di.core.annotations.JobEntry( id = JobEntryBuildModel.PLUGIN_ID,
     categoryDescription = "JobCategory.Category.Modeling", i18nPackageName = "org.pentaho.di.job.entries.build",
@@ -126,17 +126,11 @@ public class JobEntryBuildModel extends JobEntryBase implements JobEntryInterfac
 
   public JobEntryBuildModel() {
     super();
-    if ( !Props.isInitialized() ) {
-      Props.init( Props.TYPE_PROPERTIES_EMPTY );
-    }
     modeler = new DswModeler( log );
   }
 
   public JobEntryBuildModel( String name, String description ) {
     super( name, description );
-    if ( !Props.isInitialized() ) {
-      Props.init( Props.TYPE_PROPERTIES_EMPTY );
-    }
     modeler = new DswModeler( log );
   }
 

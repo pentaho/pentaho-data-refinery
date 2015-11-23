@@ -27,12 +27,10 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.pentaho.di.core.refinery.publish.agilebi.BiServerConnection;
 import org.pentaho.di.core.refinery.publish.model.ResponseStatus;
-import org.springframework.stereotype.Component;
 
 /**
  * @author Rowell Belen
  */
-@Component
 public class PublishRestUtil extends BaseRestUtil {
 
   protected static final String CAN_PUBLISH_PATH =
