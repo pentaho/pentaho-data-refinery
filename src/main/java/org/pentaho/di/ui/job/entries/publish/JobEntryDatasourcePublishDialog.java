@@ -36,6 +36,16 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
 import org.pentaho.di.core.exception.KettleException;
+import static org.pentaho.di.core.refinery.UIBuilder.DEFAULT_COMBO_SIZE;
+import static org.pentaho.di.core.refinery.UIBuilder.DEFAULT_COMPOSITE_TOP_MARGIN;
+import static org.pentaho.di.core.refinery.UIBuilder.DEFAULT_CONTROLS_TOP_MARGIN;
+import static org.pentaho.di.core.refinery.UIBuilder.DEFAULT_NO_MARGIN;
+import static org.pentaho.di.core.refinery.UIBuilder.DEFAULT_TEXT_SIZE_REGULAR;
+import static org.pentaho.di.core.refinery.UIBuilder.LEFT_MARGIN_OFFSET;
+import static org.pentaho.di.core.refinery.UIBuilder.createFormComposite;
+import static org.pentaho.di.core.refinery.UIBuilder.createFormGroup;
+import static org.pentaho.di.core.refinery.UIBuilder.positionControlBelow;
+import static org.pentaho.di.core.refinery.UIBuilder.positionLabelInputPairBelow;
 import org.pentaho.di.core.refinery.publish.agilebi.BiServerConnection;
 import org.pentaho.di.core.refinery.publish.model.DataSourcePublishModel;
 import org.pentaho.di.core.refinery.publish.util.ObjectUtils;
@@ -50,8 +60,6 @@ import org.pentaho.di.ui.core.widget.ComboVar;
 import org.pentaho.di.ui.core.widget.TextVar;
 import org.pentaho.di.ui.job.entries.common.ConnectionValidator;
 import org.pentaho.di.ui.job.entries.common.ServerConnectionGroupWrapper;
-
-import static org.pentaho.di.core.refinery.UIBuilder.*;
 
 /**
  * @author Rowell Belen
@@ -134,9 +142,12 @@ public class JobEntryDatasourcePublishDialog extends JobEntryDialogBoilerplate<J
         wUserOrRoleAcl.setEnabled( textFieldEnabled );
         if ( !textFieldEnabled ) {
           wUserOrRoleAcl.setText( StringUtils.EMPTY );
+          wUserOrRoleAcl.getTextWidget()
+              .setBackground( getParent().getDisplay().getSystemColor( SWT.COLOR_WIDGET_BACKGROUND ) );
           wUserOrRoleAcl.setForeground( getParent().getDisplay().getSystemColor( SWT.COLOR_GRAY ) ); // gray out
         } else {
           wUserOrRoleAcl.setForeground( null ); // use default
+          wUserOrRoleAcl.getTextWidget().setBackground( null );
         }
       }
     } );
