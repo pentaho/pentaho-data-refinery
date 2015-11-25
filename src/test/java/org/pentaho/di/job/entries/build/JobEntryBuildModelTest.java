@@ -184,6 +184,8 @@ public class JobEntryBuildModelTest {
       }
     } );
     buildJobEntry.setOutputStep( "Sales Fact" );
+    DswModeler modeler = new DswModeler();
+    buildJobEntry.setModeler( modeler );
     buildCopy = new JobEntryCopy( buildJobEntry );
     buildCopy.setDrawn();
     job.getJobMeta().addJobEntry( buildCopy );
@@ -480,8 +482,10 @@ public class JobEntryBuildModelTest {
     String[] steps = buildJobEntry.getOutputStepList( job.getJobMeta() );
 
     assertEquals( 2, steps.length );
-    assertEquals( "Customer Dimension", steps[0] );
-    assertEquals( "Sales Fact", steps[1] );
+
+    // can't guarantee order of the underlying map
+    assertTrue( "Customer Dimension".equals( steps[0] ) || "Customer Dimension".equals( steps[1] ) );
+    assertTrue( "Sales Fact".equals( steps[1] ) || "Sales Fact".equals( steps[0] ) );
   }
 
   @Test
@@ -506,8 +510,10 @@ public class JobEntryBuildModelTest {
     theHop.setFromEntry( theCopy );
     steps = buildJobEntry.getOutputStepList( job.getJobMeta() );
     assertEquals( 2, steps.length );
-    assertEquals( "Customer Dimension", steps[0] );
-    assertEquals( "Sales Fact", steps[1] );
+
+    // can't guarantee order of the underlying map
+    assertTrue( "Customer Dimension".equals( steps[0] ) || "Customer Dimension".equals( steps[1] ) );
+    assertTrue( "Sales Fact".equals( steps[1] ) || "Sales Fact".equals( steps[0] ) );
   }
 
   @Test

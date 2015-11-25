@@ -28,8 +28,8 @@ import org.pentaho.agilebi.modeler.ModelerException;
 import org.pentaho.agilebi.modeler.ModelerPerspective;
 import org.pentaho.agilebi.modeler.ModelerWorkspace;
 import org.pentaho.agilebi.modeler.geo.GeoContext;
+import org.pentaho.agilebi.modeler.geo.GeoContextConfigProvider;
 import org.pentaho.agilebi.modeler.geo.GeoContextFactory;
-import org.pentaho.agilebi.modeler.geo.GeoContextPropertiesProvider;
 import org.pentaho.agilebi.modeler.models.annotations.AnnotationType;
 import org.pentaho.agilebi.modeler.models.annotations.CreateAttribute;
 import org.pentaho.agilebi.modeler.models.annotations.ModelAnnotation;
@@ -66,21 +66,15 @@ import org.pentaho.metadata.model.concept.types.DataType;
 import org.pentaho.metadata.model.concept.types.LocalizedString;
 import org.pentaho.metadata.model.olap.OlapCube;
 import org.pentaho.metastore.api.IMetaStore;
-import org.pentaho.platform.engine.core.system.PentahoSystem;
 import org.pentaho.pms.core.exception.PentahoMetadataException;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Properties;
 
-import static org.pentaho.agilebi.modeler.models.annotations.ModelAnnotationGroup.ApplyStatus.FAILED;
-import static org.pentaho.agilebi.modeler.models.annotations.ModelAnnotationGroup.ApplyStatus.NULL_ANNOTATION;
-import static org.pentaho.agilebi.modeler.models.annotations.ModelAnnotationGroup.ApplyStatus.SUCCESS;
+import static org.pentaho.agilebi.modeler.models.annotations.ModelAnnotationGroup.ApplyStatus.*;
 
 public class DswModeler {
 
@@ -89,6 +83,11 @@ public class DswModeler {
   private LogChannelInterface log;
 
   private static final String MONDRIAN_CATALOG_REF = "MondrianCatalogRef";
+  private GeoContextConfigProvider geoContextConfigProvider;
+
+  public DswModeler() {
+
+  }
 
   public DswModeler( LogChannelInterface log ) {
     this.log = log;
@@ -98,11 +97,16 @@ public class DswModeler {
     this.log = log;
   }
 
+  public LogChannelInterface getLog() {
+    return log;
+  }
+
   /**
    * Creates a new DSW-enabled XMI model
    * @param modelName
    * @param source
    * @param dbMeta
+   * @param stepMetaDataCombi
    * @param stepMetaDataCombi
    * @param modelAnnotations
    * @param metaStore
@@ -193,30 +197,13 @@ public class DswModeler {
 
   private GeoContext initGeoContext() {
     try {
-      FileInputStream fis = new FileInputStream( geoRolesFile() );
-      Properties props = new Properties();
-      props.load( fis );
-      GeoContextPropertiesProvider config = new GeoContextPropertiesProvider( props );
+      GeoContextConfigProvider config = getGeoContextConfigProvider();
 
       return GeoContextFactory.create( config );
     } catch ( Throwable e ) {
-      log.logDebug( "unable to locate geoRoles.properties" );
+      log.logDebug( "unable to locate geoRoles properties" );
     }
     return null;
-  }
-
-  private File geoRolesFile() {
-    final File spoonFile = new File( geoRolesProperties() );
-    if ( spoonFile.exists() ) {
-      return spoonFile;
-    }
-    String solutionPath = PentahoSystem.getApplicationContext()
-        .getSolutionPath( "system/kettle/plugins/data-refinery-pdi-plugin/agile-bi/geoRoles.properties" );
-    return new File( solutionPath );
-  }
-
-  String geoRolesProperties() {
-    return "plugins/data-refinery-pdi-plugin/agile-bi/geoRoles.properties";
   }
 
   private void applyAnnotations(
@@ -393,6 +380,17 @@ public class DswModeler {
     if ( existingModel.getLogicalTables().size() > 1 ) {
       throw new UnsupportedModelException();
     }
+  }
+
+  public GeoContextConfigProvider getGeoContextConfigProvider() {
+    if ( geoContextConfigProvider == null ) {
+      geoContextConfigProvider = new GeoContextBlueprintConfigProvider();
+    }
+    return geoContextConfigProvider;
+  }
+
+  public void setGeoContextConfigProvider( GeoContextConfigProvider geoContextConfigProvider ) {
+    this.geoContextConfigProvider = geoContextConfigProvider;
   }
 
   private static class ColumnKey {

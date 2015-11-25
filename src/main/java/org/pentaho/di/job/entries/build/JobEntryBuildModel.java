@@ -34,6 +34,7 @@ import org.pentaho.di.core.database.DatabaseMeta;
 import org.pentaho.di.core.encryption.Encr;
 import org.pentaho.di.core.exception.KettleException;
 import org.pentaho.di.core.exception.KettleXMLException;
+import org.pentaho.di.core.logging.LogChannel;
 import org.pentaho.di.core.refinery.model.AnalysisModeler;
 import org.pentaho.di.core.refinery.model.DswModeler;
 import org.pentaho.di.core.refinery.model.DswModeler.ColumnMismatchException;
@@ -126,17 +127,27 @@ public class JobEntryBuildModel extends JobEntryBase implements JobEntryInterfac
 
   public JobEntryBuildModel() {
     super();
-    modeler = new DswModeler( log );
   }
 
   public JobEntryBuildModel( String name, String description ) {
     super( name, description );
-    modeler = new DswModeler( log );
   }
 
   @Override public void setParentJob( final Job parentJob ) {
     super.setParentJob( parentJob );
+    if ( log == null ) {
+      log = new LogChannel( this );
+    }
     modeler.setLog( log );
+  }
+
+  public DswModeler getModeler() {
+    return modeler;
+  }
+
+  public void setModeler( DswModeler modeler ) {
+    this.modeler = modeler;
+    this.modeler.setLog( this.log );
   }
 
   /**

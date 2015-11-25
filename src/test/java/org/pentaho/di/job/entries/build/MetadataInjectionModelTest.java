@@ -44,6 +44,7 @@ import org.pentaho.di.core.extension.ExtensionPointPluginType;
 import org.pentaho.di.core.plugins.PluginRegistry;
 import org.pentaho.di.core.plugins.StepPluginType;
 import org.pentaho.di.core.refinery.extension.DataRefineryTransFinishListener;
+import org.pentaho.di.core.refinery.model.DswModeler;
 import org.pentaho.di.job.Job;
 import org.pentaho.di.job.JobHopMeta;
 import org.pentaho.di.job.JobMeta;
@@ -120,7 +121,7 @@ public class MetadataInjectionModelTest {
     // Add Build Model job entry
     buildJobEntry = new JobEntryBuildModel( "Build Model", "Builds model on a metadata injected step" );
     buildJobEntry.setPluginId( JobEntryBuildModel.PLUGIN_ID );
-
+    buildJobEntry.setModeler( new DswModeler() );
     buildJobEntry.setOutputStep( "Metadata Injected Table Output" );
     buildCopy = new JobEntryCopy( buildJobEntry );
     buildCopy.setDrawn();

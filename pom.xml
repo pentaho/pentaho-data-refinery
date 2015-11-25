@@ -44,6 +44,7 @@
     <dependency.mockito.revision>1.8.4</dependency.mockito.revision>
     <dependency.h2.revision>1.0.78</dependency.h2.revision>
     <dependency.jackson.revision>1.9.2</dependency.jackson.revision>
+    <dependency.osgi.version>4.3.1</dependency.osgi.version>
     <maven-bundle-plugin.version>2.3.7</maven-bundle-plugin.version>
   </properties>
   <dependencies>
@@ -134,6 +135,19 @@
     </dependency>
 
     <dependency>
+      <groupId>org.osgi</groupId>
+      <artifactId>org.osgi.core</artifactId>
+      <version>${dependency.osgi.version}</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.osgi</groupId>
+      <artifactId>org.osgi.compendium</artifactId>
+      <version>${dependency.osgi.version}</version>
+      <scope>provided</scope>
+    </dependency>
+
+    <dependency>
       <groupId>org.eclipse.core</groupId>
       <artifactId>commands</artifactId>
       <version>3.3.0-I20070605-0010</version>
@@ -211,6 +225,7 @@
               org.pentaho.di.osgi,
               org.pentaho.di.core.plugins,
               org.pentaho.di.core.extension,
+              org.osgi.service.cm,
               *
             </Import-Package>
             <DynamicImport-Package>*</DynamicImport-Package>

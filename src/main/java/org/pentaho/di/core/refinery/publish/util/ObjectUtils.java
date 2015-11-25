@@ -32,11 +32,11 @@ import java.util.logging.Logger;
  */
 public class ObjectUtils {
 
-  private static XStream xStream = new XStream(new DomDriver());
+  private static XStream xStream = new XStream( new DomDriver() );
   private static Logger logger = Logger.getLogger( ObjectUtils.class.getName() );
 
   static {
-     xStream.setClassLoader( ObjectUtils.class.getClassLoader() );
+    xStream.setClassLoader( ObjectUtils.class.getClassLoader() );
   }
 
   @SuppressWarnings( "unchecked" )

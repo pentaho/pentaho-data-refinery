@@ -28,11 +28,12 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.pentaho.agilebi.modeler.ModelerException;
 import org.pentaho.agilebi.modeler.ModelerWorkspace;
+import org.pentaho.agilebi.modeler.geo.GeoContextPropertiesProvider;
 import org.pentaho.agilebi.modeler.models.annotations.AnnotationType;
 import org.pentaho.agilebi.modeler.models.annotations.CreateAttribute;
 import org.pentaho.agilebi.modeler.models.annotations.ModelAnnotation;
-import org.pentaho.agilebi.modeler.models.annotations.ModelAnnotationGroup;
 import org.pentaho.agilebi.modeler.models.annotations.ModelAnnotation.GeoType;
+import org.pentaho.agilebi.modeler.models.annotations.ModelAnnotationGroup;
 import org.pentaho.agilebi.modeler.util.TableModelerSource;
 import org.pentaho.di.core.KettleClientEnvironment;
 import org.pentaho.di.core.Props;
@@ -64,9 +65,12 @@ import org.pentaho.metastore.api.IMetaStore;
 import org.pentaho.metastore.stores.memory.MemoryMetaStore;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 
 import static org.junit.Assert.*;
 import static org.mockito.Matchers.any;
@@ -328,11 +332,9 @@ public class DswModelerTest {
 
     final LogChannelInterface log = mock( LogChannelInterface.class );
     when( log.isDetailed() ).thenReturn( true );
-    DswModeler modeler = new DswModeler( log ) {
-      @Override String geoRolesProperties() {
-        return getClass().getResource( "/geoRoles.properties" ).getPath();
-      }
-    };
+    DswModeler modeler = new DswModeler( log );
+    initTestGeoContextProvider( modeler );
+
     StepMetaDataCombi stepMetaDataCombi = getStepMetaDataCombi();
 
     CreateAttribute geoAttribute = new CreateAttribute();
@@ -359,6 +361,14 @@ public class DswModelerTest {
     assertEquals( 3, olapAnnotations.size() );
   }
 
+  private void initTestGeoContextProvider( DswModeler modeler ) throws IOException {
+    String path = getClass().getResource( "/geoRoles.properties" ).getPath();
+    FileInputStream fis = new FileInputStream( path );
+    Properties props = new Properties();
+    props.load( fis );
+    modeler.setGeoContextConfigProvider( new GeoContextPropertiesProvider( props ) );
+  }
+
   @Test
   public void testAutoGeoGetsApplied() throws Exception {
     DatabaseMeta dbMeta = createGeoTable();
@@ -366,11 +376,8 @@ public class DswModelerTest {
 
     final LogChannelInterface log = mock( LogChannelInterface.class );
     when( log.isDetailed() ).thenReturn( true );
-    DswModeler modeler = new DswModeler( log ) {
-      @Override String geoRolesProperties() {
-        return getClass().getResource( "/geoRoles.properties" ).getPath();
-      }
-    };
+    DswModeler modeler = new DswModeler( log );
+    initTestGeoContextProvider( modeler );
     StepMetaDataCombi stepMetaDataCombi = getGeoStepMetaDataCombi();
 
     Domain dsw = modeler.createModel(
@@ -405,11 +412,9 @@ public class DswModelerTest {
 
     final LogChannelInterface log = mock( LogChannelInterface.class );
     when( log.isDetailed() ).thenReturn( false );
-    DswModeler modeler = new DswModeler( log ) {
-      @Override String geoRolesProperties() {
-        return getClass().getResource( "/geoRoles.properties" ).getPath();
-      }
-    };
+    DswModeler modeler = new DswModeler( log );
+
+    initTestGeoContextProvider( modeler );
 
     final String geoDim = "Geography";
     CreateAttribute state = new CreateAttribute();

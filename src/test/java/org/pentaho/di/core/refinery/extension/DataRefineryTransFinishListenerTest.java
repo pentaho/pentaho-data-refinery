@@ -52,6 +52,8 @@ import static org.pentaho.di.core.refinery.test.TransTestUtil.getRowMeta;
 import static org.pentaho.di.core.refinery.test.TransTestUtil.getTransAsJobEntry;
 import static org.pentaho.di.core.refinery.test.TransTestUtil.newH2Db;
 import static org.pentaho.di.core.refinery.test.TransTestUtil.runTransformation;
+
+import org.pentaho.di.core.refinery.model.DswModeler;
 import org.pentaho.di.core.row.RowMetaInterface;
 import org.pentaho.di.core.row.ValueMetaInterface;
 import org.pentaho.di.core.row.value.ValueMetaInteger;
@@ -347,6 +349,7 @@ public class DataRefineryTransFinishListenerTest {
     jeBuildModel.setPluginId( JobEntryBuildModel.PLUGIN_ID );
     jeBuildModel.setOutputStep( outStepMeta.getName() );
     jeBuildModel.setModelName( "Das Model" );
+    jeBuildModel.setModeler( new DswModeler() );
     JobEntryCopy jeBuildModelCopy = new JobEntryCopy( jeBuildModel );
     jeBuildModelCopy.setDrawn();
     jobMeta.addJobEntry( jeBuildModelCopy );

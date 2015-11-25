@@ -107,6 +107,7 @@ public class RefineryModelerWorkspaceHelper extends BaseModelerWorkspaceHelper i
           node.setSupressEvents( true );
           strategy.autoModelOlap( ws, node );
         } catch ( ModelerException e ) {
+          // ignore it
         }
         display.syncExec( new Runnable() {
 
@@ -153,6 +154,7 @@ public class RefineryModelerWorkspaceHelper extends BaseModelerWorkspaceHelper i
           node.setSupressEvents( true );
           strategy.autoModelRelational( workspace, node );
         } catch ( ModelerException e ) {
+          // ignore it
         }
         display.syncExec( new Runnable() {
 
