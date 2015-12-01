@@ -142,11 +142,12 @@ public class JobEntryDatasourcePublishDialog extends JobEntryDialogBoilerplate<J
         wUserOrRoleAcl.setEnabled( textFieldEnabled );
         if ( !textFieldEnabled ) {
           wUserOrRoleAcl.setText( StringUtils.EMPTY );
+          wUserOrRoleAcl.setBackground( getParent().getDisplay().getSystemColor( SWT.COLOR_WIDGET_BACKGROUND ) );
           wUserOrRoleAcl.getTextWidget()
               .setBackground( getParent().getDisplay().getSystemColor( SWT.COLOR_WIDGET_BACKGROUND ) );
-          wUserOrRoleAcl.setForeground( getParent().getDisplay().getSystemColor( SWT.COLOR_GRAY ) ); // gray out
         } else {
           wUserOrRoleAcl.setForeground( null ); // use default
+          wUserOrRoleAcl.setBackground( null );
           wUserOrRoleAcl.getTextWidget().setBackground( null );
         }
       }
