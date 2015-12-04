@@ -54,6 +54,7 @@ import org.pentaho.di.job.entry.JobEntryInterface;
 import org.pentaho.di.repository.ObjectId;
 import org.pentaho.di.repository.Repository;
 import org.pentaho.di.trans.TransMeta;
+import org.pentaho.di.trans.dataservice.DataServiceContext;
 import org.pentaho.di.trans.step.StepMetaDataCombi;
 import org.pentaho.di.trans.util.TransUtil;
 import org.pentaho.di.ui.job.entries.build.JobEntryBuildModelDialog;
@@ -91,6 +92,7 @@ public class JobEntryBuildModel extends JobEntryBase implements JobEntryInterfac
   private boolean createOnPublish;
   private String selectedModel;
   private BiServerConnection biServerConnection;
+  private DataServiceContext dataServiceContext;
 
   public boolean useExistingModel() {
     return useExistingModel;
@@ -106,6 +108,10 @@ public class JobEntryBuildModel extends JobEntryBase implements JobEntryInterfac
 
   public void setExistingModel( final String existingModel ) {
     this.existingModel = existingModel;
+  }
+
+  public void setDataServiceContext( DataServiceContext dataServiceContext ) {
+    this.dataServiceContext = dataServiceContext;
   }
 
   /**
@@ -171,6 +177,7 @@ public class JobEntryBuildModel extends JobEntryBase implements JobEntryInterfac
 
         TransMeta transMeta = trans.getTransMeta( jobMeta.getRepository(), jobMeta.getMetaStore(), jobMeta );
         stepNames.addAll( TransUtil.collectOutputStepInTrans( transMeta, getRepository(), getMetaStore() ).keySet() );
+        stepNames.addAll( dataServiceContext.getMetaStoreUtil().getDataServiceNames( transMeta ) );
       }
     } catch ( Exception e ) {
       // UI aid, not a problem if it fails at this point

@@ -62,6 +62,7 @@ import org.pentaho.di.core.refinery.publish.agilebi.BiServerConnection;
 import org.pentaho.di.core.row.RowMeta;
 import org.pentaho.di.core.row.value.ValueMetaBigNumber;
 import org.pentaho.di.core.row.value.ValueMetaString;
+import org.pentaho.di.core.variables.Variables;
 import org.pentaho.di.core.xml.XMLHandler;
 import org.pentaho.di.job.Job;
 import org.pentaho.di.job.JobHopMeta;
@@ -70,6 +71,8 @@ import org.pentaho.di.job.entries.special.JobEntrySpecial;
 import org.pentaho.di.job.entries.success.JobEntrySuccess;
 import org.pentaho.di.job.entries.trans.JobEntryTrans;
 import org.pentaho.di.job.entry.JobEntryCopy;
+import org.pentaho.di.trans.dataservice.DataServiceContext;
+import org.pentaho.di.trans.dataservice.serialization.DataServiceMetaStoreUtil;
 import org.pentaho.di.trans.step.StepMetaDataCombi;
 import org.pentaho.di.trans.steps.tableoutput.TableOutputData;
 import org.pentaho.di.trans.steps.tableoutput.TableOutputMeta;
@@ -79,6 +82,7 @@ import org.pentaho.metadata.model.LogicalModel;
 import org.pentaho.metadata.model.concept.types.AggregationType;
 import org.pentaho.metadata.model.olap.OlapCube;
 import org.pentaho.metadata.util.XmiParser;
+import org.pentaho.metastore.api.IMetaStore;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 
@@ -478,14 +482,26 @@ public class JobEntryBuildModelTest {
   @Test
   public void testGetOutputStepList() throws Exception {
 
-    // step names should be auto-trimmed -  see Sales Data Load.ktr (leading/trailing spaces in the step names)
-    String[] steps = buildJobEntry.getOutputStepList( job.getJobMeta() );
+    DataServiceContext dataServiceContext = mock( DataServiceContext.class );
+    buildJobEntry.setDataServiceContext( dataServiceContext );
+    IMetaStore metaStore = mock( IMetaStore.class );
+    buildJobEntry.setMetaStore( metaStore );
 
-    assertEquals( 2, steps.length );
+    DataServiceMetaStoreUtil dataServiceMetaStoreUtil = mock( DataServiceMetaStoreUtil.class );
+    when( dataServiceContext.getMetaStoreUtil() ).thenReturn( dataServiceMetaStoreUtil );
+    when( dataServiceMetaStoreUtil.getDataServiceNames(
+      trans.getTransMeta( null, metaStore, new Variables() ) ) )
+      .thenReturn( Arrays.asList( "Sales Service", "Customer Service" ) );
+    // step names should be auto-trimmed -  see Sales Data Load.ktr (leading/trailing spaces in the step names)
+    List<String> steps = Arrays.asList( buildJobEntry.getOutputStepList( job.getJobMeta() ) );
+
+    assertEquals( 4, steps.size() );
 
     // can't guarantee order of the underlying map
-    assertTrue( "Customer Dimension".equals( steps[0] ) || "Customer Dimension".equals( steps[1] ) );
-    assertTrue( "Sales Fact".equals( steps[1] ) || "Sales Fact".equals( steps[0] ) );
+    assertTrue( steps.contains( "Customer Dimension" ) );
+    assertTrue( steps.contains( "Sales Fact" ) );
+    assertTrue( steps.contains( "Sales Service" ) );
+    assertTrue( steps.contains( "Customer Service" ) );
   }
 
   @Test

@@ -44,7 +44,31 @@
   <bean id="BuildModel_JobEntry" class="org.pentaho.di.job.entries.build.JobEntryBuildModel" scope="prototype">
     <property name="modeler" ref="dswModeler"/>
     <pen:di-plugin type="org.pentaho.di.core.plugins.JobEntryPluginType" />
+    <property name="dataServiceContext" ref="dataServiceContext"/>
   </bean>
+
+  <bean id="dataServiceContext" class="org.pentaho.di.trans.dataservice.DataServiceContext" scope="singleton">
+    <argument ref="pushDownFactories"/>
+    <argument ref="autoOptimizationServices"/>
+    <argument ref="cacheManager"/>
+    <argument ref="uiFactory"/>
+    <argument>
+      <bean class="org.pentaho.di.core.logging.LogChannel">
+        <argument value="Data Services"/>
+      </bean>
+    </argument>
+  </bean>
+
+  <reference-list id="pushDownFactories" interface="org.pentaho.di.trans.dataservice.optimization.PushDownFactory"
+                  availability="optional"/>
+
+  <reference-list id="autoOptimizationServices"
+                  interface="org.pentaho.di.trans.dataservice.optimization.AutoOptimizationService"
+                  availability="optional"/>
+
+  <reference id="cacheManager" interface="org.pentaho.caching.api.PentahoCacheManager"/>
+
+  <bean id="uiFactory" class="org.pentaho.di.trans.dataservice.ui.UIFactory" scope="singleton"/>
 
   <bean id="PublishModel_JobEntry" class="org.pentaho.di.job.entries.publish.JobEntryDatasourcePublish" scope="prototype">
     <pen:di-plugin type="org.pentaho.di.core.plugins.JobEntryPluginType" />
