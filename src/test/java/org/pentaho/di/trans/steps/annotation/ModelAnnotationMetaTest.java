@@ -46,6 +46,7 @@ import static org.pentaho.agilebi.modeler.models.annotations.ModelAnnotation.Typ
 import static org.pentaho.agilebi.modeler.models.annotations.util.XMLUtil.asDOMNode;
 import static org.pentaho.agilebi.modeler.models.annotations.util.XMLUtil.compactPrint;
 
+import org.pentaho.di.core.KettleClientEnvironment;
 import org.pentaho.di.core.database.DatabaseMeta;
 import org.pentaho.di.core.exception.KettleException;
 import org.pentaho.di.core.xml.XMLHandler;
@@ -90,6 +91,9 @@ public class ModelAnnotationMetaTest {
     transMeta = mock( TransMeta.class );
     trans = mock( Trans.class );
     stepPartitioningMeta = mock( StepPartitioningMeta.class );
+    if ( !KettleClientEnvironment.isInitialized() ) {
+      KettleClientEnvironment.init();
+    }
   }
 
   @Test
