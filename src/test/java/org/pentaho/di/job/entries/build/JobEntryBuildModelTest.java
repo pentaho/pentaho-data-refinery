@@ -24,24 +24,10 @@ package org.pentaho.di.job.entries.build;
 
 import org.apache.commons.io.IOUtils;
 import org.junit.After;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
 import org.mockito.Mockito;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 import org.pentaho.agilebi.modeler.models.annotations.CreateMeasure;
 import org.pentaho.agilebi.modeler.models.annotations.ModelAnnotation;
 import org.pentaho.agilebi.modeler.models.annotations.ModelAnnotationGroup;
@@ -62,6 +48,7 @@ import org.pentaho.di.core.refinery.publish.agilebi.BiServerConnection;
 import org.pentaho.di.core.row.RowMeta;
 import org.pentaho.di.core.row.value.ValueMetaBigNumber;
 import org.pentaho.di.core.row.value.ValueMetaString;
+import org.pentaho.di.core.variables.VariableSpace;
 import org.pentaho.di.core.variables.Variables;
 import org.pentaho.di.core.xml.XMLHandler;
 import org.pentaho.di.job.Job;
@@ -71,6 +58,8 @@ import org.pentaho.di.job.entries.special.JobEntrySpecial;
 import org.pentaho.di.job.entries.success.JobEntrySuccess;
 import org.pentaho.di.job.entries.trans.JobEntryTrans;
 import org.pentaho.di.job.entry.JobEntryCopy;
+import org.pentaho.di.repository.Repository;
+import org.pentaho.di.trans.TransMeta;
 import org.pentaho.di.trans.dataservice.DataServiceContext;
 import org.pentaho.di.trans.dataservice.serialization.DataServiceMetaStoreUtil;
 import org.pentaho.di.trans.step.StepMetaDataCombi;
@@ -89,8 +78,14 @@ import org.w3c.dom.Node;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.InputStream;
-import java.util.Arrays;
 import java.util.List;
+
+import static java.util.Arrays.asList;
+import static org.junit.Assert.*;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.*;
 
 public class JobEntryBuildModelTest {
   private Job job;
@@ -314,7 +309,7 @@ public class JobEntryBuildModelTest {
         getClass().getResourceAsStream( "/org/pentaho/di/core/refinery/model/resources/testDSW.xmi" );
     when( modelServerFetcher.downloadDswFile( "testDSW.xmi" ) )
         .thenReturn( new XmiParser().parseXmi( existingSchema ) );
-    when( modelServerFetcher.fetchDswList() ).thenReturn( Arrays.asList( "testDSW.xmi" ) );
+    when( modelServerFetcher.fetchDswList() ).thenReturn( asList( "testDSW.xmi" ) );
     job.run();
 
     assertTrue( job.getResult().getResult() );
@@ -365,7 +360,7 @@ public class JobEntryBuildModelTest {
             .toString(
                 getClass().getResourceAsStream( "/org/pentaho/di/core/refinery/model/resources/testAnalysisSchema.xml" ) ) );
 
-    Mockito.when( modelServerFetcher.fetchAnalysisList() ).thenReturn( Arrays.asList( "someModelName" ) );
+    Mockito.when( modelServerFetcher.fetchAnalysisList() ).thenReturn( asList( "someModelName" ) );
 
     when( analysisModeler.replaceTableAndSchemaNames(
         eq( existingSchema ), eq( "Car Sales Analysis" ) ) )
@@ -432,7 +427,7 @@ public class JobEntryBuildModelTest {
     buildJobEntry.setSelectedModel( "someModelName" );
     buildJobEntry.setUseExistingModel( true );
 
-    Mockito.when( modelServerFetcher.fetchAnalysisList() ).thenReturn( Arrays.asList( "otherModel" ) );
+    Mockito.when( modelServerFetcher.fetchAnalysisList() ).thenReturn( asList( "otherModel" ) );
 
     doNothing().when( connectionValidator ).validateConnectionInRuntime();
     job.run();
@@ -491,9 +486,9 @@ public class JobEntryBuildModelTest {
     when( dataServiceContext.getMetaStoreUtil() ).thenReturn( dataServiceMetaStoreUtil );
     when( dataServiceMetaStoreUtil.getDataServiceNames(
       trans.getTransMeta( null, metaStore, new Variables() ) ) )
-      .thenReturn( Arrays.asList( "Sales Service", "Customer Service" ) );
+      .thenReturn( asList( "Sales Service", "Customer Service" ) );
     // step names should be auto-trimmed -  see Sales Data Load.ktr (leading/trailing spaces in the step names)
-    List<String> steps = Arrays.asList( buildJobEntry.getOutputStepList( job.getJobMeta() ) );
+    List<String> steps = asList( buildJobEntry.getOutputStepList( job.getJobMeta() ) );
 
     assertEquals( 4, steps.size() );
 
@@ -558,5 +553,41 @@ public class JobEntryBuildModelTest {
         .setVarAndLogDebug( "JobEntryBuildModel.Mondrian.Schema.Car Sales Analysis", null );
     verify( buildJobEntry, times( 1 ) )
         .setVarAndLogBasic( "JobEntryBuildModel.Mondrian.Datasource.Car Sales Analysis", "myh2" );
+  }
+
+  @Test
+  public void testCanUseDataServiceForConnection() throws Exception {
+    JobEntryTrans trans = new JobEntryTrans( "trans" ) {
+      @Override
+      public TransMeta getTransMeta( final Repository rep, final IMetaStore metaStore, final VariableSpace space )
+        throws KettleException {
+        return new TransMeta();
+      }
+    };
+    trans.setPluginId( "TRANS" );
+    JobEntryCopy copyOne = new JobEntryCopy( trans );
+    JobEntryCopy copyTwo = new JobEntryCopy( new JobEntrySuccess() );
+    final List<JobEntryCopy> jobCopies = asList( copyOne, copyTwo );
+
+    JobEntryBuildModel jobEntry = new JobEntryBuildModel() {
+      @Override StepMetaDataCombi getStepMetaDataCombi() {
+        return null;
+      }
+
+      @Override List<JobEntryCopy> getParentJobCopies() {
+        return jobCopies;
+      }
+    };
+    jobEntry.setOutputStep( "service two" );
+    DataServiceContext dataServiceContext = Mockito.mock( DataServiceContext.class );
+    jobEntry.setDataServiceContext( dataServiceContext );
+    final DataServiceMetaStoreUtil metaStoreUtil = mock( DataServiceMetaStoreUtil.class );
+    when( dataServiceContext.getMetaStoreUtil() ).thenReturn( metaStoreUtil );
+    when( metaStoreUtil.getDataServiceNames( any( TransMeta.class )  ) )
+      .thenReturn( asList( "service one", "service two" ) );
+    ProvidesDatabaseConnectionInformation connectionInfo = jobEntry.getConnectionInfo();
+    assertTrue( connectionInfo instanceof DataServiceConnectionInformation );
+    assertEquals( "service two", connectionInfo.getTableName() );
+
   }
 }

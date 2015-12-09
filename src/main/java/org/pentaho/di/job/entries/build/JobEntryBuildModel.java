@@ -24,6 +24,7 @@ package org.pentaho.di.job.entries.build;
 
 import org.apache.commons.lang.BooleanUtils;
 import org.apache.commons.lang.StringUtils;
+import org.pentaho.agilebi.modeler.ModelerException;
 import org.pentaho.agilebi.modeler.models.annotations.ModelAnnotationGroup;
 import org.pentaho.agilebi.modeler.util.TableModelerSource;
 import org.pentaho.di.cluster.SlaveServer;
@@ -42,6 +43,7 @@ import org.pentaho.di.core.refinery.model.DswModeler.UnsupportedModelException;
 import org.pentaho.di.core.refinery.model.ModelServerFetcher;
 import org.pentaho.di.core.refinery.model.ModelServerFetcher.AuthorizationException;
 import org.pentaho.di.core.refinery.model.ModelServerFetcher.ServerException;
+import org.pentaho.di.core.refinery.model.RefineryValueMetaStrategy;
 import org.pentaho.di.core.refinery.publish.agilebi.BiServerConnection;
 import org.pentaho.di.core.xml.XMLHandler;
 import org.pentaho.di.i18n.BaseMessages;
@@ -59,9 +61,11 @@ import org.pentaho.di.trans.step.StepMetaDataCombi;
 import org.pentaho.di.trans.util.TransUtil;
 import org.pentaho.di.ui.job.entries.build.JobEntryBuildModelDialog;
 import org.pentaho.di.ui.job.entries.common.ConnectionValidator;
+import org.pentaho.metadata.automodel.PhysicalTableImporter;
 import org.pentaho.metadata.model.Domain;
 import org.pentaho.metadata.util.XmiParser;
 import org.pentaho.metastore.api.IMetaStore;
+import org.pentaho.metastore.api.exceptions.MetaStoreException;
 import org.w3c.dom.Node;
 
 import java.util.ArrayList;
@@ -211,7 +215,7 @@ public class JobEntryBuildModel extends JobEntryBase implements JobEntryInterfac
     source.setSchemaName( StringUtils.defaultIfBlank( source.getSchemaName(), "" ) );
     try {
       Domain modeledDomain;
-      StepMetaDataCombi stepMetaDataCombi = getStepMetaDataCombi();
+      PhysicalTableImporter.ImportStrategy importStrategy = getImportStrategy();
 
       final ModelAnnotationGroup modelAnnotations = getModelAnnotations();
 
@@ -225,7 +229,7 @@ public class JobEntryBuildModel extends JobEntryBase implements JobEntryInterfac
             logBasic( getMsg( "BuildModelJob.Info.ModelNotFound", existingModelId ) );
             modeledDomain =
                 getDswModeler()
-                    .createModel( modelName, source, dbMeta, stepMetaDataCombi, modelAnnotations, getMetaStore() );
+                    .createModel( modelName, source, dbMeta, importStrategy, modelAnnotations, getMetaStore() );
           } else {
             if ( Const.isEmpty( existingModelId ) ) {
               throw new KettleException( getMsg( "BuildModelJob.Error.ModelNullNotFound", getName() ) );
@@ -240,7 +244,7 @@ public class JobEntryBuildModel extends JobEntryBase implements JobEntryInterfac
       } else {
         modeledDomain =
             getDswModeler()
-                .createModel( modelName, source, dbMeta, stepMetaDataCombi, modelAnnotations, getMetaStore() );
+                .createModel( modelName, source, dbMeta, importStrategy, modelAnnotations, getMetaStore() );
       }
       XmiParser parser = new XmiParser();
       String localXmi = parser.generateXmi( modeledDomain );
@@ -268,15 +272,56 @@ public class JobEntryBuildModel extends JobEntryBase implements JobEntryInterfac
     return new ModelAnnotationGroup();
   }
 
-  private StepMetaDataCombi getStepMetaDataCombi() {
+  private PhysicalTableImporter.ImportStrategy getImportStrategy() throws KettleException, ModelerException {
+    StepMetaDataCombi stepMetaDataCombi = getStepMetaDataCombi();
+    if ( stepMetaDataCombi != null ) {
+      return new RefineryValueMetaStrategy( stepMetaDataCombi );
+    }
+    return PhysicalTableImporter.defaultImportStrategy;
+  }
+
+  StepMetaDataCombi getStepMetaDataCombi() {
     return (StepMetaDataCombi) this.getParentJob().getExtensionDataMap().get( KEY_OUTPUT_STEP_PREFIX + getName() );
+  }
+
+  private List<TransMeta> findAllTransInJob() throws KettleException {
+    List<JobEntryCopy> jobCopies = getParentJobCopies();
+    List<TransMeta> transMetas = new ArrayList<>();
+    for ( JobEntryCopy jobCopy : jobCopies ) {
+      if ( jobCopy.isTransformation() ) {
+        JobEntryTrans entry = (JobEntryTrans) jobCopy.getEntry();
+        transMetas.add( entry.getTransMeta( getRepository(), getMetaStore(), getVariables() ) );
+      }
+    }
+    return transMetas;
+  }
+
+  List<JobEntryCopy> getParentJobCopies() {
+    return getParentJob().getJobMeta().getJobCopies();
+  }
+
+  private boolean isOutputStepADataService() throws KettleException {
+    List<TransMeta> transMetas = findAllTransInJob();
+    try {
+      for ( TransMeta transMeta : transMetas ) {
+        if ( dataServiceContext.getMetaStoreUtil().getDataServiceNames( transMeta ).contains( getOutputStep() ) ) {
+          return true;
+        }
+      }
+    } catch ( MetaStoreException e ) {
+      return false;
+    }
+    return false;
   }
 
   public ProvidesDatabaseConnectionInformation getConnectionInfo() throws KettleException {
     StepMetaDataCombi stepMetaDataCombi = getStepMetaDataCombi();
     if ( stepMetaDataCombi == null ) {
+      if ( isOutputStepADataService() ) {
+        return new DataServiceConnectionInformation( getOutputStep(), getRepository(), log );
+      }
       throw new KettleException( this.getMsg( "BuildModelJob.Error.UnableToFindStep",
-          environmentSubstitute( getOutputStep() ) ) );
+        environmentSubstitute( getOutputStep() ) ) );
     }
     if ( ProvidesDatabaseConnectionInformation.class.isAssignableFrom( stepMetaDataCombi.meta.getClass() ) ) {
       return ProvidesDatabaseConnectionInformation.class.cast( stepMetaDataCombi.meta );

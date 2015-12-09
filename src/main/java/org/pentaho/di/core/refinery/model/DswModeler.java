@@ -42,8 +42,6 @@ import org.pentaho.agilebi.modeler.nodes.LevelMetaData;
 import org.pentaho.agilebi.modeler.util.TableModelerSource;
 import org.pentaho.di.core.database.DatabaseMeta;
 import org.pentaho.di.core.logging.LogChannelInterface;
-import org.pentaho.di.core.refinery.DataProviderHelper;
-import org.pentaho.di.core.row.ValueMetaInterface;
 import org.pentaho.di.i18n.BaseMessages;
 import org.pentaho.di.job.entries.build.JobEntryBuildModel;
 import org.pentaho.di.trans.step.StepMetaDataCombi;
@@ -106,19 +104,18 @@ public class DswModeler {
    * @param modelName
    * @param source
    * @param dbMeta
-   * @param stepMetaDataCombi
-   * @param stepMetaDataCombi
+   * @param importStrategy
    * @param modelAnnotations
    * @param metaStore
    * @return
    * @throws ModelerException
    */
   public Domain createModel( final String modelName, TableModelerSource source, DatabaseMeta dbMeta,
-                             final StepMetaDataCombi stepMetaDataCombi, final ModelAnnotationGroup modelAnnotations,
+                             final PhysicalTableImporter.ImportStrategy importStrategy, final ModelAnnotationGroup modelAnnotations,
                              final IMetaStore metaStore )
     throws ModelerException {
     // Create PME with physical metadata and then set into modeler
-    Domain domain = source.generateDomain( valueMetaStrategy( stepMetaDataCombi ) );
+    Domain domain = source.generateDomain( importStrategy );
 
     if ( domain.getLogicalModels().get( 0 ).getLogicalTables().get( 0 ).getLogicalColumns().size() == 0 ) {
       throw new ModelerException( BaseMessages.getString( PKG, "BuildModelJob.Error.NoData" ) );
@@ -471,31 +468,4 @@ public class DswModeler {
     }
   }
 
-  private static class RefineryValueMetaStrategy extends DataProviderHelper.OutputStepMappingAdapter
-      implements PhysicalTableImporter.ImportStrategy {
-
-    public RefineryValueMetaStrategy( final StepMetaDataCombi stepMetaDataCombi ) throws ModelerException {
-      super( stepMetaDataCombi );
-    }
-
-    @Override
-    public boolean shouldInclude( final ValueMetaInterface valueMeta ) {
-      return insertRowMeta != null && insertRowMeta.exists( valueMeta );
-    }
-
-    @Override
-    public String displayName( final ValueMetaInterface valueMeta ) {
-      for ( int i = 0; i < fieldDatabase.size(); i++ ) {
-        final String fieldName = fieldDatabase.get( i );
-        if ( fieldName.equalsIgnoreCase( valueMeta.getName() ) ) {
-          return fieldStream.get( i );
-        }
-      }
-      ValueMetaInterface insertValueMeta = insertRowMeta.searchValueMeta( valueMeta.getName() );
-      if ( insertValueMeta != null ) {
-        return insertValueMeta.getName();
-      }
-      return valueMeta.getName();
-    }
-  }
 }

@@ -50,6 +50,7 @@ import org.pentaho.di.core.row.value.ValueMetaString;
 import org.pentaho.di.trans.step.StepMetaDataCombi;
 import org.pentaho.di.trans.steps.tableoutput.TableOutputData;
 import org.pentaho.di.trans.steps.tableoutput.TableOutputMeta;
+import org.pentaho.metadata.automodel.PhysicalTableImporter;
 import org.pentaho.metadata.model.Domain;
 import org.pentaho.metadata.model.IPhysicalModel;
 import org.pentaho.metadata.model.LogicalModel;
@@ -172,13 +173,13 @@ public class DswModelerTest {
     final LogChannelInterface log = mock( LogChannelInterface.class );
     when( log.isDetailed() ).thenReturn( true );
     DswModeler modeler = new DswModeler( log );
-    StepMetaDataCombi stepMetaDataCombi = getStepMetaDataCombi();
+    PhysicalTableImporter.ImportStrategy importStrategy = getImportStrategy();
 
     ModelAnnotation annotation1 = whenApply( "summary 1" );
     ModelAnnotation annotation2 = whenApply( "summary 2" );
 
     ModelAnnotationGroup modelAnnotations = new ModelAnnotationGroup( annotation1, annotation2 );
-    Domain dsw = modeler.createModel( "FromScratch", source, dbMeta, stepMetaDataCombi, modelAnnotations, metaStore );
+    Domain dsw = modeler.createModel( "FromScratch", source, dbMeta, importStrategy, modelAnnotations, metaStore );
     LogicalModel anlModel = dsw.getLogicalModels().get( 1 );
     LogicalModel rptModel = dsw.getLogicalModels().get( 0 );
     @SuppressWarnings( "unchecked" )
@@ -205,13 +206,13 @@ public class DswModelerTest {
     final LogChannelInterface log = mock( LogChannelInterface.class );
     when( log.isDetailed() ).thenReturn( true );
     DswModeler modeler = new DswModeler( log );
-    StepMetaDataCombi stepMetaDataCombi = getStepMetaDataCombi();
+    PhysicalTableImporter.ImportStrategy importStrategy = getImportStrategy();
 
     ModelAnnotation modelAnnotation = new ModelAnnotation();
     ModelAnnotationGroup modelAnnotations = new ModelAnnotationGroup( modelAnnotation );
 
     //no expections here is the test
-    modeler.createModel( "FromScratch", source, dbMeta, stepMetaDataCombi, modelAnnotations, metaStore );
+    modeler.createModel( "FromScratch", source, dbMeta, importStrategy, modelAnnotations, metaStore );
     verify( log ).logDebug( "Ignoring a null annotation" );
   }
 
@@ -236,7 +237,7 @@ public class DswModelerTest {
     when( log.isDetailed() ).thenReturn( false );
     DswModeler modeler = new DswModeler( log );
 
-    StepMetaDataCombi stepMetaDataCombi = getStepMetaDataCombi();
+    PhysicalTableImporter.ImportStrategy importStrategy = getImportStrategy();
     ModelAnnotation annotation1 = mock( ModelAnnotation.class );
     ModelAnnotation annotation2 = mock( ModelAnnotation.class );
     ModelAnnotationGroup modelAnnotations = new ModelAnnotationGroup( annotation1, annotation2 );
@@ -246,7 +247,7 @@ public class DswModelerTest {
     when( annotation1.getAnnotation() ).thenReturn( annotationType );
     when( annotation2.getAnnotation() ).thenReturn( annotationType );
 
-    Domain dsw = modeler.createModel( "FromScratch", source, dbMeta, stepMetaDataCombi, modelAnnotations, metaStore );
+    Domain dsw = modeler.createModel( "FromScratch", source, dbMeta, importStrategy, modelAnnotations, metaStore );
     LogicalModel anlModel = dsw.getLogicalModels().get( 1 );
     LogicalModel rptModel = dsw.getLogicalModels().get( 0 );
     @SuppressWarnings( "unchecked" )
@@ -274,7 +275,7 @@ public class DswModelerTest {
     DswModeler modeler = new DswModeler( null );
     modeler.setLog( log );
 
-    StepMetaDataCombi stepMetaDataCombi = getStepMetaDataCombi();
+    PhysicalTableImporter.ImportStrategy importStrategy = getImportStrategy();
     ModelAnnotation annotation1 = mock( ModelAnnotation.class );
     whenSummary( annotation1, "annotation 1 Summary" );
     ModelAnnotation annotation2 = mock( ModelAnnotation.class );
@@ -286,7 +287,7 @@ public class DswModelerTest {
     when( annotation2.apply( any( ModelerWorkspace.class ), same( metaStore ) ) ).thenReturn( false, false );
     when( annotation3.apply( any( ModelerWorkspace.class ), same( metaStore ) ) ).thenReturn( true );
 
-    Domain dsw = modeler.createModel( "FromScratch", source, dbMeta, stepMetaDataCombi, modelAnnotations, metaStore );
+    Domain dsw = modeler.createModel( "FromScratch", source, dbMeta, importStrategy, modelAnnotations, metaStore );
     LogicalModel anlModel = dsw.getLogicalModels().get( 1 );
     LogicalModel rptModel = dsw.getLogicalModels().get( 0 );
     @SuppressWarnings( "unchecked" )
@@ -314,12 +315,12 @@ public class DswModelerTest {
     final LogChannelInterface log = mock( LogChannelInterface.class );
     DswModeler modeler = new DswModeler( log );
 
-    StepMetaDataCombi stepMetaDataCombi = getEmptyStepMetaDataCombi();
+    PhysicalTableImporter.ImportStrategy importStrategy = getEmptyMetaImportStrategy();
     ModelAnnotation annotation1 = mock( ModelAnnotation.class );
     ModelAnnotation annotation2 = mock( ModelAnnotation.class );
     ModelAnnotationGroup modelAnnotations = new ModelAnnotationGroup( annotation1, annotation2 );
     try {
-      modeler.createModel( "FromScratch", source, dbMeta, stepMetaDataCombi, modelAnnotations, metaStore );
+      modeler.createModel( "FromScratch", source, dbMeta, importStrategy, modelAnnotations, metaStore );
     } catch ( ModelerException e ) {
       assertEquals( "No Data to Model", e.getMessage() );
     }
@@ -335,7 +336,7 @@ public class DswModelerTest {
     DswModeler modeler = new DswModeler( log );
     initTestGeoContextProvider( modeler );
 
-    StepMetaDataCombi stepMetaDataCombi = getStepMetaDataCombi();
+    PhysicalTableImporter.ImportStrategy importStrategy = getImportStrategy();
 
     CreateAttribute geoAttribute = new CreateAttribute();
     geoAttribute.setName( "State" );
@@ -344,7 +345,7 @@ public class DswModelerTest {
     geoAttribute.setField( "Status" );
     ModelAnnotation annotation1 = new ModelAnnotation<CreateAttribute>( geoAttribute );
     ModelAnnotationGroup modelAnnotations = new ModelAnnotationGroup( annotation1 );
-    Domain dsw = modeler.createModel( "FromScratch", source, dbMeta, stepMetaDataCombi, modelAnnotations, metaStore );
+    Domain dsw = modeler.createModel( "FromScratch", source, dbMeta, importStrategy, modelAnnotations, metaStore );
     LogicalModel anlModel = dsw.getLogicalModels().get( 1 );
     @SuppressWarnings( "unchecked" )
     OlapCube cube = ( (List<OlapCube>) anlModel.getProperty( LogicalModel.PROPERTY_OLAP_CUBES ) ).get( 0 );
@@ -378,10 +379,10 @@ public class DswModelerTest {
     when( log.isDetailed() ).thenReturn( true );
     DswModeler modeler = new DswModeler( log );
     initTestGeoContextProvider( modeler );
-    StepMetaDataCombi stepMetaDataCombi = getGeoStepMetaDataCombi();
+    PhysicalTableImporter.ImportStrategy importStrategy = getGeoStepMetaDataCombi();
 
     Domain dsw = modeler.createModel(
-        "FromScratch", source, dbMeta, stepMetaDataCombi, new ModelAnnotationGroup( ), metaStore );
+        "FromScratch", source, dbMeta, importStrategy, new ModelAnnotationGroup( ), metaStore );
     LogicalModel anlModel = dsw.getLogicalModels().get( 1 );
     @SuppressWarnings( "unchecked" )
     OlapCube cube = ( (List<OlapCube>) anlModel.getProperty( LogicalModel.PROPERTY_OLAP_CUBES ) ).get( 0 );
@@ -456,10 +457,10 @@ public class DswModelerTest {
       new ModelAnnotation<CreateAttribute>( state )
     );
     modelAnnotations.setName( "GeoDim" );
-    StepMetaDataCombi stepMetaDataCombi = getGeoStepMetaDataCombi();
+    PhysicalTableImporter.ImportStrategy importStrategy = getGeoStepMetaDataCombi();
 
     Domain domain = modeler.createModel(
-        "GeographyDimModel", source, dbMeta, stepMetaDataCombi, modelAnnotations, metaStore );
+        "GeographyDimModel", source, dbMeta, importStrategy, modelAnnotations, metaStore );
     boolean foundDim = false;
     for ( OlapDimension dim : getDimensions( domain ) ) {
       if ( dim.getName().equals( geoDim ) ) {
@@ -477,7 +478,7 @@ public class DswModelerTest {
     assertTrue( geoDim + " modeled.", foundDim );
   }
 
-  private StepMetaDataCombi getStepMetaDataCombi() {
+  private PhysicalTableImporter.ImportStrategy getImportStrategy() throws ModelerException {
     StepMetaDataCombi stepMetaDataCombi = new StepMetaDataCombi();
     RowMeta rowMeta = new RowMeta();
     rowMeta.addValueMeta( new ValueMetaInteger( "QuantityOrdered" ) );
@@ -493,10 +494,10 @@ public class DswModelerTest {
     tableOutputMeta.setFieldStream( new String[] { "Quantity Ordered", "Total Price", "Product Code", "Status" } );
     tableOutputMeta.setFieldDatabase( new String[] { "QuantityOrdered", "TotalPrice", "ProductCode", "Status" } );
     stepMetaDataCombi.meta = tableOutputMeta;
-    return stepMetaDataCombi;
+    return new RefineryValueMetaStrategy( stepMetaDataCombi );
   }
 
-  private StepMetaDataCombi getGeoStepMetaDataCombi() {
+  private PhysicalTableImporter.ImportStrategy getGeoStepMetaDataCombi() throws ModelerException {
     StepMetaDataCombi stepMetaDataCombi = new StepMetaDataCombi();
     RowMeta rowMeta = new RowMeta();
     rowMeta.addValueMeta( new ValueMetaInteger( "state_fips" ) );
@@ -512,17 +513,17 @@ public class DswModelerTest {
     tableOutputMeta.setFieldStream( new String[] { "state_fips", "state", "state_abbr", "zipcode", "county", "city" } );
     tableOutputMeta.setFieldDatabase( new String[] { "state_fips", "state", "state_abbr", "zipcode", "county", "city" } );
     stepMetaDataCombi.meta = tableOutputMeta;
-    return stepMetaDataCombi;
+    return new RefineryValueMetaStrategy( stepMetaDataCombi );
   }
 
-  private StepMetaDataCombi getEmptyStepMetaDataCombi() {
+  private PhysicalTableImporter.ImportStrategy getEmptyMetaImportStrategy() throws ModelerException {
     StepMetaDataCombi stepMetaDataCombi = new StepMetaDataCombi();
     TableOutputData tableOutputData = new TableOutputData();
     stepMetaDataCombi.data = tableOutputData;
     TableOutputMeta tableOutputMeta = new TableOutputMeta();
     tableOutputMeta.setFieldDatabase( new String[] { "QuantityOrdered", "TotalPrice", "ProductCode", "Status" } );
     stepMetaDataCombi.meta = tableOutputMeta;
-    return stepMetaDataCombi;
+    return new RefineryValueMetaStrategy( stepMetaDataCombi );
   }
 
   private DatabaseMeta createOrderfactDB() throws Exception {
