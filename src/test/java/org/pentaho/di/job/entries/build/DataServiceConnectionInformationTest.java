@@ -123,7 +123,7 @@ public class DataServiceConnectionInformationTest {
     );
     final IUser user = mock( IUser.class );
     when( repository.getUserInfo() ).thenReturn( user );
-    when( user.getUsername() ).thenReturn( "open" );
+    when( user.getLogin() ).thenReturn( "open" );
     when( user.getPassword() ).thenReturn( "sesame" );
     DataServiceConnectionInformation connectInfo = new DataServiceConnectionInformation( dataServiceName, repository,
       log );

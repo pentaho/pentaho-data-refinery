@@ -74,7 +74,7 @@ public class DataServiceConnectionInformation implements ProvidesDatabaseConnect
       URI uri = new URI( repositoryUrl );
       DatabaseMeta databaseMeta =
         new DatabaseMeta( dataServiceName, KETTLE_THIN, NATIVE, uri.getHost(), KETTLE_THIN,
-          Integer.toString( uri.getPort() ), repository.getUserInfo().getUsername(),
+          Integer.toString( uri.getPort() ), repository.getUserInfo().getLogin(),
           repository.getUserInfo().getPassword() );
       databaseMeta.addExtraOption( KETTLE_THIN, "webappname", uri.getPath().substring( 1 ) );
       return databaseMeta;
