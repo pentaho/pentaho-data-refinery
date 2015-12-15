@@ -46,24 +46,27 @@
     <dependency.jackson.revision>1.9.2</dependency.jackson.revision>
     <dependency.osgi.version>4.3.1</dependency.osgi.version>
     <maven-bundle-plugin.version>2.3.7</maven-bundle-plugin.version>
+    <dependency.pdi-dataservice-plugin.revision>6.1-SNAPSHOT</dependency.pdi-dataservice-plugin.revision>
+    <dependency.pentaho-osgi-bundles.revision>6.1-SNAPSHOT</dependency.pentaho-osgi-bundles.revision>
+    <dependency.pentaho-xul.revision>6.1-SNAPSHOT</dependency.pentaho-xul.revision>
   </properties>
   <dependencies>
     <dependency>
       <groupId>pentaho</groupId>
       <artifactId>pdi-dataservice-server-plugin</artifactId>
-      <version>6.1-SNAPSHOT</version>
+      <version>${dependency.pdi-dataservice-plugin.revision}</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>pentaho</groupId>
       <artifactId>pentaho-cache-manager-api</artifactId>
-      <version>${project.version}</version>
+      <version>${dependency.pentaho-osgi-bundles.revision}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>pentaho</groupId>
       <artifactId>pdi-dataservice-client-plugin</artifactId>
-      <version>${project.version}</version>
+      <version>${dependency.pdi-dataservice-plugin.revision}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
@@ -84,12 +87,12 @@
     <dependency>
       <groupId>pentaho</groupId>
       <artifactId>pentaho-xul-core</artifactId>
-      <version>${dependency.kettle.revision}</version>
+      <version>${dependency.pentaho-xul.revision}</version>
     </dependency>
     <dependency>
       <groupId>pentaho</groupId>
       <artifactId>pentaho-xul-swt</artifactId>
-      <version>${dependency.kettle.revision}</version>
+      <version>${dependency.pentaho-xul.revision}</version>
     </dependency>
     <dependency>
       <groupId>pentaho</groupId>
