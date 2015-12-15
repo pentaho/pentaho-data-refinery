@@ -182,6 +182,7 @@ public class ModelAnnotationMetaTest {
       + "<type>CREATE_MEASURE</type>"
       + "<properties>"
       + "<property><name>formatString</name><value>xxxx</value></property>"
+      + "<property><name>hidden</name><value>false</value></property>"
       + "<property><name>description</name><value>some description</value></property>"
       + "<property><name>aggregateType</name><value>SUM</value></property></properties>"
       + "</annotation>"
@@ -190,6 +191,7 @@ public class ModelAnnotationMetaTest {
       + "<field>col1</field><type>CREATE_MEASURE</type>"
       + "<properties>"
       + "<property><name>formatString</name><value>xxxx</value></property>"
+      + "<property><name>hidden</name><value>false</value></property>"
       + "<property><name>description</name><value>some description</value></property>"
       + "<property><name>aggregateType</name><value>SUM</value></property>"
       + "</properties>"
@@ -405,6 +407,7 @@ public class ModelAnnotationMetaTest {
     verify( rep ).saveStepAttribute( transId, stepId, 0, "PROPERTY_VALUE_unique", "false" );
     verify( rep ).saveStepAttribute( transId, stepId, 0, "PROPERTY_VALUE_hierarchy", "Gender" );
     verify( rep ).saveStepAttribute( transId, stepId, 0, "PROPERTY_VALUE_name", "Gender" );
+    verify( rep ).saveStepAttribute( transId, stepId, 0, "PROPERTY_VALUE_hidden", "false" );
 
     verify( rep ).saveStepAttribute( transId, stepId, 1, "ANNOTATION_NAME", "54321" );
     verify( rep ).saveStepAttribute( transId, stepId, 1, "ANNOTATION_FIELD_NAME", "sales" );
@@ -412,6 +415,7 @@ public class ModelAnnotationMetaTest {
     verify( rep ).saveStepAttribute( transId, stepId, 1, "PROPERTY_VALUE_field", "sales" );
     verify( rep ).saveStepAttribute( transId, stepId, 1, "PROPERTY_VALUE_name", "Total Sales" );
     verify( rep ).saveStepAttribute( transId, stepId, 1, "PROPERTY_VALUE_aggregateType", "SUM" );
+    verify( rep ).saveStepAttribute( transId, stepId, 1, "PROPERTY_VALUE_hidden", "false" );
 
     verify( rep ).saveStepAttribute( transId, stepId, "SHARED_DIMENSION", false );
     verify( rep ).saveStepAttribute( transId, stepId, "DESCRIPTION", "aDescription" );
@@ -460,6 +464,7 @@ public class ModelAnnotationMetaTest {
     verify( rep ).saveStepAttribute( transId, stepId, 0, "PROPERTY_VALUE_unique", "false" );
     verify( rep ).saveStepAttribute( transId, stepId, 0, "PROPERTY_VALUE_hierarchy", "Gender" );
     verify( rep ).saveStepAttribute( transId, stepId, 0, "PROPERTY_VALUE_name", "Gender" );
+    verify( rep ).saveStepAttribute( transId, stepId, 0, "PROPERTY_VALUE_hidden", "false" );
 
     verify( rep ).saveStepAttribute( transId, stepId, "SHARED_DIMENSION", true );
     verify( rep ).saveStepAttribute( transId, stepId, "DESCRIPTION", "aDescription" );

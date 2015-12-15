@@ -65,38 +65,41 @@ public class CompatibilityTest {
     assertTrue( m1.getField().equals( "county" ) );
 
     Map<String, Serializable> p1 = m1.describeAnnotation();
-    assertEquals( 5, p1.size() );
+    assertEquals( 6, p1.size() );
     assertEquals( "county", p1.get( "field" ) );
     assertEquals( "Geography", p1.get( "dimension" ) );
     assertEquals( false, p1.get( "unique" ) );
     assertEquals( "County", p1.get( "name" ) );
     assertEquals( "Geography", p1.get( "hierarchy" ) );
+    assertEquals( false, p1.get( "hidden" ) );
 
     ModelAnnotation m2 = modelAnnotationGroup.get( 1 );
     assertTrue( m2.getType() == ModelAnnotation.Type.CREATE_ATTRIBUTE );
     assertTrue( m2.getField().equals( "city" ) );
 
     Map<String, Serializable> p2 = m2.describeAnnotation();
-    assertEquals( 6, p2.size() );
+    assertEquals( 7, p2.size() );
     assertEquals( "city", p2.get( "field" ) );
     assertEquals( "Geography", p2.get( "dimension" ) );
     assertEquals( false, p2.get( "unique" ) );
     assertEquals( "City", p2.get( "name" ) );
     assertEquals( "Geography", p2.get( "hierarchy" ) );
     assertEquals( "County", p2.get( "parentAttribute" ) );
+    assertEquals( false, p2.get( "hidden" ) );
 
     ModelAnnotation m3 = modelAnnotationGroup.get( 2 );
     assertTrue( m3.getType() == ModelAnnotation.Type.CREATE_ATTRIBUTE );
     assertTrue( m3.getField().equals( "state" ) );
 
     Map<String, Serializable> p3 = m3.describeAnnotation();
-    assertEquals( 6, p3.size() );
+    assertEquals( 7, p3.size() );
     assertEquals( "state", p3.get( "field" ) );
     assertEquals( "Geography", p3.get( "dimension" ) );
     assertEquals( false, p3.get( "unique" ) );
     assertEquals( "State", p3.get( "name" ) );
     assertEquals( "Geography", p3.get( "hierarchy" ) );
     assertEquals( "City", p3.get( "parentAttribute" ) );
+    assertEquals( false, p2.get( "hidden" ) );
   }
 
   @Test
@@ -112,11 +115,12 @@ public class CompatibilityTest {
     assertTrue( m1.getField().equals( "col1" ) );
 
     Map<String, Serializable> p1 = m1.describeAnnotation();
-    assertEquals( 4, p1.size() );
+    assertEquals( 5, p1.size() );
     assertEquals( "col1", p1.get( "field" ) );
     assertEquals( "xxxx", p1.get( "formatString" ) );
     assertEquals( "some description", p1.get( "description" ) );
     assertEquals( AggregationType.SUM, p1.get( "aggregateType" ) );
+    assertEquals( false, p1.get( "hidden" ) );
 
     // skip the 2nd one
 
