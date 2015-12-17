@@ -221,6 +221,12 @@ public class ModelServerPublishTest {
   }
 
   @Test
+  public void testCanPublishDatabaseTypesThatAreNotAvailableInThisClassloader() throws Exception {
+    doReturn( "ORACLE" ).when( databaseInterface ).getPluginId();  //Oracle driver shouldn't be available for unit tests
+    assertEquals( "Oracle", modelServerPublishSpy.getDatabaseType( databaseInterface ).getName() );
+  }
+
+  @Test
   public void testGetClient() throws Exception {
 
     doCallRealMethod().when( modelServerPublishSpy ).getClient();

@@ -44,6 +44,7 @@ import org.pentaho.di.core.xml.XMLHandler;
 import org.pentaho.di.i18n.BaseMessages;
 import org.pentaho.di.job.JobHopMeta;
 import org.pentaho.di.job.JobMeta;
+import org.pentaho.di.job.entries.build.DataServiceConnectionInformation;
 import org.pentaho.di.job.entries.build.JobEntryBuildModel;
 import org.pentaho.di.job.entry.JobEntryBase;
 import org.pentaho.di.job.entry.JobEntryInterface;
@@ -336,6 +337,9 @@ public class JobEntryDatasourcePublish extends JobEntryBase implements Cloneable
   protected void publishDatabaseMeta( final ModelServerPublish modelServerPublish, final DatabaseMeta databaseMeta,
       final boolean forceOverride ) throws KettleException {
 
+    if ( isKettleThinLocal( databaseMeta ) ) {
+      throw new KettleException( getMsg( "JobEntryDatasourcePublish.Publish.LocalPentahoDataService" ) );
+    }
     modelServerPublish.setDatabaseMeta( databaseMeta ); // provide database info
 
     // TODO Simple Check - Need to make this smarter and inspect the database connection
@@ -359,10 +363,17 @@ public class JobEntryDatasourcePublish extends JobEntryBase implements Cloneable
             .getName() ) );
       }
 
+    } catch ( KettleException ke ) {
+      throw ke;
     } catch ( Exception e ) {
       throw new KettleException( e );
     }
     logBasic( this.getMsg( "JobEntryDatasourcePublish.Publish.DBConnection.Success", databaseMeta.getName() ) );
+  }
+
+  private boolean isKettleThinLocal( final DatabaseMeta databaseMeta ) {
+    return DataServiceConnectionInformation.KETTLE_THIN.equals( databaseMeta.getDatabaseInterface().getPluginId() )
+      && "true".equals( databaseMeta.getExtraOptions().get( DataServiceConnectionInformation.KETTLE_THIN + ".local" ) );
   }
 
   protected void publishMondrianSchema( final String modelName, final ModelServerPublish modelServerPublish,

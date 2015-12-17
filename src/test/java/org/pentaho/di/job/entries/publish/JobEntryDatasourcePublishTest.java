@@ -34,6 +34,7 @@ import org.pentaho.database.model.DatabaseConnection;
 import org.pentaho.di.core.KettleClientEnvironment;
 import org.pentaho.di.core.ProvidesDatabaseConnectionInformation;
 import org.pentaho.di.core.Result;
+import org.pentaho.di.core.database.DatabaseInterface;
 import org.pentaho.di.core.database.DatabaseMeta;
 import org.pentaho.di.core.exception.KettleException;
 import org.pentaho.di.core.refinery.DataRefineryConfig;
@@ -53,20 +54,24 @@ import org.pentaho.di.repository.Repository;
 import org.pentaho.di.ui.job.entries.common.ConnectionValidator;
 import org.w3c.dom.Node;
 
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
-
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 
 import static org.junit.Assert.*;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyBoolean;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.isA;
+import static org.mockito.Mockito.argThat;
 import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.matches;
 
 /**
  * @author Rowell Belen
@@ -222,7 +227,47 @@ public class JobEntryDatasourcePublishTest {
     JobEntryDatasourcePublish datasourcePublishSpy = spy( jobEntryDatasourcePublish );
 
     when( modelServerPublish.connectionNameExists( anyString() ) ).thenReturn( databaseConnection );
+    final DatabaseInterface databaseInterface = mock( DatabaseInterface.class );
+    when( databaseMeta.getDatabaseInterface() ).thenReturn( databaseInterface );
+    when( databaseInterface.getPluginId() ).thenReturn( "Oracle" );
     datasourcePublishSpy.publishDatabaseMeta( modelServerPublish, databaseMeta, false );
+  }
+
+  @Test
+  public void testCannotPublishKettleThinLocal() throws Exception {
+    JobEntryDatasourcePublish datasourcePublishSpy = spy( jobEntryDatasourcePublish );
+
+    when( modelServerPublish.connectionNameExists( anyString() ) ).thenReturn( databaseConnection );
+    when( modelServerPublish.publishDataSource( anyBoolean(), anyString() ) ).thenReturn( true );
+    final DatabaseInterface databaseInterface = mock( DatabaseInterface.class );
+    when( databaseMeta.getDatabaseInterface() ).thenReturn( databaseInterface );
+    when( databaseInterface.getPluginId() ).thenReturn( "KettleThin" );
+    Map<String, String> extraOptions = new HashMap<>();
+    extraOptions.put( "KettleThin.local", "true" );
+    when( databaseMeta.getExtraOptions() ).thenReturn( extraOptions );
+    try {
+      datasourcePublishSpy.publishDatabaseMeta( modelServerPublish, databaseMeta, false );
+      fail( "expected Exception" );
+    } catch ( KettleException e ) {
+      assertEquals( "You must be connected to a DI Repository in order to publish a Pentaho Data Service connection", e.getMessage().trim() );
+    }
+  }
+
+  @Test
+  public void testCanPublishKettleThinRepository() throws Exception {
+    JobEntryDatasourcePublish datasourcePublishSpy = spy( jobEntryDatasourcePublish );
+
+    when( modelServerPublish.connectionNameExists( anyString() ) ).thenReturn( databaseConnection );
+    when( modelServerPublish.publishDataSource( anyBoolean(), anyString() ) ).thenReturn( true );
+    final DatabaseInterface databaseInterface = mock( DatabaseInterface.class );
+    when( databaseMeta.getDatabaseInterface() ).thenReturn( databaseInterface );
+    when( databaseInterface.getPluginId() ).thenReturn( "KettleThin" );
+    when( databaseMeta.getExtraOptions() ).thenReturn( new HashMap<String, String>() );
+    try {
+      datasourcePublishSpy.publishDatabaseMeta( modelServerPublish, databaseMeta, false );
+    } catch ( KettleException e ) {
+      fail( "did not expect exception " + e.getMessage() );
+    }
   }
 
   @Test
@@ -231,6 +276,9 @@ public class JobEntryDatasourcePublishTest {
 
     when( modelServerPublish.connectionNameExists( anyString() ) ).thenReturn( databaseConnection );
     when( modelServerPublish.publishDataSource( anyBoolean(), anyString() ) ).thenReturn( true );
+    final DatabaseInterface databaseInterface = mock( DatabaseInterface.class );
+    when( databaseMeta.getDatabaseInterface() ).thenReturn( databaseInterface );
+    when( databaseInterface.getPluginId() ).thenReturn( "Oracle" );
     datasourcePublishSpy.publishDatabaseMeta( modelServerPublish, databaseMeta, false );
   }
 
@@ -240,6 +288,9 @@ public class JobEntryDatasourcePublishTest {
 
     when( modelServerPublish.connectionNameExists( anyString() ) ).thenReturn( databaseConnection );
     when( modelServerPublish.publishDataSource( anyBoolean(), anyString() ) ).thenReturn( true );
+    final DatabaseInterface databaseInterface = mock( DatabaseInterface.class );
+    when( databaseMeta.getDatabaseInterface() ).thenReturn( databaseInterface );
+    when( databaseInterface.getPluginId() ).thenReturn( "Oracle" );
     datasourcePublishSpy.publishDatabaseMeta( modelServerPublish, databaseMeta, true );
   }
 
@@ -249,6 +300,9 @@ public class JobEntryDatasourcePublishTest {
 
     when( modelServerPublish.connectionNameExists( anyString() ) ).thenReturn( null );
     when( modelServerPublish.publishDataSource( anyBoolean(), anyString() ) ).thenReturn( true );
+    final DatabaseInterface databaseInterface = mock( DatabaseInterface.class );
+    when( databaseMeta.getDatabaseInterface() ).thenReturn( databaseInterface );
+    when( databaseInterface.getPluginId() ).thenReturn( "Oracle" );
     datasourcePublishSpy.publishDatabaseMeta( modelServerPublish, databaseMeta, true );
   }
 

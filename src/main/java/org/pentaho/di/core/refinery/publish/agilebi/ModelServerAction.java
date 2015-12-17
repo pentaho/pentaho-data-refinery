@@ -70,7 +70,7 @@ public class ModelServerAction {
     try {
       Thread.currentThread().setContextClassLoader( IDatabaseDialect.class.getClassLoader() );
 
-      DatabaseDialectService dds = new DatabaseDialectService();
+      DatabaseDialectService dds = new DatabaseDialectService( false );
       DatabaseTypeHelper dth = new DatabaseTypeHelper( dds.getDatabaseTypes() );
       dbType = dth.getDatabaseTypeByShortName( databaseInterface.getPluginId() );
     } finally {
