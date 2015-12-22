@@ -249,7 +249,8 @@ public class JobEntryDatasourcePublishTest {
       datasourcePublishSpy.publishDatabaseMeta( modelServerPublish, databaseMeta, false );
       fail( "expected Exception" );
     } catch ( KettleException e ) {
-      assertEquals( "You must be connected to a DI Repository in order to publish a Pentaho Data Service connection", e.getMessage().trim() );
+      assertEquals( "We werent able to publish the requested Pentaho Data Service connection. Make sure you are connected to a Pentaho Repository.",
+        e.getMessage().trim() );
     }
   }
 
