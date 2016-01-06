@@ -385,7 +385,9 @@ public class ModelAnnotationActionPropertiesDialog extends ModelAnnotationAction
           Object object = annotationType.getModelPropertyValueByName( name );
           if ( object != null ) {
             String value = object.toString();
-            if ( StringUtils.equals( name, CreateAttribute.UNIQUE_NAME ) ) {
+            if ( StringUtils.equals( name, CreateAttribute.UNIQUE_NAME ) ||
+                StringUtils.equals( name, CreateAttribute.HIDDEN_NAME ) ||
+                StringUtils.equals( name, CreateMeasure.HIDDEN_NAME ) ) {
               value = StringUtils.capitalize( value );
             }
             item.setText( 2, value );
