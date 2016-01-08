@@ -1,2 +1,3 @@
-pentaho-data-refinery-ee
+pentaho-data-refinery
 ========================
+
