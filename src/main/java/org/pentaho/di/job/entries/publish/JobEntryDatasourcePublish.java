@@ -2,7 +2,7 @@
  *
  * Pentaho Community Edition Project: data-refinery-pdi-plugin
  *
- * Copyright (C) 2002-2015 by Pentaho : http://www.pentaho.com
+ * Copyright (C) 2002-20156by Pentaho : http://www.pentaho.com
  *
  * *******************************************************************************
  *
@@ -98,6 +98,12 @@ public class JobEntryDatasourcePublish extends JobEntryBase implements Cloneable
 
   @Override
   public Result execute( Result result, int i ) throws KettleException {
+    boolean dsPublished, metaPublished;
+    dsPublished = metaPublished =false;
+    DatabaseMeta databaseMeta = null;
+    ModelServerPublish modelServerPublish = null;
+    String dswFlag = null;
+    String modelName = null;
     try {
       BiServerConnection biServerModel = dataSourcePublishModel.getBiServerConnection();
 
@@ -122,11 +128,10 @@ public class JobEntryDatasourcePublish extends JobEntryBase implements Cloneable
       connection.setUserId( biServerModel.getUserId() );
       log.logBasic( getMsg( "JobEntryDatasourcePublish.Publish.BAServer", biServerModel.getUrl() ) );
 
-      ModelServerPublish modelServerPublish = getModelServerPublish();
+      modelServerPublish = getModelServerPublish();
       modelServerPublish.setBiServerConnection( connection );
 
       boolean forceOverride = dataSourcePublishModel.isOverride();
-
 
       DataSourceAclModel datasourceAcl = new DataSourceAclModel();
       String accessType =
@@ -148,7 +153,7 @@ public class JobEntryDatasourcePublish extends JobEntryBase implements Cloneable
       }
       modelServerPublish.setAclModel( datasourceAcl );
 
-      String modelName = getModelName();
+      modelName = getModelName();
       log.logBasic( this.getMsg( "JobEntryDatasourcePublish.Publish.Model", modelName ) );
 
       // We support publishing whatever is available to the publish job entry.. so if a build model job entry
@@ -156,7 +161,7 @@ public class JobEntryDatasourcePublish extends JobEntryBase implements Cloneable
       // job entry precedes this, then we publish whatever is set by this job entry.
 
       // Publish Database Meta
-      DatabaseMeta databaseMeta = discoverDatabaseMeta( getParentJob().getJobMeta() );
+      databaseMeta = discoverDatabaseMeta( getParentJob().getJobMeta() );
       if ( databaseMeta != null ) {
 
         // Cannot publish JNDI data sources at this time, we don't know if BIServer has access to it
@@ -175,9 +180,10 @@ public class JobEntryDatasourcePublish extends JobEntryBase implements Cloneable
       } else {
         throw new KettleException( this.getMsg( "JobEntryDatasourcePublish.Error.UnableToFindDBConnection" ) );
       }
+      dsPublished = true;
 
       // Publish Metadata XMI
-      String dswFlag = getParentJob().getVariable( "JobEntryBuildModel.XMI.DSW." + modelName );
+      dswFlag = getParentJob().getVariable( "JobEntryBuildModel.XMI.DSW." + modelName );
       log.logBasic( getMsg( "JobEntryDatasourcePublish.Publish.ReadVariable", "JobEntryBuildModel.XMI.DSW."
           + modelName, dswFlag ) );
       if ( dswFlag != null && dswFlag.equalsIgnoreCase( "true" ) ) {
@@ -185,6 +191,7 @@ public class JobEntryDatasourcePublish extends JobEntryBase implements Cloneable
       } else {
         publishMetadataXmi( modelName, modelServerPublish, forceOverride );
       }
+      metaPublished = true;
 
       // Publish Mondrian Schema
       publishMondrianSchema( modelName, modelServerPublish, forceOverride );
@@ -192,6 +199,13 @@ public class JobEntryDatasourcePublish extends JobEntryBase implements Cloneable
       result.setResult( true );
 
     } catch ( KettleException e ) {
+      logBasic( this.getMsg( "JobEntryDatasourcePublish.Rollback" ) );
+      if ( dsPublished && databaseMeta != null ) {
+        deleteDatabaseMeta( modelServerPublish, databaseMeta );
+      }
+      if ( metaPublished && modelName != null ) {
+        deleteXMI( modelServerPublish, modelName, dswFlag );
+      }
       logError( e.getMessage(), e );
       result.setResult( false );
       result.setNrErrors( 1 );
@@ -369,6 +383,56 @@ public class JobEntryDatasourcePublish extends JobEntryBase implements Cloneable
       throw new KettleException( e );
     }
     logBasic( this.getMsg( "JobEntryDatasourcePublish.Publish.DBConnection.Success", databaseMeta.getName() ) );
+  }
+
+  protected void deleteDatabaseMeta( final ModelServerPublish modelServerPublish, final DatabaseMeta databaseMeta )
+      throws KettleException {
+
+    if ( isKettleThinLocal( databaseMeta ) ) {
+      throw new KettleException( getMsg( "JobEntryDatasourcePublish.Publish.LocalPentahoDataService" ) );
+    }
+    // TODO Simple Check - Need to make this smarter and inspect the database connection
+    DatabaseConnection connection = modelServerPublish.connectionNameExists( databaseMeta.getName() );
+
+    try {
+      boolean success = true;
+      if ( connection != null ) {
+        success = modelServerPublish.deleteConnection( connection.getName() );
+      }
+
+      if ( !success ) {
+        throw new Exception( this.getMsg( "JobEntryDatasourcePublish.Delete.DBConnection.Failed", databaseMeta
+            .getName() ) );
+      }
+
+    } catch ( KettleException ke ) {
+      throw ke;
+    } catch ( Exception e ) {
+      throw new KettleException( e );
+    }
+    logBasic( this.getMsg( "JobEntryDatasourcePublish.Delete.DBConnection.Success", databaseMeta.getName() ) );
+  }
+
+  protected void deleteXMI( final ModelServerPublish modelServerPublish, final String modelName, String dswFlag )
+      throws KettleException {
+    try {
+      boolean success = true;
+      if ( dswFlag != null && dswFlag.equalsIgnoreCase( "true" ) ) {
+        success = modelServerPublish.deleteDSWXmi( checkDswId( modelName ) );
+      } else {
+        success = modelServerPublish.deleteMetadataXmi( modelName );
+      }
+
+      if ( !success ) {
+        throw new Exception( this.getMsg( "JobEntryDatasourcePublish.Delete.XMI.Failed", modelName  ) );
+      }
+
+    } catch ( KettleException ke ) {
+      throw ke;
+    } catch ( Exception e ) {
+      throw new KettleException( e );
+    }
+    logBasic( this.getMsg( "JobEntryDatasourcePublish.Delete.XMI.Success", modelName ) );
   }
 
   private boolean isKettleThinLocal( final DatabaseMeta databaseMeta ) {

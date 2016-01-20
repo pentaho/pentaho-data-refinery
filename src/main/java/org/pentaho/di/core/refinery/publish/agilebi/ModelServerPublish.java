@@ -2,7 +2,7 @@
  *
  * Pentaho Community Edition Project: data-refinery-pdi-plugin
  *
- * Copyright (C) 2002-2015 by Pentaho : http://www.pentaho.com
+ * Copyright (C) 2002-2016 by Pentaho : http://www.pentaho.com
  *
  * *******************************************************************************
  *
@@ -56,6 +56,7 @@ public class ModelServerPublish extends ModelServerAction {
   private static final String MONDRIAN_POST_ANALYSIS_URL = "plugin/data-access/api/mondrian/postAnalysis";
   private static final String PLUGIN_DATA_ACCESS_API_CONNECTION_ADD = "plugin/data-access/api/connection/add";
   private static final String PLUGIN_DATA_ACCESS_API_CONNECTION_UPDATE = "plugin/data-access/api/connection/update";
+  private static final String PLUGIN_DATA_ACCESS_API_CONNECTION_DELETE = "plugin/data-access/api/connection/deletebyname";
   private static final String DATA_ACCESS_API_CONNECTION_GET = "plugin/data-access/api/connection/getresponse";
   private static Logger logger = Logger.getLogger( ModelServerPublish.class.getName() );
   private boolean forceOverwrite;
@@ -113,6 +114,55 @@ public class ModelServerPublish extends ModelServerAction {
           .entity( connection );
 
       ClientResponse resp = httpPost( builder );
+      if ( resp == null || resp.getStatus() != 200 ) {
+        return false;
+      }
+    } catch ( Exception ex ) {
+      Log.error( ex.getMessage() );
+      return false;
+    }
+    return true;
+  }
+  
+  /**
+   * Jersey call to delete connection
+   *
+   * @param connectionName
+   * @return
+   */
+  public boolean deleteConnection( String connectionName ) {
+    return deleteEntity( biServerConnection.getUrl() + PLUGIN_DATA_ACCESS_API_CONNECTION_DELETE + REST_NAME_PARM 
+      + connectionName );
+  }
+
+  /**
+   * Jersey call to delete connection
+   *
+   * @param connectionName
+   * @return
+   */
+  public boolean deleteMetadataXmi( String domainId ) {
+    return deleteEntity( biServerConnection.getUrl() + "plugin/data-access/api/datasource/metadata/domain/"
+        + domainId );
+  }
+
+  /**
+   * Jersey call to delete connection
+   *
+   * @param connectionName
+   * @return
+   */
+  public boolean deleteDSWXmi( String domainId ) {
+    return deleteEntity( biServerConnection.getUrl() + "plugin/data-access/api/datasource/dsw/domain/" + domainId );
+  }
+
+  protected boolean deleteEntity( String url ) {
+    try {
+      WebResource resource = getClient().resource( url );
+      Builder builder = resource
+          .type( MediaType.APPLICATION_JSON );
+
+      ClientResponse resp = httpDelete( builder );
       if ( resp == null || resp.getStatus() != 200 ) {
         return false;
       }
