@@ -2,7 +2,7 @@
  *
  * Pentaho Community Edition Project: data-refinery-pdi-plugin
  *
- * Copyright (C) 2002-2015 by Pentaho : http://www.pentaho.com
+ * Copyright (C) 2002-2016 by Pentaho : http://www.pentaho.com
  *
  * *******************************************************************************
  *
@@ -527,6 +527,54 @@ public class JobEntryDatasourcePublishTest {
     model.setUserOrRole( "admin" );
     Result r3 = datasourcePublishSpy.execute( new Result( 0 ), 0 );
     assertTrue( r3.getResult() ); // Success
+  }
+
+  @Test
+  public void testRollback() throws Exception {
+
+    JobEntryDatasourcePublish datasourcePublishSpy = spy( jobEntryDatasourcePublish );
+
+    when( datasourcePublishSpy.getParentJob() ).thenReturn( parentJob );
+
+    // suppress log basic
+    doNothing().when( datasourcePublishSpy ).logBasic( anyString() );
+
+    // return mocks
+    when( datasourcePublishSpy.getModelServerPublish() ).thenReturn( modelServerPublish );
+    when( datasourcePublishSpy
+        .getConnectionValidator( any( BiServerConnection.class ) ) ).thenReturn( connectionValidator );
+
+    doReturn( true ).when( connectionValidator ).isPentahoServer();
+    doReturn( true ).when( connectionValidator ).isUserInfoProvided();
+    doReturn( true ).when( connectionValidator ).canConnect();
+
+    doReturn( databaseMeta ).when( datasourcePublishSpy ).discoverDatabaseMeta( any( JobMeta.class ) );
+
+    DataSourcePublishModel model = new DataSourcePublishModel();
+    model.setModelName( "logicalModel" );
+    model.setBiServerConnection( biServerConnection );
+
+    datasourcePublishSpy.setDataSourcePublishModel( model );
+
+    doNothing().when( datasourcePublishSpy ).deleteDatabaseMeta( any( ModelServerPublish.class ),
+        any( DatabaseMeta.class ) );
+    doNothing().when( datasourcePublishSpy ).deleteXMI( any( ModelServerPublish.class ), anyString(),
+        anyString() );
+    doNothing().when( datasourcePublishSpy ).publishDatabaseMeta( any( ModelServerPublish.class ),
+        any( DatabaseMeta.class ), anyBoolean() );
+    doNothing().when( datasourcePublishSpy ).publishMetadataXmi( anyString(), any( ModelServerPublish.class ),
+        anyBoolean() );
+    doThrow( new KettleException() ).when( datasourcePublishSpy ).publishMondrianSchema( anyString(),
+        any( ModelServerPublish.class ), anyBoolean() );
+
+    model.setAccessType( "user" );
+    model.setUserOrRole( "admin" );
+    Result r3 = datasourcePublishSpy.execute( new Result( 0 ), 0 );
+    assertTrue( !r3.getResult() ); // Success
+    verify( datasourcePublishSpy, times( 1 ) ).deleteDatabaseMeta( any( ModelServerPublish.class ),
+        any( DatabaseMeta.class ) );
+    verify( datasourcePublishSpy, times( 1 ) ).deleteXMI( any( ModelServerPublish.class ), anyString(),
+        anyString() );
   }
 
   @Test

@@ -2,7 +2,7 @@
  *
  * Pentaho Community Edition Project: data-refinery-pdi-plugin
  *
- * Copyright (C) 2002-2015 by Pentaho : http://www.pentaho.com
+ * Copyright (C) 2002-2016 by Pentaho : http://www.pentaho.com
  *
  * *******************************************************************************
  *
@@ -89,6 +89,10 @@ public class ModelServerAction {
 
   protected ClientResponse httpGet( final Builder builder ) {
     return builder.get( ClientResponse.class );
+  }
+
+  protected ClientResponse httpDelete( final Builder builder ) {
+    return builder.delete( ClientResponse.class );
   }
 
   protected String getUrl( final String path ) {
