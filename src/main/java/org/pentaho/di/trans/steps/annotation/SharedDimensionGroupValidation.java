@@ -85,6 +85,8 @@ public class SharedDimensionGroupValidation {
         case CREATE_ATTRIBUTE:
           dimension = validateDimension( dimension, annotation );
           break;
+        case BLANK:
+          break;
         default:
           addError( annotation,
               BaseMessages.getString( PKG, "ModelAnnotation.SharedDimension.ValidationError.WrongAnnotationType" ) );
