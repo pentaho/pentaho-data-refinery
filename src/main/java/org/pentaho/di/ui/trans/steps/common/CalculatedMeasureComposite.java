@@ -59,6 +59,7 @@ public class CalculatedMeasureComposite extends BaseComposite {
   private Text wFormula;
 
   private Button wCalculateSubtotals;
+  private Button wHidden;
 
   private OptionsResolver optionsResolver;
 
@@ -107,15 +108,25 @@ public class CalculatedMeasureComposite extends BaseComposite {
     setLook( wlFormula );
     UIBuilder.positionControlBelow( wlFormula, wFormat, 10, 10 );
 
+    wHidden = new Button( this, SWT.CHECK );
+    wHidden.setText(
+      BaseMessages.getString( getLocalizationPkg(), "CalculatedMeasure.Composite.Hidden.Label" ) );
+    setLook( wHidden );
+    FormData fdHidden = new FormData();
+    fdHidden.left = new FormAttachment( 0, 10 );
+    fdHidden.right = new FormAttachment( 100, -10 );
+    fdHidden.bottom = new FormAttachment( 100, -10 );
+    wHidden.setLayoutData( fdHidden );
+
     wCalculateSubtotals = new Button( this, SWT.CHECK );
     wCalculateSubtotals.setText(
-        BaseMessages.getString( getLocalizationPkg(), "CalculatedMeasure.Composite.Subtotal.Label" ) );
+      BaseMessages.getString( getLocalizationPkg(), "CalculatedMeasure.Composite.Subtotal.Label" ) );
     setLook( wCalculateSubtotals );
-    FormData fdCalculatedSubtotals = new FormData();
-    fdCalculatedSubtotals.left = new FormAttachment( 0, 10 );
-    fdCalculatedSubtotals.right = new FormAttachment( 100, -10 );
-    fdCalculatedSubtotals.bottom = new FormAttachment( 100, -10 );
-    wCalculateSubtotals.setLayoutData( fdCalculatedSubtotals );
+    FormData fdCalculateSubtotals = new FormData();
+    fdCalculateSubtotals.left = new FormAttachment( 0, 10 );
+    fdCalculateSubtotals.right = new FormAttachment( 100, -10 );
+    fdCalculateSubtotals.bottom = new FormAttachment( wHidden, -10 );
+    wCalculateSubtotals.setLayoutData( fdCalculateSubtotals );
 
     wFormula = new Text( this, SWT.MULTI | SWT.BORDER | SWT.WRAP );
     setLook( wFormula );
@@ -139,6 +150,7 @@ public class CalculatedMeasureComposite extends BaseComposite {
     wFormat.setText( StringUtils.defaultIfBlank( calculatedMember.getFormatString(), "" ) );
     wFormula.setText( StringUtils.defaultIfBlank( calculatedMember.getFormula(), "" ) );
     wCalculateSubtotals.setSelection( calculatedMember.isCalculateSubtotals() );
+    wHidden.setSelection( calculatedMember.isHidden() );
   }
 
   public void save( AnnotationType annotationType ) {
@@ -154,6 +166,7 @@ public class CalculatedMeasureComposite extends BaseComposite {
     calculatedMember.setFormula( StringUtils.defaultIfBlank( wFormula.getText(), null ) );
     calculatedMember.setDimension( DEFAULT_DIMENSION );
     calculatedMember.setCalculateSubtotals( wCalculateSubtotals.getSelection() );
+    calculatedMember.setHidden( wHidden.getSelection() );
   }
 
   public ModelAnnotation<?> get() {
