@@ -28,6 +28,7 @@ import java.util.Locale;
 
 import org.junit.Test;
 import org.mockito.Mockito;
+import org.pentaho.agilebi.modeler.models.annotations.BlankAnnotation;
 import org.pentaho.agilebi.modeler.models.annotations.CreateAttribute;
 import org.pentaho.agilebi.modeler.models.annotations.CreateDimensionKey;
 import org.pentaho.agilebi.modeler.models.annotations.CreateMeasure;
@@ -236,6 +237,17 @@ public class SharedDimensionGroupValidationTest {
     group.setSharedDimension( true );
     group.setName( "${someVariable}" );
 
+    SharedDimensionGroupValidation validation = new SharedDimensionGroupValidation( group, getLog() );
+    assertFalse( validation.hasErrors() );
+  }
+
+  @Test
+  public void testFieldWithEmptyAnnotationIsAllowed() throws Exception {
+    BlankAnnotation blankAnnotation = new BlankAnnotation();
+    blankAnnotation.setField( "anyField" );
+    ModelAnnotationGroup group = new ModelAnnotationGroup(
+      new ModelAnnotation<>( blankAnnotation ), new ModelAnnotation<>( new CreateDimensionKey() ) );
+    group.setSharedDimension( true );
     SharedDimensionGroupValidation validation = new SharedDimensionGroupValidation( group, getLog() );
     assertFalse( validation.hasErrors() );
   }
