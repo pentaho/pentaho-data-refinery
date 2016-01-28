@@ -590,4 +590,14 @@ public class JobEntryBuildModelTest {
     assertEquals( "service two", connectionInfo.getTableName() );
 
   }
+
+  @Test
+  public void testEmptyOutputStepIsError() throws Exception {
+    buildJobEntry.setOutputStep( null );
+    job.run();
+    assertEquals( 1, job.getResult().getNrErrors() );
+    buildJobEntry.setOutputStep( "" );
+    job.run();
+    assertEquals( 1, job.getResult().getNrErrors() );
+  }
 }

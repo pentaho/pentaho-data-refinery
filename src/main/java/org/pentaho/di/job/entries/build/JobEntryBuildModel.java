@@ -73,6 +73,7 @@ import java.util.HashSet;
 import java.util.List;
 
 import static org.pentaho.di.core.Const.nullToEmpty;
+import static org.pentaho.platform.util.StringUtil.isEmpty;
 
 @org.pentaho.di.core.annotations.JobEntry( id = JobEntryBuildModel.PLUGIN_ID,
     categoryDescription = "JobCategory.Category.Modeling", i18nPackageName = "org.pentaho.di.job.entries.build",
@@ -316,18 +317,18 @@ public class JobEntryBuildModel extends JobEntryBase implements JobEntryInterfac
 
   public ProvidesDatabaseConnectionInformation getConnectionInfo() throws KettleException {
     StepMetaDataCombi stepMetaDataCombi = getStepMetaDataCombi();
+    String sourceName = environmentSubstitute( getOutputStep() );
     if ( stepMetaDataCombi == null ) {
       if ( isOutputStepADataService() ) {
         return new DataServiceConnectionInformation( getOutputStep(), getRepository(), log );
       }
-      throw new KettleException( this.getMsg( "BuildModelJob.Error.UnableToFindStep",
-        environmentSubstitute( getOutputStep() ) ) );
+      throw new KettleException( this.getMsg( isEmpty( sourceName )
+        ? "BuildModelJob.Error.SourceUndefined" : "BuildModelJob.Error.UnableToFindStep", sourceName ) );
     }
     if ( ProvidesDatabaseConnectionInformation.class.isAssignableFrom( stepMetaDataCombi.meta.getClass() ) ) {
       return ProvidesDatabaseConnectionInformation.class.cast( stepMetaDataCombi.meta );
     }
-    throw new KettleException( this.getMsg( "BuildModelJob.Error.NoConnectionInfo",
-        environmentSubstitute( getOutputStep() ) ) );
+    throw new KettleException( this.getMsg( "BuildModelJob.Error.NoConnectionInfo", sourceName ) );
   }
 
   protected BiServerConnection validBIServerConnection() throws KettleException {
