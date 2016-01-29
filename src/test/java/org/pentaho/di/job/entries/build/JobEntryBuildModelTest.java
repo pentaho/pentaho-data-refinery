@@ -39,6 +39,7 @@ import org.pentaho.di.core.Result;
 import org.pentaho.di.core.database.Database;
 import org.pentaho.di.core.database.DatabaseMeta;
 import org.pentaho.di.core.exception.KettleException;
+import org.pentaho.di.core.logging.LogChannelInterface;
 import org.pentaho.di.core.plugins.PluginRegistry;
 import org.pentaho.di.core.plugins.StepPluginType;
 import org.pentaho.di.core.refinery.model.AnalysisModeler;
@@ -88,6 +89,7 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.*;
 
 public class JobEntryBuildModelTest {
+  private LogChannelInterface mockLog;
   private Job job;
   private JobEntryTrans trans;
   private DatabaseMeta databaseMeta;
@@ -195,6 +197,7 @@ public class JobEntryBuildModelTest {
 
     setJobMeta();
     setAnnotations();
+    mockLog = Mockito.mock( LogChannelInterface.class );
   }
 
   private void setAnnotations() {
@@ -565,19 +568,20 @@ public class JobEntryBuildModelTest {
       }
     };
     trans.setPluginId( "TRANS" );
-    JobEntryCopy copyOne = new JobEntryCopy( trans );
-    JobEntryCopy copyTwo = new JobEntryCopy( new JobEntrySuccess() );
-    final List<JobEntryCopy> jobCopies = asList( copyOne, copyTwo );
-
-    JobEntryBuildModel jobEntry = new JobEntryBuildModel() {
-      @Override StepMetaDataCombi getStepMetaDataCombi() {
-        return null;
-      }
-
-      @Override List<JobEntryCopy> getParentJobCopies() {
-        return jobCopies;
+    JobEntryTrans badTrans = new JobEntryTrans( "badTrans" ) {
+      @Override
+      public TransMeta getTransMeta( final Repository rep, final IMetaStore metaStore, final VariableSpace space )
+        throws KettleException {
+        throw new KettleException( "something happend" );
       }
     };
+    badTrans.setPluginId( "TRANS" );
+    JobEntryCopy copyOne = new JobEntryCopy( trans );
+    JobEntryCopy badCopy = new JobEntryCopy( badTrans );
+    JobEntryCopy copyTwo = new JobEntryCopy( new JobEntrySuccess() );
+    final List<JobEntryCopy> jobCopies = asList( copyOne, badCopy, copyTwo );
+
+    JobEntryBuildModel jobEntry = new JobEntryBuildModelForTest( jobCopies );
     jobEntry.setOutputStep( "service two" );
     DataServiceContext dataServiceContext = Mockito.mock( DataServiceContext.class );
     jobEntry.setDataServiceContext( dataServiceContext );
@@ -588,7 +592,25 @@ public class JobEntryBuildModelTest {
     ProvidesDatabaseConnectionInformation connectionInfo = jobEntry.getConnectionInfo();
     assertTrue( connectionInfo instanceof DataServiceConnectionInformation );
     assertEquals( "service two", connectionInfo.getTableName() );
+    verify( mockLog ).logDebug( eq( "Unable to look inside transformation badTrans." ), any() );
+  }
+  
+  private class JobEntryBuildModelForTest extends JobEntryBuildModel {
+    private List<JobEntryCopy> jobCopies;
 
+    public JobEntryBuildModelForTest( final List<JobEntryCopy> jobCopies ) {
+      super();
+      this.jobCopies = jobCopies;
+      log = mockLog;
+    }
+
+    @Override StepMetaDataCombi getStepMetaDataCombi() {
+      return null;
+    }
+
+    @Override List<JobEntryCopy> getParentJobCopies() {
+      return jobCopies;
+    }
   }
 
   @Test

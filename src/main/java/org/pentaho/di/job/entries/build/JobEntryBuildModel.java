@@ -291,7 +291,11 @@ public class JobEntryBuildModel extends JobEntryBase implements JobEntryInterfac
     for ( JobEntryCopy jobCopy : jobCopies ) {
       if ( jobCopy.isTransformation() ) {
         JobEntryTrans entry = (JobEntryTrans) jobCopy.getEntry();
-        transMetas.add( entry.getTransMeta( getRepository(), getMetaStore(), getVariables() ) );
+        try {
+          transMetas.add( entry.getTransMeta( getRepository(), getMetaStore(), getVariables() ) );
+        } catch ( Exception e ) {
+          log.logDebug( getMsg( "BuildModelJob.Debug.BadTrans", jobCopy.getName() ), e );
+        }
       }
     }
     return transMetas;
