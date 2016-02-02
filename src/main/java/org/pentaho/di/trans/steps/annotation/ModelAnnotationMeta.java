@@ -66,7 +66,7 @@ import java.util.UUID;
 @Step( id = "FieldMetadataAnnotation", image = "ModelAnnotation.svg",
     i18nPackageName = "org.pentaho.di.trans.steps.annotation", name = "ModelAnnotation.TransName",
     description = "ModelAnnotation.TransDescription",
-    documentationUrl = "https://help.pentaho.com/Documentation/6.0/0N0/060/0B0/020/0B0",
+    documentationUrl = "https://help.pentaho.com/Documentation/6.1/0N0/060/0B0/020/0B0",
     categoryDescription = "i18n:org.pentaho.di.trans.step:BaseStep.Category.Flow" )
 public class ModelAnnotationMeta extends BaseStepMeta implements StepMetaInterface, StepMetaChangeListenerInterface {
 
