@@ -288,4 +288,15 @@ public class JobEntryBuildModelDialog extends JobEntryDialogBoilerplate<JobEntry
   protected String getJobIcon() {
     return "model_entry.svg";
   }
+
+  @Override protected boolean okToClose() {
+    if ( super.okToClose() ) {
+      if ( wModelName.getText().contains( "/" ) ) {
+        showError( getMsg( "System.StepJobEntryNameMissing.Title" ), getMsg( "BuildModelJob.Error.ModelName.InvalidCharacter" ) );
+        return false;
+      }
+      return true;
+    }
+    return false;
+  }
 }

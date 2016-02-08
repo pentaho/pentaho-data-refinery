@@ -30,6 +30,7 @@ import org.pentaho.agilebi.modeler.models.annotations.ModelAnnotationManager;
 import org.pentaho.agilebi.modeler.models.annotations.data.ColumnMapping;
 import org.pentaho.di.core.KettleClientEnvironment;
 import org.pentaho.di.core.database.DatabaseMeta;
+import org.pentaho.di.core.exception.KettleException;
 import org.pentaho.di.core.row.RowMeta;
 import org.pentaho.di.core.row.RowMetaInterface;
 import org.pentaho.di.core.row.ValueMetaInterface;
@@ -289,4 +290,35 @@ public class DataProviderHelperTest {
     rowMeta.setValueMetaList( Arrays.asList( valueMetas ) );
     return rowMeta;
   }
+  @Test
+  public void testFrontSlashIsInvalidCharacterInConnectionName() throws Exception {
+    IMetaStore metaStore = mock( IMetaStore.class );
+    final DatabaseMeta dbMeta =
+      new DatabaseMeta( "dbmeta/Test", "postgresql", "Native", "somehost", "db", "3001", "user", "pass" );
+
+    TableOutputMeta tableOutMeta = new TableOutputMeta();
+    tableOutMeta.setDefault();
+    tableOutMeta.setDatabaseMeta( dbMeta );
+
+    StepMetaDataCombi combi = new StepMetaDataCombi();
+    combi.stepname = "out1";
+    TableOutputData tableOutData = new TableOutputData();
+    TableOutput tableOutStep = mock( TableOutput.class );
+    combi.meta = tableOutMeta;
+    combi.data = tableOutData;
+    combi.step = tableOutStep;
+
+    ModelAnnotationGroup group = new ModelAnnotationGroup();
+    group.setName( "mag" );
+    DataProviderHelper helper = new DataProviderHelper( metaStore );
+    try {
+      helper.updateDataProvider( group, combi );
+      fail( "should have got exception" );
+    } catch ( KettleException e ) {
+      assertEquals(
+        "Connection Name 'dbmeta/Test' cannot be used for a Shared Dimension, it contains invalid character '/'",
+        e.getMessage().trim() );
+    }
+  }
+
 }
