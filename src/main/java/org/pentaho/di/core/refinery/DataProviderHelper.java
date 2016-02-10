@@ -35,6 +35,8 @@ import org.pentaho.di.core.exception.KettleException;
 import org.pentaho.di.core.row.RowMeta;
 import org.pentaho.di.core.row.ValueMetaInterface;
 import org.pentaho.di.core.variables.VariableSpace;
+import org.pentaho.di.i18n.BaseMessages;
+import org.pentaho.di.job.entries.build.JobEntryBuildModel;
 import org.pentaho.di.trans.step.StepMetaDataCombi;
 import org.pentaho.metadata.model.concept.types.DataType;
 import org.pentaho.metastore.api.IMetaStore;
@@ -49,6 +51,7 @@ public class DataProviderHelper {
 
   private final IMetaStore mstore;
   private final ModelAnnotationManager annotationManager = new ModelAnnotationManager( true );
+  private static Class<?> PKG = JobEntryBuildModel.class; // for i18n purposes, needed by Translator2!!
 
   public DataProviderHelper( IMetaStore mstore ) {
     this.mstore = mstore;
@@ -85,6 +88,10 @@ public class DataProviderHelper {
     provider.setName( outputCombi.stepname );
     ProvidesDatabaseConnectionInformation connInfo = (ProvidesDatabaseConnectionInformation) outputCombi.meta;
     DatabaseMeta dbMeta = fillConnectionInfo( provider, connInfo, outputCombi.step );
+    if ( dbMeta.getName().contains( "/" ) ) {
+      throw new KettleException( BaseMessages.getString(
+        PKG, "BuildModelJob.Error.ConnectionName.InvalidCharacter", dbMeta.getName() ) );
+    }
     provider.setColumnMappings( getColumnMappings( outputCombi ) );
     provider.setDatabaseMetaNameRef( getModelAnnotationManager().storeDatabaseMeta( dbMeta, mstore ) );
     return provider;
