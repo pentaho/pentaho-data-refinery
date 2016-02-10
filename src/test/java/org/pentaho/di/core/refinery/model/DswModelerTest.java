@@ -171,7 +171,7 @@ public class DswModelerTest {
     TableModelerSource source = new TableModelerSource( dbMeta, "orderfact", "" );
 
     final LogChannelInterface log = mock( LogChannelInterface.class );
-    when( log.isDetailed() ).thenReturn( true );
+    when( log.isBasic() ).thenReturn( true );
     DswModeler modeler = new DswModeler( log );
     PhysicalTableImporter.ImportStrategy importStrategy = getImportStrategy();
 
@@ -193,9 +193,9 @@ public class DswModelerTest {
     // categoryName
     assertEquals( "FromScratch", rptModel.getCategories().get( 0 ).getName( "en_US" ) );
     verify( annotation1 ).apply( any( ModelerWorkspace.class ), same( metaStore ) );
-    verify( log ).logDetailed( "Successfully applied annotation: summary 1" );
+    verify( log ).logBasic( "Successfully applied annotation: summary 1" );
     verify( annotation2 ).apply( any( ModelerWorkspace.class ), same( metaStore ) );
-    verify( log ).logDetailed( "Successfully applied annotation: summary 2" );
+    verify( log ).logBasic( "Successfully applied annotation: summary 2" );
   }
 
   @Test
@@ -204,7 +204,7 @@ public class DswModelerTest {
     TableModelerSource source = new TableModelerSource( dbMeta, "orderfact", "" );
 
     final LogChannelInterface log = mock( LogChannelInterface.class );
-    when( log.isDetailed() ).thenReturn( true );
+    when( log.isBasic() ).thenReturn( true );
     DswModeler modeler = new DswModeler( log );
     PhysicalTableImporter.ImportStrategy importStrategy = getImportStrategy();
 
@@ -234,7 +234,7 @@ public class DswModelerTest {
     DatabaseMeta dbMeta = createOrderfactDB();
     TableModelerSource source = new TableModelerSource( dbMeta, "orderfact", "" );
     final LogChannelInterface log = mock( LogChannelInterface.class );
-    when( log.isDetailed() ).thenReturn( false );
+    when( log.isBasic() ).thenReturn( false );
     DswModeler modeler = new DswModeler( log );
 
     PhysicalTableImporter.ImportStrategy importStrategy = getImportStrategy();
@@ -261,9 +261,9 @@ public class DswModelerTest {
     // categoryName
     assertEquals( "FromScratch", rptModel.getCategories().get( 0 ).getName( "en_US" ) );
     verify( annotation1, times( 2 ) ).apply( any( ModelerWorkspace.class ), same( metaStore ) );
-    verify( log, never() ).logDetailed( any( String.class ) );
+    verify( log, never() ).logBasic( any( String.class ) );
     verify( annotation2 ).apply( any( ModelerWorkspace.class ), same( metaStore ) );
-    verify( log, never() ).logDetailed( any( String.class ) );
+    verify( log, never() ).logBasic( any( String.class ) );
   }
 
   @Test
@@ -271,7 +271,7 @@ public class DswModelerTest {
     DatabaseMeta dbMeta = createOrderfactDB();
     TableModelerSource source = new TableModelerSource( dbMeta, "orderfact", "" );
     final LogChannelInterface log = mock( LogChannelInterface.class );
-    when( log.isDetailed() ).thenReturn( true );
+    when( log.isBasic() ).thenReturn( true );
     DswModeler modeler = new DswModeler( null );
     modeler.setLog( log );
 
@@ -301,11 +301,11 @@ public class DswModelerTest {
     // categoryName
     assertEquals( "FromScratch", rptModel.getCategories().get( 0 ).getName( "en_US" ) );
     verify( annotation1, times( 2 ) ).apply( any( ModelerWorkspace.class ), same( metaStore ) );
-    verify( log ).logDetailed( "Unable to apply annotation: annotation 1 Summary" );
+    verify( log ).logBasic( "Unable to apply annotation: annotation 1 Summary" );
     verify( annotation2, times( 2 ) ).apply( any( ModelerWorkspace.class ), same( metaStore ) );
-    verify( log ).logDetailed( "Unable to apply annotation: annotation 2 Summary" );
+    verify( log ).logBasic( "Unable to apply annotation: annotation 2 Summary" );
     verify( annotation3 ).apply( any( ModelerWorkspace.class ), same( metaStore ) );
-    verify( log ).logDetailed( "Successfully applied annotation: annotation 3 Summary" );
+    verify( log ).logBasic( "Successfully applied annotation: annotation 3 Summary" );
   }
 
   @Test
@@ -332,7 +332,7 @@ public class DswModelerTest {
     TableModelerSource source = new TableModelerSource( dbMeta, "orderfact", "" );
 
     final LogChannelInterface log = mock( LogChannelInterface.class );
-    when( log.isDetailed() ).thenReturn( true );
+    when( log.isBasic() ).thenReturn( true );
     DswModeler modeler = new DswModeler( log );
     initTestGeoContextProvider( modeler );
 
@@ -376,7 +376,7 @@ public class DswModelerTest {
     TableModelerSource source = new TableModelerSource( dbMeta, "geodata", "" );
 
     final LogChannelInterface log = mock( LogChannelInterface.class );
-    when( log.isDetailed() ).thenReturn( true );
+    when( log.isBasic() ).thenReturn( true );
     DswModeler modeler = new DswModeler( log );
     initTestGeoContextProvider( modeler );
     PhysicalTableImporter.ImportStrategy importStrategy = getGeoStepMetaDataCombi();
@@ -412,7 +412,7 @@ public class DswModelerTest {
     TableModelerSource source = new TableModelerSource( dbMeta, "geodata", "" );
 
     final LogChannelInterface log = mock( LogChannelInterface.class );
-    when( log.isDetailed() ).thenReturn( false );
+    when( log.isBasic() ).thenReturn( false );
     DswModeler modeler = new DswModeler( log );
 
     initTestGeoContextProvider( modeler );

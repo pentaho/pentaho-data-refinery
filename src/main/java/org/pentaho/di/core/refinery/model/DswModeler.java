@@ -208,16 +208,16 @@ public class DswModeler {
     throws ModelerException {
     Map<ApplyStatus, List<ModelAnnotation>> statusMap =
         modelAnnotations.applyAnnotations( model, metaStore );
-    if ( log.isDetailed() ) {
-      logDetailed( statusMap.get( SUCCESS ), "ModelAnnotation.log.AnnotationSuccess" );
-      logDetailed( statusMap.get( FAILED ), "ModelAnnotation.log.AnnotationFailure" );
+    if ( log.isBasic() ) {
+      logBasic( statusMap.get( SUCCESS ), "ModelAnnotation.log.AnnotationSuccess" );
+      logBasic( statusMap.get( FAILED ), "ModelAnnotation.log.AnnotationFailure" );
     }
     logDebug( statusMap.get( NULL_ANNOTATION ), "Ignoring a null annotation" );
   }
 
-  private void logDetailed( final List<ModelAnnotation> modelAnnotations, final String msgKey ) {
+  private void logBasic( final List<ModelAnnotation> modelAnnotations, final String msgKey ) {
     for ( ModelAnnotation modelAnnotation : modelAnnotations ) {
-      log.logDetailed(
+      log.logBasic(
           BaseMessages.getString(
               PKG, msgKey, modelAnnotation.getAnnotation().getSummary() ) );
     }
