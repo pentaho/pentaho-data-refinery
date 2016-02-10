@@ -488,7 +488,7 @@ public class ModelAnnotationMetaTest {
     Repository rep = mock( Repository.class );
     when( rep.getStepAttributeString( stepId, "CATEGORY_NAME" ) ).thenReturn( "aCategory" );
     when( rep.getStepAttributeString( stepId, "TARGET_OUTPUT_STEP" ) ).thenReturn( "target" );
-    when( rep.countNrStepAttributes( stepId, "ANNOTATION_FIELD_NAME" ) ).thenReturn( 1 );
+    when( rep.countNrStepAttributes( stepId, "ANNOTATION_NAME" ) ).thenReturn( 1 );
 
     when( rep.getStepAttributeString( stepId, 0, "ANNOTATION_NAME" ) ).thenReturn( "12345" );
     when( rep.getStepAttributeString( stepId, 0, "ANNOTATION_FIELD_NAME" ) ).thenReturn( "Gender" );

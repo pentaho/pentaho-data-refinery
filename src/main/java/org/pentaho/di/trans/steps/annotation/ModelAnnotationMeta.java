@@ -294,7 +294,7 @@ public class ModelAnnotationMeta extends BaseStepMeta implements StepMetaInterfa
       setModelAnnotationCategory( rep.getStepAttributeString( id_step, "CATEGORY_NAME" ) );
       setTargetOutputStep( rep.getStepAttributeString( id_step, "TARGET_OUTPUT_STEP" ) );
 
-      int nrAnnotations = rep.countNrStepAttributes( id_step, "ANNOTATION_FIELD_NAME" );
+      int nrAnnotations = rep.countNrStepAttributes( id_step, "ANNOTATION_NAME" );
 
       // Read annotations
       for ( int i = 0; i < nrAnnotations; i++ ) {
