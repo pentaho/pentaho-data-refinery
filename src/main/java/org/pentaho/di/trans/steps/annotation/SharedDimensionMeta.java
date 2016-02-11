@@ -28,7 +28,7 @@ import org.pentaho.di.core.annotations.Step;
 @Step( id = "CreateSharedDimensions", image = "SharedDimensions.svg",
     i18nPackageName = "org.pentaho.di.trans.steps.annotation", name = "SharedDimension.TransName",
     description = "SharedDimension.TransDescription",
-    documentationUrl = "https://help.pentaho.com/Documentation/6.1/0N0/060/0B0/020/0C0",
+    documentationUrl = "0N0/060/0B0/020/0C0",
     categoryDescription = "i18n:org.pentaho.di.trans.step:BaseStep.Category.Flow" )
 public class SharedDimensionMeta extends ModelAnnotationMeta {
 
