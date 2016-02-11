@@ -66,7 +66,7 @@ import static org.pentaho.di.core.Const.nullToEmpty;
 @org.pentaho.di.core.annotations.JobEntry( id = "DATASOURCE_PUBLISH",
     i18nPackageName = "org.pentaho.di.job.entries.publish", image = "publish.svg",
     name = "JobEntryDatasourcePublish.JobName", description = "JobEntryDatasourcePublish.JobDescription",
-    documentationUrl = "https://help.pentaho.com/Documentation/6.1/0N0/060/0B0/020/0D0",
+    documentationUrl = "0N0/060/0B0/020/0D0",
     categoryDescription = "JobCategory.Category.Modeling" )
 public class JobEntryDatasourcePublish extends JobEntryBase implements Cloneable, JobEntryInterface {
 
