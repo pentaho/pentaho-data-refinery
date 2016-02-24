@@ -131,10 +131,21 @@ public class ModelAnnotationActionPropertiesDialog extends ModelAnnotationAction
                     && StringUtils.isNotBlank( m.getAnnotation().getName() )
                     && !at.equals( m.getAnnotation() ) ) {
                   // return dimension names
+                  String dimensionName = null;
                   if ( ModelAnnotation.Type.CREATE_ATTRIBUTE.equals( m.getType() ) ) {
-                    names.add( ( (CreateAttribute) m.getAnnotation() ).getDimension() );
+                    // CCombo.setItems (the end consumer of this call) will throw an error if you give it an array
+                    // of strings that has a null entry. prevent that from happening here
+                    dimensionName = ( (CreateAttribute) m.getAnnotation() ).getDimension();
+                    if ( StringUtils.isNotBlank( dimensionName ) ) {
+                      names.add( dimensionName );
+                    }
                   } else if ( ModelAnnotation.Type.CREATE_DIMENSION_KEY.equals( m.getType() ) ) {
-                    names.add( ( (CreateDimensionKey) m.getAnnotation() ).getDimension() );
+                    // CCombo.setItems (the end consumer of this call) will throw an error if you give it an array
+                    // of strings that has a null entry. prevent that from happening here
+                    dimensionName = ( (CreateDimensionKey) m.getAnnotation() ).getDimension();
+                    if ( StringUtils.isNotBlank( dimensionName ) ) {
+                      names.add( dimensionName );
+                    }
                   }
                 }
               }
@@ -385,9 +396,9 @@ public class ModelAnnotationActionPropertiesDialog extends ModelAnnotationAction
           Object object = annotationType.getModelPropertyValueByName( name );
           if ( object != null ) {
             String value = object.toString();
-            if ( StringUtils.equals( name, CreateAttribute.UNIQUE_NAME ) ||
-                StringUtils.equals( name, CreateAttribute.HIDDEN_NAME ) ||
-                StringUtils.equals( name, CreateMeasure.HIDDEN_NAME ) ) {
+            if ( StringUtils.equals( name, CreateAttribute.UNIQUE_NAME )
+              || StringUtils.equals( name, CreateAttribute.HIDDEN_NAME )
+              || StringUtils.equals( name, CreateMeasure.HIDDEN_NAME ) ) {
               value = StringUtils.capitalize( value );
             }
             item.setText( 2, value );
