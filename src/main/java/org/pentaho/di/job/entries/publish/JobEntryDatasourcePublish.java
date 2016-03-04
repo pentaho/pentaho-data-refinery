@@ -58,8 +58,6 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.List;
 
-import static org.pentaho.di.core.Const.nullToEmpty;
-
 /**
  * @author Rowell Belen
  */
@@ -99,7 +97,7 @@ public class JobEntryDatasourcePublish extends JobEntryBase implements Cloneable
   @Override
   public Result execute( Result result, int i ) throws KettleException {
     boolean dsPublished, metaPublished;
-    dsPublished = metaPublished =false;
+    dsPublished = metaPublished = false;
     DatabaseMeta databaseMeta = null;
     ModelServerPublish modelServerPublish = null;
     String dswFlag = null;
@@ -240,16 +238,16 @@ public class JobEntryDatasourcePublish extends JobEntryBase implements Cloneable
       BiServerConnection biServerConnection = model.getBiServerConnection();
       if ( biServerConnection != null ) {
         xml.append( "      " ).append(
-            XMLHandler.addTagValue( Fields.BASERVER_NAME, nullToEmpty( biServerConnection.getName() ) ) );
+            XMLHandler.addTagValue( Fields.BASERVER_NAME, Const.nullToEmpty( biServerConnection.getName() ) ) );
 
         // Encrypt password
         String password = Encr.encryptPasswordIfNotUsingVariables( biServerConnection.getPassword() );
-        xml.append( "      " ).append( XMLHandler.addTagValue( Fields.BASERVER_PASSWORD, nullToEmpty( password ) ) );
+        xml.append( "      " ).append( XMLHandler.addTagValue( Fields.BASERVER_PASSWORD, Const.nullToEmpty( password ) ) );
 
         xml.append( "      " ).append( XMLHandler.addTagValue(
-            Fields.BASERVER_URL, nullToEmpty( biServerConnection.getUrl() ) ) );
+            Fields.BASERVER_URL, Const.nullToEmpty( biServerConnection.getUrl() ) ) );
         xml.append( "      " ).append(
-            XMLHandler.addTagValue( Fields.BASERVER_USERID, nullToEmpty( biServerConnection.getUserId() ) ) );
+            XMLHandler.addTagValue( Fields.BASERVER_USERID, Const.nullToEmpty( biServerConnection.getUserId() ) ) );
       }
     }
 
@@ -264,14 +262,14 @@ public class JobEntryDatasourcePublish extends JobEntryBase implements Cloneable
     DataSourcePublishModel model = new DataSourcePublishModel();
 
     BiServerConnection biServerModel = new BiServerConnection();
-    biServerModel.setName( nullToEmpty( XMLHandler.getTagValue( entrynode, Fields.BASERVER_NAME ) ) );
-    biServerModel.setUrl( nullToEmpty( XMLHandler.getTagValue( entrynode, Fields.BASERVER_URL ) ) );
-    biServerModel.setUserId( nullToEmpty( XMLHandler.getTagValue( entrynode, Fields.BASERVER_USERID ) ) );
+    biServerModel.setName( Const.nullToEmpty( XMLHandler.getTagValue( entrynode, Fields.BASERVER_NAME ) ) );
+    biServerModel.setUrl( Const.nullToEmpty( XMLHandler.getTagValue( entrynode, Fields.BASERVER_URL ) ) );
+    biServerModel.setUserId( Const.nullToEmpty( XMLHandler.getTagValue( entrynode, Fields.BASERVER_USERID ) ) );
 
     // Decrypt
     String password =
         Encr.decryptPasswordOptionallyEncrypted(
-          nullToEmpty( XMLHandler.getTagValue( entrynode, Fields.BASERVER_PASSWORD ) ) );
+          Const.nullToEmpty( XMLHandler.getTagValue( entrynode, Fields.BASERVER_PASSWORD ) ) );
     biServerModel.setPassword( password );
 
     model.setBiServerConnection( biServerModel );
@@ -296,10 +294,10 @@ public class JobEntryDatasourcePublish extends JobEntryBase implements Cloneable
     String password =
         Encr.decryptPasswordOptionallyEncrypted( rep
             .getJobEntryAttributeString( id_jobentry, Fields.BASERVER_PASSWORD ) );
-    biServerModel.setPassword( nullToEmpty( password ) );
+    biServerModel.setPassword( Const.nullToEmpty( password ) );
 
-    biServerModel.setUrl( nullToEmpty( rep.getJobEntryAttributeString( id_jobentry, Fields.BASERVER_URL ) ) );
-    biServerModel.setUserId( nullToEmpty( rep.getJobEntryAttributeString( id_jobentry, Fields.BASERVER_USERID ) ) );
+    biServerModel.setUrl( Const.nullToEmpty( rep.getJobEntryAttributeString( id_jobentry, Fields.BASERVER_URL ) ) );
+    biServerModel.setUserId( Const.nullToEmpty( rep.getJobEntryAttributeString( id_jobentry, Fields.BASERVER_USERID ) ) );
 
     DataSourcePublishModel dsModel = new DataSourcePublishModel();
     dsModel.setModelName( rep.getJobEntryAttributeString( id_jobentry, Fields.LOGICAL_MODEL ) );
@@ -316,12 +314,12 @@ public class JobEntryDatasourcePublish extends JobEntryBase implements Cloneable
     if ( dataSourcePublishModel != null ) {
       BiServerConnection biServerConnection = dataSourcePublishModel.getBiServerConnection();
       rep.saveJobEntryAttribute( id_job, getObjectId(), Fields.BASERVER_NAME,
-          nullToEmpty( biServerConnection.getName() ) );
+          Const.nullToEmpty( biServerConnection.getName() ) );
       // Encrypt password
       String password = Encr.encryptPasswordIfNotUsingVariables( biServerConnection.getPassword() );
-      rep.saveJobEntryAttribute( id_job, getObjectId(), Fields.BASERVER_PASSWORD, nullToEmpty( password ) );
-      rep.saveJobEntryAttribute( id_job, getObjectId(), Fields.BASERVER_URL, nullToEmpty( biServerConnection.getUrl() ) );
-      rep.saveJobEntryAttribute( id_job, getObjectId(), Fields.BASERVER_USERID, nullToEmpty( biServerConnection
+      rep.saveJobEntryAttribute( id_job, getObjectId(), Fields.BASERVER_PASSWORD, Const.nullToEmpty( password ) );
+      rep.saveJobEntryAttribute( id_job, getObjectId(), Fields.BASERVER_URL, Const.nullToEmpty( biServerConnection.getUrl() ) );
+      rep.saveJobEntryAttribute( id_job, getObjectId(), Fields.BASERVER_USERID, Const.nullToEmpty( biServerConnection
           .getUserId() ) );
       rep.saveJobEntryAttribute( id_job, getObjectId(), Fields.LOGICAL_MODEL, dataSourcePublishModel.getModelName() );
       rep.saveJobEntryAttribute( id_job, getObjectId(), Fields.OVERRIDE, dataSourcePublishModel.isOverride() );
@@ -333,7 +331,7 @@ public class JobEntryDatasourcePublish extends JobEntryBase implements Cloneable
 
   // Allows dependency injection/mocks
   protected ModelServerPublish getModelServerPublish() {
-    return new ModelServerPublish();
+    return new ModelServerPublish( getLogChannel() );
   }
 
   // Allows dependency injection/mocks

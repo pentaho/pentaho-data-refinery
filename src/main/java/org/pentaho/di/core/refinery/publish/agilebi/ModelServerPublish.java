@@ -36,13 +36,15 @@ import org.pentaho.database.model.DatabaseAccessType;
 import org.pentaho.database.model.DatabaseConnection;
 import org.pentaho.di.core.database.DatabaseInterface;
 import org.pentaho.di.core.exception.KettleDatabaseException;
+import org.pentaho.di.core.logging.LogChannelInterface;
 import org.pentaho.di.core.refinery.publish.model.DataSourceAclModel;
 import org.pentaho.di.core.refinery.publish.util.JAXBUtils;
 
 import javax.ws.rs.core.MediaType;
 
 import java.io.InputStream;
-import java.util.logging.Logger;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 
 /**
  * This is copied from AgileBI's org.pentaho.agilebi.spoon.publish.ModelServerPublish
@@ -58,9 +60,14 @@ public class ModelServerPublish extends ModelServerAction {
   private static final String PLUGIN_DATA_ACCESS_API_CONNECTION_UPDATE = "plugin/data-access/api/connection/update";
   private static final String PLUGIN_DATA_ACCESS_API_CONNECTION_DELETE = "plugin/data-access/api/connection/deletebyname";
   private static final String DATA_ACCESS_API_CONNECTION_GET = "plugin/data-access/api/connection/getresponse";
-  private static Logger logger = Logger.getLogger( ModelServerPublish.class.getName() );
   private boolean forceOverwrite;
   private DataSourceAclModel aclModel;
+  private LogChannelInterface logChannel;
+
+  public ModelServerPublish( final LogChannelInterface logChannel ) {
+
+    this.logChannel = logChannel;
+  }
 
   /**
    * Publishes a datasource to the current BI server
@@ -123,7 +130,7 @@ public class ModelServerPublish extends ModelServerAction {
     }
     return true;
   }
-  
+
   /**
    * Jersey call to delete connection
    *
@@ -131,8 +138,13 @@ public class ModelServerPublish extends ModelServerAction {
    * @return
    */
   public boolean deleteConnection( String connectionName ) {
-    return deleteEntity( biServerConnection.getUrl() + PLUGIN_DATA_ACCESS_API_CONNECTION_DELETE + REST_NAME_PARM 
-      + connectionName );
+    try {
+      return deleteEntity( biServerConnection.getUrl() + PLUGIN_DATA_ACCESS_API_CONNECTION_DELETE + REST_NAME_PARM
+        + URLEncoder.encode( connectionName, "UTF-8" ) );
+    } catch ( UnsupportedEncodingException e ) {
+      logChannel.logError( e.getMessage() );
+      return false;
+    }
   }
 
   /**
@@ -311,14 +323,6 @@ public class ModelServerPublish extends ModelServerAction {
         part.field( "acl", this.aclModel.toXml(), MediaType.MULTIPART_FORM_DATA_TYPE );
       }
     }
-  }
-
-  private void error( String message ) {
-    logger.severe( message );
-  }
-
-  private void success( String message ) {
-    logger.info( message );
   }
 
   public DatabaseConnection connectionNameExists( String connectionName ) {
