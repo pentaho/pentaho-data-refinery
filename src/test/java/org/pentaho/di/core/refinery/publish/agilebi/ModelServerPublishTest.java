@@ -40,6 +40,7 @@ import org.pentaho.database.model.IDatabaseType;
 import org.pentaho.database.util.DatabaseTypeHelper;
 import org.pentaho.di.core.database.DatabaseInterface;
 import org.pentaho.di.core.database.DatabaseMeta;
+import org.pentaho.di.core.logging.LogChannelInterface;
 import org.pentaho.di.core.refinery.publish.model.DataSourceAclModel;
 import org.pentaho.di.core.refinery.publish.util.JAXBUtils;
 
@@ -69,6 +70,7 @@ public class ModelServerPublishTest {
   private Client client;
   private ClientResponse clientResponse;
   private boolean overwrite;
+  private LogChannelInterface logChannel;
 
   @Before
   public void setup() {
@@ -87,8 +89,9 @@ public class ModelServerPublishTest {
     databaseConnection = mock( DatabaseConnection.class );
     attributes = mock( Properties.class );
     clientResponse = mock( ClientResponse.class );
+    logChannel = mock( LogChannelInterface.class );
 
-    modelServerPublish = new ModelServerPublish();
+    modelServerPublish = new ModelServerPublish( logChannel );
     modelServerPublishSpy = spy( modelServerPublish );
 
     // mock responses
@@ -265,6 +268,12 @@ public class ModelServerPublishTest {
     when( clientResponse.getStatus() ).thenReturn( 200 );
     success = modelServerPublishSpy.updateConnection( databaseConnection, false );
     assertTrue( success );
+  }
+
+  @Test
+  public void testDeleteConnectionEncodesName() throws Exception {
+    modelServerPublishSpy.deleteConnection( "some name" );
+    verify( client ).resource( "http://localhost:8080/pentaho/plugin/data-access/api/connection/deletebyname?name=some+name" );
   }
 
   @Test

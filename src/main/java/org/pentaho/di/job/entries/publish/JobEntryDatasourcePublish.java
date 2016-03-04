@@ -99,7 +99,7 @@ public class JobEntryDatasourcePublish extends JobEntryBase implements Cloneable
   @Override
   public Result execute( Result result, int i ) throws KettleException {
     boolean dsPublished, metaPublished;
-    dsPublished = metaPublished =false;
+    dsPublished = metaPublished = false;
     DatabaseMeta databaseMeta = null;
     ModelServerPublish modelServerPublish = null;
     String dswFlag = null;
@@ -333,7 +333,7 @@ public class JobEntryDatasourcePublish extends JobEntryBase implements Cloneable
 
   // Allows dependency injection/mocks
   protected ModelServerPublish getModelServerPublish() {
-    return new ModelServerPublish();
+    return new ModelServerPublish( getLogChannel() );
   }
 
   // Allows dependency injection/mocks
