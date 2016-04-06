@@ -31,7 +31,7 @@ import org.pentaho.di.core.Const;
 import org.pentaho.di.core.exception.KettleException;
 import org.pentaho.di.core.row.ValueMetaInterface;
 import org.pentaho.di.i18n.BaseMessages;
-import static org.pentaho.di.job.entries.build.JobEntryBuildModel.KEY_MODEL_ANNOTATIONS;
+import org.pentaho.di.job.entries.build.JobEntryBuildModel;
 import org.pentaho.di.trans.Trans;
 import org.pentaho.di.trans.TransMeta;
 import org.pentaho.di.trans.step.BaseStep;
@@ -114,7 +114,7 @@ public class ModelAnnotationStep extends BaseStep implements StepInterface {
       if ( !currentGroup.isSharedDimension() ) {
         allAnnotations.addAll( currentGroup );
       }
-      getTrans().getParentJob().getExtensionDataMap().put( KEY_MODEL_ANNOTATIONS, allAnnotations );
+      getTrans().getParentJob().getExtensionDataMap().put( JobEntryBuildModel.KEY_MODEL_ANNOTATIONS, allAnnotations );
     }
     return currentGroup;
   }
@@ -135,7 +135,9 @@ public class ModelAnnotationStep extends BaseStep implements StepInterface {
       ModelAnnotationManager mgr = getModelAnnotationsManager( modelAnnotationMeta );
       ModelAnnotationGroup group = mgr.readGroup( groupName, metaStore );
       if ( group == null ) {
-        throw new KettleException( BaseMessages.getString( PKG, "ModelAnnotation.Runtime.GroupNotFound", groupName ) );
+        throw new KettleException( BaseMessages.getString(
+          PKG, modelAnnotationMeta.isSharedDimension()
+            ? "ModelAnnotation.Runtime.GroupNotFound" : "ModelAnnotation.Runtime.AnnotationGroupNotFound", groupName ) );
       }
       return group;
     } catch ( MetaStoreException e ) {
@@ -175,7 +177,7 @@ public class ModelAnnotationStep extends BaseStep implements StepInterface {
   private ModelAnnotationGroup getExistingAnnotations() {
     Object o = ( getTrans().getParentJob() == null )
         ? null
-        : getTrans().getParentJob().getExtensionDataMap().get( KEY_MODEL_ANNOTATIONS );
+        : getTrans().getParentJob().getExtensionDataMap().get( JobEntryBuildModel.KEY_MODEL_ANNOTATIONS );
     if ( o == null ) {
       return new ModelAnnotationGroup();
     } else {
