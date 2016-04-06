@@ -22,9 +22,10 @@
 
 package org.pentaho.di.trans.steps.annotation;
 
-import junit.framework.Assert;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
+
+import org.junit.Assert;
 import org.junit.Test;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
@@ -45,8 +46,11 @@ import org.pentaho.di.trans.Trans;
 import org.pentaho.di.trans.TransMeta;
 import org.pentaho.di.trans.step.StepDataInterface;
 import org.pentaho.di.trans.step.StepMeta;
+import org.pentaho.di.trans.step.StepMetaDataCombi;
 import org.pentaho.metadata.model.concept.types.AggregationType;
 import org.pentaho.metastore.api.IMetaStore;
+
+import java.util.Collections;
 
 public class ModelAnnotationStepTest {
   @Test
@@ -152,10 +156,41 @@ public class ModelAnnotationStepTest {
       modelAnnotation.processRow( modelAnnotationMeta, stepDataInterface );
       Assert.fail();
     } catch ( KettleException e ) {
-      //
+      assertEquals( "Shared annotation group someGroup is not found in meta store.", e.getMessage().trim() );
     }
   }
 
+  @Test
+  public void testMetaStoreSharedDimensionNotThere() throws Exception {
+    final String groupName = "someGroup";
+
+    // 'metastore'
+    IMetaStore metaStore = mock( IMetaStore.class );
+    final ModelAnnotationManager manager = mock( ModelAnnotationManager.class );
+    when( manager.readGroup( groupName, metaStore ) ).thenReturn( null );
+
+    // step
+    StepDataInterface stepDataInterface = new ModelAnnotationData();
+    ModelAnnotationStep modelAnnotation = createOneShotStep( stepDataInterface, metaStore, manager );
+
+    // set up a linked group in the meta
+    ModelAnnotationMeta modelAnnotationMeta = new ModelAnnotationMeta();
+    modelAnnotationMeta.setDefault();
+    modelAnnotationMeta.setSharedDimension( true );
+    ModelAnnotationGroup sharedAnnotations = new ModelAnnotationGroup();
+    sharedAnnotations.setName( groupName );
+    modelAnnotationMeta.setModelAnnotations( sharedAnnotations );
+    modelAnnotationMeta.setModelAnnotationCategory( groupName );
+    modelAnnotationMeta.setTargetOutputStep( "step name" );
+
+    // run
+    try {
+      modelAnnotation.processRow( modelAnnotationMeta, stepDataInterface );
+      Assert.fail();
+    } catch ( KettleException e ) {
+      assertEquals( "Shared dimension someGroup is not found in meta store.", e.getMessage().trim() );
+    }
+  }
   @Test
   public void testFailNonNumericMeasure() throws Exception {
     ModelAnnotationGroup group = new ModelAnnotationGroup();
@@ -279,6 +314,9 @@ public class ModelAnnotationStepTest {
     when( transMeta.findStep( "someName" ) ).thenReturn( stepMeta );
     Job job = mock( Job.class );
     when( trans.getParentJob() ).thenReturn( job );
+    StepMetaDataCombi stepMetaDataCombi = new StepMetaDataCombi();
+    stepMetaDataCombi.stepname = "step name";
+    when( trans.getSteps() ).thenReturn( Collections.singletonList( stepMetaDataCombi ) );
     ModelAnnotationStep modelAnnotation = new ModelAnnotationStep( stepMeta, stepDataInterface, 1, transMeta, trans ) {
       @Override public Object[] getRow() throws KettleException {
         return null;
