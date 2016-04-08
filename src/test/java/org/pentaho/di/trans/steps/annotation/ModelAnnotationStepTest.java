@@ -2,7 +2,7 @@
  *
  * Pentaho Community Edition Project: data-refinery-pdi-plugin
  *
- * Copyright (C) 2002-2015 by Pentaho : http://www.pentaho.com
+ * Copyright (C) 2002-2016 by Pentaho : http://www.pentaho.com
  *
  * *******************************************************************************
  *
@@ -156,7 +156,7 @@ public class ModelAnnotationStepTest {
       modelAnnotation.processRow( modelAnnotationMeta, stepDataInterface );
       Assert.fail();
     } catch ( KettleException e ) {
-      assertEquals( "Shared annotation group someGroup is not found in meta store.", e.getMessage().trim() );
+      assertEquals( "Shared annotation group someGroup is not found.", e.getMessage().trim() );
     }
   }
 
@@ -188,7 +188,7 @@ public class ModelAnnotationStepTest {
       modelAnnotation.processRow( modelAnnotationMeta, stepDataInterface );
       Assert.fail();
     } catch ( KettleException e ) {
-      assertEquals( "Shared dimension someGroup is not found in meta store.", e.getMessage().trim() );
+      assertEquals( "Shared dimension someGroup is not found.", e.getMessage().trim() );
     }
   }
   @Test
