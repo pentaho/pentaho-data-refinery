@@ -2,7 +2,7 @@
  *
  * Pentaho Community Edition Project: data-refinery-pdi-plugin
  *
- * Copyright (C) 2002-2015 by Pentaho : http://www.pentaho.com
+ * Copyright (C) 2002-2016 by Pentaho : http://www.pentaho.com
  *
  * *******************************************************************************
  *
@@ -33,6 +33,7 @@ import org.pentaho.agilebi.modeler.models.annotations.CreateAttribute;
 import org.pentaho.agilebi.modeler.models.annotations.CreateMeasure;
 import org.pentaho.agilebi.modeler.models.annotations.ModelAnnotation;
 import org.pentaho.agilebi.modeler.models.annotations.ModelAnnotationGroup;
+import org.pentaho.agilebi.modeler.models.annotations.ModelProperty;
 import org.pentaho.agilebi.modeler.nodes.TimeRole;
 import org.pentaho.agilebi.modeler.models.annotations.ModelAnnotationManager;
 import org.pentaho.di.core.row.RowMetaInterface;
@@ -141,6 +142,19 @@ public class OptionsResolverTest {
 
     options = optionsResolver.resolveOrdinalFieldOptions( transMeta, "myStepError", modelAnnotation ); // error
     assertTrue( options.length == 0 );
+  }
+
+  @Test
+  public void testResolveAttributeFormat() throws Exception {
+    OptionsResolver resolver = new OptionsResolver();
+    String[] formatStrings = resolver.resolveAttributeFormatOptions( ModelProperty.AppliesTo.Time );
+    assertEquals( 17, formatStrings.length );
+    assertEquals( "m/d", formatStrings[0] );
+    formatStrings = resolver.resolveAttributeFormatOptions( ModelProperty.AppliesTo.Numeric );
+    assertEquals( 1, formatStrings.length );
+    assertEquals( "00000", formatStrings[0] );
+    formatStrings = resolver.resolveAttributeFormatOptions( ModelProperty.AppliesTo.String );
+    assertEquals( 0, formatStrings.length );
   }
 
   @Test
