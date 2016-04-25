@@ -2,7 +2,7 @@
  *
  * Pentaho Community Edition Project: data-refinery-pdi-plugin
  *
- * Copyright (C) 2002-2015 by Pentaho : http://www.pentaho.com
+ * Copyright (C) 2002-2016 by Pentaho : http://www.pentaho.com
  *
  * *******************************************************************************
  *
@@ -27,6 +27,7 @@ import org.pentaho.agilebi.modeler.models.annotations.AnnotationType;
 import org.pentaho.agilebi.modeler.models.annotations.ModelAnnotation;
 import org.pentaho.agilebi.modeler.models.annotations.ModelAnnotationGroup;
 import org.pentaho.agilebi.modeler.models.annotations.ModelAnnotationManager;
+import org.pentaho.agilebi.modeler.models.annotations.ModelProperty;
 import org.pentaho.agilebi.modeler.nodes.TimeRole;
 import org.pentaho.di.core.row.RowMetaInterface;
 import org.pentaho.di.core.row.ValueMetaInterface;
@@ -165,6 +166,37 @@ public class OptionsResolver {
     } catch ( Exception e ) {
       logger.warning( e.getMessage() );
       return new String[0];
+    }
+  }
+
+  public String[] resolveAttributeFormatOptions( final ModelProperty.AppliesTo dataType ) {
+    switch ( dataType ) {
+      case Time:
+        return new String[] {
+          "m/d",
+          "m/d/yy",
+          "mm/dd/yy",
+          "d-mmm",
+          "d-mmm-yy",
+          "mmm-y",
+          "mmmm-yy",
+          "mmmm d, yyyy",
+          "m/d/yy h:mm AM/PM",
+          "m/d/yy h:mm",
+          "m/d/yyyy",
+          "d-mmm-yyyy",
+          "h:mm",
+          "h:mm AM/PM",
+          "h:mm:ss",
+          "h:mm:ss AM/PM",
+          "[h]:mm:ss"
+        };
+      case Numeric:
+        return new String[] {
+          "00000"
+        };
+      default:
+        return new String[0];
     }
   }
 }

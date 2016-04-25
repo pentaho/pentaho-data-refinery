@@ -2,7 +2,7 @@
  *
  * Pentaho Community Edition Project: data-refinery-pdi-plugin
  *
- * Copyright (C) 2002-2015 by Pentaho : http://www.pentaho.com
+ * Copyright (C) 2002-2016 by Pentaho : http://www.pentaho.com
  *
  * *******************************************************************************
  *
@@ -60,6 +60,7 @@ import org.pentaho.metadata.model.concept.types.AggregationType;
 import org.pentaho.metastore.api.IMetaStore;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedHashSet;
 import java.util.List;
 
@@ -197,8 +198,14 @@ public class ModelAnnotationActionPropertiesDialog extends ModelAnnotationAction
             }
 
             // Measure Format String options
-            if ( name.equals( CreateMeasure.FORMAT_STRING_NAME ) ) {
+            if ( name.equals( CreateMeasure.FORMAT_STRING_NAME )
+              && ModelAnnotation.Type.CREATE_MEASURE.equals( at.getType() ) ) {
               return optionsResolver.resolveMeasureFormatOptions();
+            }
+
+            if ( name.equals( CreateMeasure.FORMAT_STRING_NAME )
+              && ModelAnnotation.Type.CREATE_ATTRIBUTE.equals( at.getType() ) ) {
+              return optionsResolver.resolveAttributeFormatOptions( applyToType( getValueMeta() ) );
             }
 
             // AggregationType options
@@ -390,7 +397,7 @@ public class ModelAnnotationActionPropertiesDialog extends ModelAnnotationAction
     for ( ModelProperty prop : annotationType.getModelProperties() ) {
       String name = prop.name();
       TableItem item = new TableItem( wProperties.table, SWT.NONE );
-      if ( getModelAnnotation() != null && !prop.hideUI() ) {
+      if ( getModelAnnotation() != null && !prop.hideUI() && applies( prop ) ) {
         item.setText( 1, name );
         try {
           Object object = annotationType.getModelPropertyValueByName( name );
@@ -411,6 +418,25 @@ public class ModelAnnotationActionPropertiesDialog extends ModelAnnotationAction
 
     wProperties.removeEmptyRows();
     wProperties.setRowNums();
+  }
+
+  private boolean applies( final ModelProperty prop ) {
+    return Arrays.asList( prop.appliesTo() ).contains( applyToType( getValueMeta() ) );
+  }
+
+  private ModelProperty.AppliesTo applyToType( final ValueMetaInterface valueMeta ) {
+    int type = valueMeta.getType();
+    switch ( type ) {
+      case ValueMetaInterface.TYPE_BIGNUMBER:
+      case ValueMetaInterface.TYPE_INTEGER:
+      case ValueMetaInterface.TYPE_NUMBER:
+        return ModelProperty.AppliesTo.Numeric;
+      case ValueMetaInterface.TYPE_TIMESTAMP:
+      case ValueMetaInterface.TYPE_DATE:
+        return ModelProperty.AppliesTo.Time;
+      default:
+        return ModelProperty.AppliesTo.String;
+    }
   }
 
   protected AnnotationType createAnnotationType() {
