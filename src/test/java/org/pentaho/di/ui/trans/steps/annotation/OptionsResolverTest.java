@@ -150,9 +150,11 @@ public class OptionsResolverTest {
     String[] formatStrings = resolver.resolveAttributeFormatOptions( ModelProperty.AppliesTo.Time );
     assertEquals( 17, formatStrings.length );
     assertEquals( "m/d", formatStrings[0] );
+    assertEquals( "[h]:mm:ss", formatStrings[16] );
     formatStrings = resolver.resolveAttributeFormatOptions( ModelProperty.AppliesTo.Numeric );
-    assertEquals( 1, formatStrings.length );
-    assertEquals( "00000", formatStrings[0] );
+    assertEquals( 16, formatStrings.length );
+    assertEquals( "0", formatStrings[0] );
+    assertEquals( "##0.0E+0", formatStrings[15] );
     formatStrings = resolver.resolveAttributeFormatOptions( ModelProperty.AppliesTo.String );
     assertEquals( 0, formatStrings.length );
   }
