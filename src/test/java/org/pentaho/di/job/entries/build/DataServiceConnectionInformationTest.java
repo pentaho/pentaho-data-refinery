@@ -2,7 +2,7 @@
  *
  * Pentaho Community Edition Project: data-refinery-pdi-plugin
  *
- * Copyright (C) 2002-2015 by Pentaho : http://www.pentaho.com
+ * Copyright (C) 2002-2016 by Pentaho : http://www.pentaho.com
  *
  * *******************************************************************************
  *
@@ -138,7 +138,7 @@ public class DataServiceConnectionInformationTest {
     assertEquals( "12345", databaseMeta.getDatabasePortNumberString() );
     assertEquals( "open", databaseMeta.getUsername() );
     assertEquals( "sesame", databaseMeta.getPassword() );
-    assertEquals( "pentaho-di", databaseMeta.getExtraOptions().get( "KettleThin.webappname" ) );
+    assertEquals( "pentaho-di", databaseMeta.getAttributes().get( "WEB_APPLICATION_NAME" ) );
   }
 
   @Test

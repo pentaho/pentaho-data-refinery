@@ -2,7 +2,7 @@
  *
  * Pentaho Community Edition Project: data-refinery-pdi-plugin
  *
- * Copyright (C) 2002-2015 by Pentaho : http://www.pentaho.com
+ * Copyright (C) 2002-2016 by Pentaho : http://www.pentaho.com
  *
  * *******************************************************************************
  *
@@ -39,6 +39,7 @@ import java.net.URISyntaxException;
 public class DataServiceConnectionInformation implements ProvidesDatabaseConnectionInformation {
   public static final String KETTLE_THIN = "KettleThin";
   public static final String NATIVE = "native";
+  public static final String WEB_APPLICATION_NAME = "WEB_APPLICATION_NAME";
   private String dataServiceName;
   private Repository repository;
   private LogChannelInterface log;
@@ -76,7 +77,7 @@ public class DataServiceConnectionInformation implements ProvidesDatabaseConnect
         new DatabaseMeta( dataServiceName, KETTLE_THIN, NATIVE, uri.getHost(), KETTLE_THIN,
           Integer.toString( uri.getPort() ), repository.getUserInfo().getLogin(),
           repository.getUserInfo().getPassword() );
-      databaseMeta.addExtraOption( KETTLE_THIN, "webappname", uri.getPath().substring( 1 ) );
+      databaseMeta.getAttributes().setProperty( WEB_APPLICATION_NAME, uri.getPath().substring( 1 ) );
       return databaseMeta;
     } catch ( URISyntaxException e ) {
       throw new KettleException( e );
