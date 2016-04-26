@@ -86,7 +86,7 @@ public class OptionsResolverTest {
 
   @Test
   public void testResolveMeasureFormatOptions() {
-    assertEquals( 5, optionsResolver.resolveMeasureFormatOptions().length );
+    assertEquals( 16, optionsResolver.resolveMeasureFormatOptions().length );
   }
 
   @Test
