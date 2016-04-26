@@ -99,11 +99,22 @@ public class OptionsResolver {
   public String[] resolveMeasureFormatOptions() {
 
     List<String> options = new ArrayList<String>();
-    options.add( "#,###;(#,###)" );
-    options.add( "#,###.00;(#,###.00)" );
-    options.add( "$#,###;($#,###)" );
-    options.add( "$#,###.00;($#,###.00)" );
-    options.add( "#.#%;(#.#%)" );
+    options.add( "0" );
+    options.add( "0.00" );
+    options.add( "#,##0" );
+    options.add( "#,###.00" );
+    options.add( "-#,###.00" );
+    options.add( "(#,###.00)" );
+    options.add( "$ #,##0" );
+    options.add( "$ #,##0.00" );
+    options.add( "$ -#,##0.00" );
+    options.add( "$ (#,##0.00)" );
+    options.add( "$ #,##0.00;(#,##0.00)" );
+    options.add( "0 %" );
+    options.add( "0.00 %" );
+    options.add( "#E+#" );
+    options.add( "0.00E+00" );
+    options.add( "##0.0E+0" );
 
     return options.toArray( new String[options.size()] );
   }
