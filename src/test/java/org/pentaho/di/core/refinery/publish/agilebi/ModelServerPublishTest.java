@@ -2,7 +2,7 @@
  *
  * Pentaho Community Edition Project: data-refinery-pdi-plugin
  *
- * Copyright (C) 2002-2015 by Pentaho : http://www.pentaho.com
+ * Copyright (C) 2002-2016 by Pentaho : http://www.pentaho.com
  *
  * *******************************************************************************
  *
@@ -27,6 +27,10 @@ import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.multipart.BodyPart;
 import com.sun.jersey.multipart.FormDataMultiPart;
+import java.io.InputStream;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Properties;
 import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
@@ -43,15 +47,23 @@ import org.pentaho.di.core.database.DatabaseMeta;
 import org.pentaho.di.core.logging.LogChannelInterface;
 import org.pentaho.di.core.refinery.publish.model.DataSourceAclModel;
 import org.pentaho.di.core.refinery.publish.util.JAXBUtils;
+import org.pentaho.di.job.entries.build.DataServiceConnectionInformation;
 
-import java.io.InputStream;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Properties;
-
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.argThat;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.anyBoolean;
+import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.doCallRealMethod;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /**
  * @author Rowell Belen
@@ -147,6 +159,7 @@ public class ModelServerPublishTest {
     final String dbName = "dbName";
     final String dbPort = "dbPort";
     final String hostname = "hostname";
+    final String webAppName = "pentaho-di";
 
     doReturn( extraOptions ).when( databaseMeta ).getExtraOptions();
     doReturn( username ).when( databaseMeta ).getUsername();
@@ -158,6 +171,9 @@ public class ModelServerPublishTest {
     doReturn( dbPort ).when( databaseMeta ).environmentSubstitute( dbPort );
     doReturn( hostname ).when( databaseMeta ).getHostname();
     doReturn( hostname ).when( databaseMeta ).environmentSubstitute( hostname );
+    Properties props = new Properties();
+    props.put( DataServiceConnectionInformation.WEB_APPLICATION_NAME, webAppName );
+    doReturn( props ).when( databaseMeta).getAttributes();
 
     doReturn( attributes ).when( databaseInterface ).getAttributes();
     doReturn( dbPort ).when( attributes ).getProperty( "PORT_NUMBER" );
@@ -178,7 +194,8 @@ public class ModelServerPublishTest {
             && db.isQuoteAllFields()
             && db.getAccessType().equals( DatabaseAccessType.NATIVE )
             && db.getExtraOptions().equals( databaseMeta.getExtraOptions() )
-            && db.getDatabaseType().equals( databaseType );
+            && db.getDatabaseType().equals( databaseType )
+            && db.getAttributes().get( DataServiceConnectionInformation.WEB_APPLICATION_NAME ).equals( webAppName );
       }
     } ), anyBoolean() );
 
