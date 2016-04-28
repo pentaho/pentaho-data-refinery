@@ -149,7 +149,7 @@ public class OptionsResolverTest {
     OptionsResolver resolver = new OptionsResolver();
     String[] formatStrings = resolver.resolveAttributeFormatOptions( ModelProperty.AppliesTo.Time );
     assertEquals( 17, formatStrings.length );
-    assertEquals( "m/d", formatStrings[0] );
+    assertEquals( "M/d", formatStrings[0] );
     assertEquals( "[h]:mm:ss", formatStrings[16] );
     formatStrings = resolver.resolveAttributeFormatOptions( ModelProperty.AppliesTo.Numeric );
     assertEquals( 16, formatStrings.length );
