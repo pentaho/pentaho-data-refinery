@@ -2,7 +2,7 @@
  *
  * Pentaho Community Edition Project: data-refinery-pdi-plugin
  *
- * Copyright (C) 2002-2015 by Pentaho : http://www.pentaho.com
+ * Copyright (C) 2002-2016 by Pentaho : http://www.pentaho.com
  *
  * *******************************************************************************
  *
@@ -291,7 +291,7 @@ public class JobEntryBuildModelDialog extends JobEntryDialogBoilerplate<JobEntry
 
   @Override protected boolean okToClose() {
     if ( super.okToClose() ) {
-      if ( wModelName.getText().contains( "/" ) ) {
+      if ( StringUtils.containsAny( wModelName.getText(), "/\\\t\r\n" ) ) {
         showError( getMsg( "System.StepJobEntryNameMissing.Title" ), getMsg( "BuildModelJob.Error.ModelName.InvalidCharacter" ) );
         return false;
       }
