@@ -29,7 +29,6 @@ import com.sun.jersey.api.client.WebResource.Builder;
 import com.sun.jersey.core.header.FormDataContentDisposition;
 import com.sun.jersey.multipart.FormDataMultiPart;
 
-import java.util.Properties;
 import org.apache.commons.httpclient.util.URIUtil;
 import org.apache.commons.lang.StringUtils;
 import org.jfree.util.Log;
@@ -46,7 +45,6 @@ import javax.ws.rs.core.MediaType;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
-import org.pentaho.di.job.entries.build.DataServiceConnectionInformation;
 
 /**
  * This is copied from AgileBI's org.pentaho.agilebi.spoon.publish.ModelServerPublish
@@ -97,13 +95,6 @@ public class ModelServerPublish extends ModelServerAction {
     connection.setQuoteAllFields( "N".equals( intf.getAttributes().getProperty( "QUOTE_ALL_FIELDS" ) ) ? false : true );
     connection.setAccessType( DatabaseAccessType.NATIVE );
     connection.setExtraOptions( getDatabaseMeta().getExtraOptions() );
-
-    Properties props = getDatabaseMeta().getAttributes();
-    if ( props != null && props.getProperty( DataServiceConnectionInformation.WEB_APPLICATION_NAME ) != null ) {
-      connection.getAttributes().put( DataServiceConnectionInformation.WEB_APPLICATION_NAME,
-          props.getProperty( DataServiceConnectionInformation.WEB_APPLICATION_NAME ) );
-    }
-
     connection.setDatabaseType( getDatabaseType( intf ) );
     return updateConnection( connection, update );
   }

@@ -138,7 +138,6 @@ public class DataServiceConnectionInformationTest {
     assertEquals( "12345", databaseMeta.getDatabasePortNumberString() );
     assertEquals( "open", databaseMeta.getUsername() );
     assertEquals( "sesame", databaseMeta.getPassword() );
-    assertEquals( "pentaho-di", databaseMeta.getAttributes().get( "WEB_APPLICATION_NAME" ) );
   }
 
   @Test
