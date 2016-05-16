@@ -47,7 +47,6 @@ import org.pentaho.di.core.database.DatabaseMeta;
 import org.pentaho.di.core.logging.LogChannelInterface;
 import org.pentaho.di.core.refinery.publish.model.DataSourceAclModel;
 import org.pentaho.di.core.refinery.publish.util.JAXBUtils;
-import org.pentaho.di.job.entries.build.DataServiceConnectionInformation;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -171,9 +170,6 @@ public class ModelServerPublishTest {
     doReturn( dbPort ).when( databaseMeta ).environmentSubstitute( dbPort );
     doReturn( hostname ).when( databaseMeta ).getHostname();
     doReturn( hostname ).when( databaseMeta ).environmentSubstitute( hostname );
-    Properties props = new Properties();
-    props.put( DataServiceConnectionInformation.WEB_APPLICATION_NAME, webAppName );
-    doReturn( props ).when( databaseMeta).getAttributes();
 
     doReturn( attributes ).when( databaseInterface ).getAttributes();
     doReturn( dbPort ).when( attributes ).getProperty( "PORT_NUMBER" );
@@ -194,8 +190,7 @@ public class ModelServerPublishTest {
             && db.isQuoteAllFields()
             && db.getAccessType().equals( DatabaseAccessType.NATIVE )
             && db.getExtraOptions().equals( databaseMeta.getExtraOptions() )
-            && db.getDatabaseType().equals( databaseType )
-            && db.getAttributes().get( DataServiceConnectionInformation.WEB_APPLICATION_NAME ).equals( webAppName );
+            && db.getDatabaseType().equals( databaseType );
       }
     } ), anyBoolean() );
 
