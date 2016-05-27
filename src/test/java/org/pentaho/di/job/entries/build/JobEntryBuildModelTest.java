@@ -2,7 +2,7 @@
  *
  * Pentaho Community Edition Project: data-refinery-pdi-plugin
  *
- * Copyright (C) 2002-2015 by Pentaho : http://www.pentaho.com
+ * Copyright (C) 2002-2016 by Pentaho : http://www.pentaho.com
  *
  * *******************************************************************************
  *
@@ -28,6 +28,7 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.mockito.Mockito;
+import org.pentaho.agilebi.modeler.ModelerException;
 import org.pentaho.agilebi.modeler.models.annotations.CreateMeasure;
 import org.pentaho.agilebi.modeler.models.annotations.ModelAnnotation;
 import org.pentaho.agilebi.modeler.models.annotations.ModelAnnotationGroup;
@@ -67,6 +68,7 @@ import org.pentaho.di.trans.step.StepMetaDataCombi;
 import org.pentaho.di.trans.steps.tableoutput.TableOutputData;
 import org.pentaho.di.trans.steps.tableoutput.TableOutputMeta;
 import org.pentaho.di.ui.job.entries.common.ConnectionValidator;
+import org.pentaho.metadata.automodel.PhysicalTableImporter;
 import org.pentaho.metadata.model.Domain;
 import org.pentaho.metadata.model.LogicalModel;
 import org.pentaho.metadata.model.concept.types.AggregationType;
@@ -594,7 +596,41 @@ public class JobEntryBuildModelTest {
     assertEquals( "service two", connectionInfo.getTableName() );
     verify( mockLog ).logDebug( eq( "Unable to look inside transformation badTrans." ), any() );
   }
-  
+
+  @Test
+  public void testFailedDataServiceHasSpecificError() throws Exception {
+    runModelerExceptionTest( true, "We weren't able to run the transformation associated with the Pentaho Data Service. The transformation needs to run from the server." );
+    runModelerExceptionTest( false, "org.pentaho.agilebi.modeler.ModelerException: modeler Exception Message\n"
+      + "modeler Exception Message" );
+  }
+
+  private void runModelerExceptionTest( final boolean isDataService, final String msg ) {
+    final LogChannelInterface logChannel = mock( LogChannelInterface.class );
+    final DatabaseMeta mockMeta = mock( DatabaseMeta.class );
+    JobEntryBuildModel jobEntryBuildModel = new JobEntryBuildModel() {
+      @Override public ProvidesDatabaseConnectionInformation getConnectionInfo() throws KettleException {
+        return new DataServiceConnectionInformation( "aService", null, logChannel ) {
+          @Override public DatabaseMeta getDatabaseMeta() {
+            return mockMeta;
+          }
+        };
+      }
+
+      @Override PhysicalTableImporter.ImportStrategy getImportStrategy() throws KettleException, ModelerException {
+        throw new ModelerException( "modeler Exception Message" );
+      }
+
+      @Override boolean isOutputStepADataService() throws KettleException {
+        return isDataService;
+      }
+    };
+    try {
+      jobEntryBuildModel.buildXmi( null, "someStepName", "any" );
+    } catch ( KettleException e ) {
+      assertEquals( msg, e.getMessage().trim() );
+    }
+  }
+
   private class JobEntryBuildModelForTest extends JobEntryBuildModel {
     private List<JobEntryCopy> jobCopies;
 
