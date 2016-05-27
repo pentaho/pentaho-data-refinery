@@ -131,7 +131,7 @@ public class DataServiceConnectionInformationTest {
     assertEquals( "Kettle", connectInfo.getSchemaName() );
     DatabaseMeta databaseMeta = connectInfo.getDatabaseMeta();
     assertEquals( "org.pentaho.di.trans.dataservice.jdbc.ThinDriver", databaseMeta.getDriverClass() );
-    assertEquals( "kettle", databaseMeta.getDatabaseName() );
+    assertEquals( "pentaho-di", databaseMeta.getDatabaseName() );
     assertEquals( dataServiceName, databaseMeta.getName() );
     assertNull( databaseMeta.getExtraOptions().get( "KettleThin.local" ) );
     assertEquals( "farfaraway", databaseMeta.getHostname() );
@@ -204,7 +204,7 @@ public class DataServiceConnectionInformationTest {
     assertEquals( "Kettle", connectInfo.getSchemaName() );
     DatabaseMeta databaseMeta = connectInfo.getDatabaseMeta();
     assertEquals( "org.pentaho.di.trans.dataservice.jdbc.ThinDriver", databaseMeta.getDriverClass() );
-    assertEquals( "kettle", databaseMeta.getDatabaseName() );
+    assertEquals( "KettleThin", databaseMeta.getDatabaseName() );
     assertEquals( dataServiceName, databaseMeta.getName() );
     assertEquals( "true", databaseMeta.getExtraOptions().get( "KettleThin.local" ) );
   }
