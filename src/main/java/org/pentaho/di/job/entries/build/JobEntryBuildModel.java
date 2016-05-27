@@ -2,7 +2,7 @@
  *
  * Pentaho Community Edition Project: data-refinery-pdi-plugin
  *
- * Copyright (C) 2002-2015 by Pentaho : http://www.pentaho.com
+ * Copyright (C) 2002-2016 by Pentaho : http://www.pentaho.com
  *
  * *******************************************************************************
  *
@@ -260,6 +260,12 @@ public class JobEntryBuildModel extends JobEntryBase implements JobEntryInterfac
     } catch ( UnsupportedModelException e ) {
       throw new KettleException( getMsg( "BuildModelJob.Error.CannotUpdateModel",
           getMsg( "BuildModelJob.Error.UnsupportedModel" ) ) );
+    } catch ( ModelerException e ) {
+      if ( isOutputStepADataService() ) {
+        throw new KettleException( getMsg( "BuildModelJob.Error.DataServiceProblem" ) );
+      } else {
+        throw new KettleException( e );
+      }
     } catch ( Exception e ) {
       throw new KettleException( e );
     }
@@ -273,7 +279,7 @@ public class JobEntryBuildModel extends JobEntryBase implements JobEntryInterfac
     return new ModelAnnotationGroup();
   }
 
-  private PhysicalTableImporter.ImportStrategy getImportStrategy() throws KettleException, ModelerException {
+  PhysicalTableImporter.ImportStrategy getImportStrategy() throws KettleException, ModelerException {
     StepMetaDataCombi stepMetaDataCombi = getStepMetaDataCombi();
     if ( stepMetaDataCombi != null ) {
       return new RefineryValueMetaStrategy( stepMetaDataCombi );
@@ -305,7 +311,7 @@ public class JobEntryBuildModel extends JobEntryBase implements JobEntryInterfac
     return getParentJob().getJobMeta().getJobCopies();
   }
 
-  private boolean isOutputStepADataService() throws KettleException {
+  boolean isOutputStepADataService() throws KettleException {
     List<TransMeta> transMetas = findAllTransInJob();
     try {
       for ( TransMeta transMeta : transMetas ) {
