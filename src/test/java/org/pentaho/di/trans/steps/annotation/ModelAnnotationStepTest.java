@@ -86,6 +86,38 @@ public class ModelAnnotationStepTest {
   }
 
   @Test
+  public void testPutsAnnotationGroupIntoTheExtensionMapNoJob() throws Exception {
+    StepDataInterface stepDataInterface = new ModelAnnotationData();
+
+    ModelAnnotationStep modelAnnotation = createOneShotStep( stepDataInterface, null, null, false );
+    ModelAnnotationMeta modelAnnotationMeta = new ModelAnnotationMeta();
+    CreateAttribute ca1 = new CreateAttribute();
+    ca1.setField( "f" );
+    ModelAnnotation<?> annotationMock1 = new ModelAnnotation<CreateAttribute>( ca1 );
+    ModelAnnotationGroup modelAnnotations = new ModelAnnotationGroup( annotationMock1 );
+    modelAnnotationMeta.setModelAnnotations( modelAnnotations );
+
+    modelAnnotation.processRow( modelAnnotationMeta, stepDataInterface );
+    ModelAnnotationGroup actualAnnotations =
+        (ModelAnnotationGroup) modelAnnotation.getExtensionDataMap().get( JobEntryBuildModel.KEY_MODEL_ANNOTATIONS );
+    assertEquals( 1, actualAnnotations.size() );
+    assertSame( annotationMock1, actualAnnotations.get( 0 ) );
+    CreateAttribute ca2 = new CreateAttribute();
+    ca2.setField( "f" );
+    ModelAnnotation<?> annotationMock2 = new ModelAnnotation<CreateAttribute>( ca2 );
+    modelAnnotations.add( annotationMock2 );
+    modelAnnotation.first = true;
+
+    modelAnnotation.processRow( modelAnnotationMeta, stepDataInterface );
+    actualAnnotations =
+        (ModelAnnotationGroup) modelAnnotation.getExtensionDataMap().get( JobEntryBuildModel.KEY_MODEL_ANNOTATIONS );
+    assertEquals( 3, actualAnnotations.size() );
+    assertSame( annotationMock1, actualAnnotations.get( 0 ) );
+    assertSame( annotationMock1, actualAnnotations.get( 1 ) );
+    assertSame( annotationMock2, actualAnnotations.get( 2 ) );
+  }
+
+  @Test
   public void testReadsMetaStoreAnnotationGroup() throws Exception {
     final String groupName = "someGroup";
 
@@ -107,6 +139,51 @@ public class ModelAnnotationStepTest {
     //step
     StepDataInterface stepDataInterface = new ModelAnnotationData();
     ModelAnnotationStep modelAnnotation = spy( createOneShotStep( stepDataInterface, metaStore, manager ) );
+    RowMeta rowMeta = new RowMeta();
+    rowMeta.addValueMeta( new ValueMetaString( "f1" ) );
+    rowMeta.addValueMeta( new ValueMetaNumber( "f2" ) );
+    when( modelAnnotation.getInputRowMeta() ).thenReturn( rowMeta );
+
+    // set up a linked group in the meta
+    ModelAnnotationMeta modelAnnotationMeta = new ModelAnnotationMeta();
+    modelAnnotationMeta.setDefault();
+    ModelAnnotationGroup linkedGroup = new ModelAnnotationGroup();
+    linkedGroup.setName( groupName );
+    modelAnnotationMeta.setModelAnnotations( linkedGroup );
+    modelAnnotationMeta.setModelAnnotationCategory( groupName );
+
+    // run
+    modelAnnotation.processRow( modelAnnotationMeta, stepDataInterface );
+    ModelAnnotationGroup actualAnnotations =
+        (ModelAnnotationGroup) modelAnnotation.getExtensionDataMap().get( JobEntryBuildModel.KEY_MODEL_ANNOTATIONS );
+
+    for ( int i = 0; i < modelAnnotations.size(); i++ ) {
+      assertEquals( modelAnnotations.get( i ), actualAnnotations.get( i ) );
+    }
+  }
+
+  @Test
+  public void testReadsMetaStoreAnnotationGroupNoJob() throws Exception {
+    final String groupName = "someGroup";
+
+    // metastored annotations
+    CreateAttribute ca = new CreateAttribute();
+    ca.setField( "f1" );
+    CreateMeasure cm = new CreateMeasure();
+    cm.setField( "f2" );
+    ModelAnnotation<CreateAttribute> a1 = new ModelAnnotation<CreateAttribute>( ca );
+    ModelAnnotation<CreateMeasure> a2 = new ModelAnnotation<CreateMeasure>( cm );
+    ModelAnnotationGroup modelAnnotations = new ModelAnnotationGroup( a1, a2 );
+    modelAnnotations.setName( groupName );
+
+    // 'metastore'
+    IMetaStore metaStore = mock( IMetaStore.class );
+    final ModelAnnotationManager manager = mock( ModelAnnotationManager.class );
+    when( manager.readGroup( groupName, metaStore ) ).thenReturn( modelAnnotations );
+
+    //step
+    StepDataInterface stepDataInterface = new ModelAnnotationData();
+    ModelAnnotationStep modelAnnotation = spy( createOneShotStep( stepDataInterface, metaStore, manager, false ) );
     RowMeta rowMeta = new RowMeta();
     rowMeta.addValueMeta( new ValueMetaString( "f1" ) );
     rowMeta.addValueMeta( new ValueMetaNumber( "f2" ) );
@@ -307,13 +384,22 @@ public class ModelAnnotationStepTest {
 
   private ModelAnnotationStep createOneShotStep( StepDataInterface stepDataInterface, IMetaStore metaStore,
       final ModelAnnotationManager manager ) {
+      return createOneShotStep( stepDataInterface, metaStore, manager, true );
+  }
+  private ModelAnnotationStep createOneShotStep( StepDataInterface stepDataInterface, IMetaStore metaStore,
+      final ModelAnnotationManager manager, boolean createJob ) {
     StepMeta stepMeta = mock( StepMeta.class );
     TransMeta transMeta = mock( TransMeta.class );
     final Trans trans = mock( Trans.class );
     when( stepMeta.getName() ).thenReturn( "someName" );
     when( transMeta.findStep( "someName" ) ).thenReturn( stepMeta );
-    Job job = mock( Job.class );
-    when( trans.getParentJob() ).thenReturn( job );
+    Job job = null;
+    if ( createJob ) {
+      job = mock( Job.class );
+      when( trans.getParentJob() ).thenReturn( job );
+    } else {
+      when( trans.getParentJob() ).thenReturn( null );
+    }
     StepMetaDataCombi stepMetaDataCombi = new StepMetaDataCombi();
     stepMetaDataCombi.stepname = "step name";
     when( trans.getSteps() ).thenReturn( Collections.singletonList( stepMetaDataCombi ) );
@@ -333,7 +419,11 @@ public class ModelAnnotationStepTest {
     };
     modelAnnotation.setLogLevel( LogLevel.BASIC );
     modelAnnotation.setMetaStore( metaStore );
-    when( job.getExtensionDataMap() ).thenReturn( modelAnnotation.getExtensionDataMap() );
+    if ( createJob ) {
+      when( job.getExtensionDataMap() ).thenReturn( modelAnnotation.getExtensionDataMap() );
+    } else {
+      when( trans.getExtensionDataMap() ).thenReturn( modelAnnotation.getExtensionDataMap() );
+    }
     return modelAnnotation;
   }
 

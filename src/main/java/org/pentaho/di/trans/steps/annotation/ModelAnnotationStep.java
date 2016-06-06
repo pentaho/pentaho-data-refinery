@@ -2,7 +2,7 @@
  *
  * Pentaho Community Edition Project: data-refinery-pdi-plugin
  *
- * Copyright (C) 2002-2015 by Pentaho : http://www.pentaho.com
+ * Copyright (C) 2002-2016 by Pentaho : http://www.pentaho.com
  *
  * *******************************************************************************
  *
@@ -109,12 +109,14 @@ public class ModelAnnotationStep extends BaseStep implements StepInterface {
     }
     validateMeasuresNumeric( currentGroup );
 
+    ModelAnnotationGroup allAnnotations = getExistingAnnotations();
+    if ( !currentGroup.isSharedDimension() ) {
+      allAnnotations.addAll( currentGroup );
+    }
     if ( getTrans().getParentJob() != null ) {
-      ModelAnnotationGroup allAnnotations = getExistingAnnotations();
-      if ( !currentGroup.isSharedDimension() ) {
-        allAnnotations.addAll( currentGroup );
-      }
       getTrans().getParentJob().getExtensionDataMap().put( JobEntryBuildModel.KEY_MODEL_ANNOTATIONS, allAnnotations );
+    } else {
+      getTrans().getExtensionDataMap().put( JobEntryBuildModel.KEY_MODEL_ANNOTATIONS, allAnnotations );
     }
     return currentGroup;
   }
@@ -176,7 +178,7 @@ public class ModelAnnotationStep extends BaseStep implements StepInterface {
 
   private ModelAnnotationGroup getExistingAnnotations() {
     Object o = ( getTrans().getParentJob() == null )
-        ? null
+        ? getTrans().getExtensionDataMap().get( JobEntryBuildModel.KEY_MODEL_ANNOTATIONS )
         : getTrans().getParentJob().getExtensionDataMap().get( JobEntryBuildModel.KEY_MODEL_ANNOTATIONS );
     if ( o == null ) {
       return new ModelAnnotationGroup();
