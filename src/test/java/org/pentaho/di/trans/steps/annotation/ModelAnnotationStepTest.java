@@ -23,13 +23,14 @@
 package org.pentaho.di.trans.steps.annotation;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 
 import org.junit.Assert;
 import org.junit.Test;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.when;
+
+import static org.mockito.Mockito.*;
+
 import org.pentaho.agilebi.modeler.models.annotations.CreateAttribute;
 import org.pentaho.agilebi.modeler.models.annotations.CreateMeasure;
 import org.pentaho.agilebi.modeler.models.annotations.ModelAnnotation;
@@ -57,13 +58,14 @@ public class ModelAnnotationStepTest {
   public void testPutsAnnotationGroupIntoTheExtensionMap() throws Exception {
     StepDataInterface stepDataInterface = new ModelAnnotationData();
 
-    ModelAnnotationStep modelAnnotation = createOneShotStep( stepDataInterface, null, null );
+    ModelAnnotationStep modelAnnotation = spy( createOneShotStep( stepDataInterface, null, null ) );
     ModelAnnotationMeta modelAnnotationMeta = new ModelAnnotationMeta();
     CreateAttribute ca1 = new CreateAttribute();
     ca1.setField( "f" );
     ModelAnnotation<?> annotationMock1 = new ModelAnnotation<CreateAttribute>( ca1 );
     ModelAnnotationGroup modelAnnotations = new ModelAnnotationGroup( annotationMock1 );
     modelAnnotationMeta.setModelAnnotations( modelAnnotations );
+    doNothing().when( modelAnnotation ).putRow( null, new Object[]{} );
 
     modelAnnotation.processRow( modelAnnotationMeta, stepDataInterface );
     ModelAnnotationGroup actualAnnotations =
@@ -89,13 +91,15 @@ public class ModelAnnotationStepTest {
   public void testPutsAnnotationGroupIntoTheExtensionMapNoJob() throws Exception {
     StepDataInterface stepDataInterface = new ModelAnnotationData();
 
-    ModelAnnotationStep modelAnnotation = createOneShotStep( stepDataInterface, null, null, false );
+    ModelAnnotationStep modelAnnotation =
+      spy( createOneShotStep( stepDataInterface, null, null, false, new Object[] {} ) );
     ModelAnnotationMeta modelAnnotationMeta = new ModelAnnotationMeta();
     CreateAttribute ca1 = new CreateAttribute();
     ca1.setField( "f" );
     ModelAnnotation<?> annotationMock1 = new ModelAnnotation<CreateAttribute>( ca1 );
     ModelAnnotationGroup modelAnnotations = new ModelAnnotationGroup( annotationMock1 );
     modelAnnotationMeta.setModelAnnotations( modelAnnotations );
+    doNothing().when( modelAnnotation ).putRow( null, new Object[]{} );
 
     modelAnnotation.processRow( modelAnnotationMeta, stepDataInterface );
     ModelAnnotationGroup actualAnnotations =
@@ -143,6 +147,7 @@ public class ModelAnnotationStepTest {
     rowMeta.addValueMeta( new ValueMetaString( "f1" ) );
     rowMeta.addValueMeta( new ValueMetaNumber( "f2" ) );
     when( modelAnnotation.getInputRowMeta() ).thenReturn( rowMeta );
+    doNothing().when( modelAnnotation ).putRow( rowMeta, new Object[]{} );
 
     // set up a linked group in the meta
     ModelAnnotationMeta modelAnnotationMeta = new ModelAnnotationMeta();
@@ -183,11 +188,14 @@ public class ModelAnnotationStepTest {
 
     //step
     StepDataInterface stepDataInterface = new ModelAnnotationData();
-    ModelAnnotationStep modelAnnotation = spy( createOneShotStep( stepDataInterface, metaStore, manager, false ) );
+    ModelAnnotationStep modelAnnotation = spy( createOneShotStep( stepDataInterface, metaStore, manager, false,
+      new Object[]{} ) );
     RowMeta rowMeta = new RowMeta();
     rowMeta.addValueMeta( new ValueMetaString( "f1" ) );
     rowMeta.addValueMeta( new ValueMetaNumber( "f2" ) );
     when( modelAnnotation.getInputRowMeta() ).thenReturn( rowMeta );
+    doNothing().when( modelAnnotation ).putRow( rowMeta, new Object[]{} );
+
 
     // set up a linked group in the meta
     ModelAnnotationMeta modelAnnotationMeta = new ModelAnnotationMeta();
@@ -297,6 +305,7 @@ public class ModelAnnotationStepTest {
     okMeta.addValueMeta( new ValueMetaString( "f1" ) );
     okMeta.addValueMeta( new ValueMetaNumber( "f2" ) );
     when( modelAnnotation.getInputRowMeta() ).thenReturn( okMeta );
+    doNothing().when( modelAnnotation ).putRow( okMeta, new Object[]{} );
 
     modelAnnotation.processRow( modelAnnotationMeta, stepDataInterface );
 
@@ -306,6 +315,7 @@ public class ModelAnnotationStepTest {
     badMeta.addValueMeta( new ValueMetaString( "f2" ) );
     modelAnnotation = spy( createOneShotStep( stepDataInterface, null, null ) );
     when( modelAnnotation.getInputRowMeta() ).thenReturn( badMeta );
+    doNothing().when( modelAnnotation ).putRow( badMeta, new Object[]{} );
     try {
       modelAnnotation.processRow( modelAnnotationMeta, stepDataInterface );
       Assert.fail( "not validated" );
@@ -316,18 +326,21 @@ public class ModelAnnotationStepTest {
     // count is fine for non-numeric
     modelAnnotation = spy( createOneShotStep( stepDataInterface, null, null ) );
     when( modelAnnotation.getInputRowMeta() ).thenReturn( badMeta );
+    doNothing().when( modelAnnotation ).putRow( badMeta, new Object[]{} );
     cm.setAggregateType( AggregationType.COUNT );
     modelAnnotation.processRow( modelAnnotationMeta, stepDataInterface );
 
     // count distinct is fine for non-numeric
     modelAnnotation = spy( createOneShotStep( stepDataInterface, null, null ) );
     when( modelAnnotation.getInputRowMeta() ).thenReturn( badMeta );
+    doNothing().when( modelAnnotation ).putRow( badMeta, new Object[]{} );
     cm.setAggregateType( AggregationType.COUNT_DISTINCT );
     modelAnnotation.processRow( modelAnnotationMeta, stepDataInterface );
 
     // fail. does not support maximum
     modelAnnotation = spy( createOneShotStep( stepDataInterface, null, null ) );
     when( modelAnnotation.getInputRowMeta() ).thenReturn( badMeta );
+    doNothing().when( modelAnnotation ).putRow( badMeta, new Object[]{} );
     cm.setAggregateType( AggregationType.MAXIMUM );
     try {
       modelAnnotation.processRow( modelAnnotationMeta, stepDataInterface );
@@ -360,6 +373,14 @@ public class ModelAnnotationStepTest {
   }
 
   @Test
+  public void testAnnotationsOnlyWrittenOnValidRow() throws Exception {
+    StepDataInterface stepDataInterface = new ModelAnnotationData();
+    ModelAnnotationStep modelAnnotation = createOneShotStep( stepDataInterface, null, null, true, null );
+    modelAnnotation.processRow( null, null );
+    assertNull( modelAnnotation.getTrans().getExtensionDataMap().get( JobEntryBuildModel.KEY_MODEL_ANNOTATIONS ) );
+  }
+
+  @Test
   public void testOutputStepIsMissing() throws Exception {
 
     // step
@@ -384,10 +405,11 @@ public class ModelAnnotationStepTest {
 
   private ModelAnnotationStep createOneShotStep( StepDataInterface stepDataInterface, IMetaStore metaStore,
       final ModelAnnotationManager manager ) {
-      return createOneShotStep( stepDataInterface, metaStore, manager, true );
+    return createOneShotStep( stepDataInterface, metaStore, manager, true, new Object[] {} );
   }
   private ModelAnnotationStep createOneShotStep( StepDataInterface stepDataInterface, IMetaStore metaStore,
-      final ModelAnnotationManager manager, boolean createJob ) {
+                                                 final ModelAnnotationManager manager, boolean createJob,
+                                                 final Object[] fakeRow ) {
     StepMeta stepMeta = mock( StepMeta.class );
     TransMeta transMeta = mock( TransMeta.class );
     final Trans trans = mock( Trans.class );
@@ -405,7 +427,7 @@ public class ModelAnnotationStepTest {
     when( trans.getSteps() ).thenReturn( Collections.singletonList( stepMetaDataCombi ) );
     ModelAnnotationStep modelAnnotation = new ModelAnnotationStep( stepMeta, stepDataInterface, 1, transMeta, trans ) {
       @Override public Object[] getRow() throws KettleException {
-        return null;
+        return fakeRow;
       }
 
       @Override public Trans getTrans() {

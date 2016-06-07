@@ -72,7 +72,7 @@ public class ModelAnnotationStep extends BaseStep implements StepInterface {
 
 
     Object[] row = getRow();
-    if ( first ) {
+    if ( first && row != null ) {
       first = false;
       ModelAnnotationMeta modelAnnotationMeta = (ModelAnnotationMeta) smi;
       ModelAnnotationData modelAnnotationData = (ModelAnnotationData) sdi;
