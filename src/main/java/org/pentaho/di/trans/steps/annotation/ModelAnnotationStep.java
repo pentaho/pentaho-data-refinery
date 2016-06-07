@@ -22,11 +22,14 @@
 
 package org.pentaho.di.trans.steps.annotation;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
+import org.pentaho.agilebi.modeler.models.annotations.AnnotationType;
 import org.pentaho.agilebi.modeler.models.annotations.CreateMeasure;
 import org.pentaho.agilebi.modeler.models.annotations.ModelAnnotation;
 import org.pentaho.agilebi.modeler.models.annotations.ModelAnnotationGroup;
 import org.pentaho.agilebi.modeler.models.annotations.ModelAnnotationManager;
+import org.pentaho.agilebi.modeler.models.annotations.ModelProperty;
 import org.pentaho.di.core.Const;
 import org.pentaho.di.core.exception.KettleException;
 import org.pentaho.di.core.row.ValueMetaInterface;
@@ -42,6 +45,9 @@ import org.pentaho.di.trans.step.StepMetaDataCombi;
 import org.pentaho.di.trans.step.StepMetaInterface;
 import org.pentaho.metadata.model.concept.types.AggregationType;
 import org.pentaho.metastore.api.exceptions.MetaStoreException;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @author Rowell Belen
@@ -197,4 +203,66 @@ public class ModelAnnotationStep extends BaseStep implements StepInterface {
     }
     return false;
   }
+
+  @Override public boolean init( StepMetaInterface smi, StepDataInterface sdi ) {
+    ModelAnnotationMeta meta = (ModelAnnotationMeta) smi;
+
+    ModelAnnotationGroup modelAnnotations = meta.getModelAnnotations();
+
+    // if a shared dimension is referenced, assume we should not be injecting any annotations. they will come from there
+    if ( !meta.isSharedDimension() ) {
+      if ( modelAnnotations == null ) {
+        modelAnnotations = new ModelAnnotationGroup();
+        meta.setModelAnnotations( modelAnnotations );
+      }
+
+      addInjectedAnnotations( modelAnnotations, meta.createMeasureAnnotations );
+      addInjectedAnnotations( modelAnnotations, meta.createAttributeAnnotations );
+      addInjectedAnnotations( modelAnnotations, meta.createLinkDimensionAnnotations );
+      addInjectedAnnotations( modelAnnotations, meta.createCalcMeasureAnnotations );
+    }
+
+    final boolean superInit = super.init( smi, sdi );
+    return superInit;
+  }
+
+  protected void addInjectedAnnotations( ModelAnnotationGroup modelAnnotations,
+                                       List<? extends AnnotationType> annotations ) {
+
+    for ( AnnotationType annotationType : annotations ) {
+      ModelAnnotation existingAnnotation = findExistingAnnotation( modelAnnotations, annotationType );
+      ModelAnnotation ma = existingAnnotation == null ? new ModelAnnotation() : existingAnnotation;
+
+      ma.setName( annotationType.getName() );
+
+      if ( existingAnnotation == null ) {
+        ma.setAnnotation( annotationType );
+
+        modelAnnotations.add( ma );
+      } else {
+        // set each of the specific values that are injected onto the existing annotation
+        List<ModelProperty> modelProperties = annotationType.getModelProperties();
+        modelProperties.stream().forEach( modelProperty -> {
+          try {
+            Object value = annotationType.getModelPropertyValueById( modelProperty.id() );
+            if ( value != null ) {
+              ma.getAnnotation().setModelPropertyValueById( modelProperty.id(), value );
+            }
+          } catch ( Exception e ) {
+            // this shouldn't happen since we are iterating over the properties
+          }
+        } );
+
+      }
+    }
+  }
+
+  protected ModelAnnotation findExistingAnnotation( ModelAnnotationGroup modelAnnotations, AnnotationType annotation ) {
+    List<ModelAnnotation> matches = modelAnnotations.stream()
+      .filter( ma -> ma.getAnnotation().equalsLogically( annotation ) )
+      .collect( Collectors.toList() );
+
+    return CollectionUtils.isNotEmpty( matches ) ? matches.get( 0 ) : null;
+  }
+
 }
