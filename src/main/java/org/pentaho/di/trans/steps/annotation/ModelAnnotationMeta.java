@@ -2,7 +2,7 @@
  *
  * Pentaho Community Edition Project: data-refinery-pdi-plugin
  *
- * Copyright (C) 2002-2015 by Pentaho : http://www.pentaho.com
+ * Copyright (C) 2002-2016 by Pentaho : http://www.pentaho.com
  *
  * *******************************************************************************
  *
@@ -25,6 +25,10 @@ package org.pentaho.di.trans.steps.annotation;
 import org.apache.commons.lang.BooleanUtils;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang.StringUtils;
+import org.pentaho.agilebi.modeler.models.annotations.CreateAttribute;
+import org.pentaho.agilebi.modeler.models.annotations.CreateCalculatedMember;
+import org.pentaho.agilebi.modeler.models.annotations.CreateMeasure;
+import org.pentaho.agilebi.modeler.models.annotations.LinkDimension;
 import org.pentaho.agilebi.modeler.models.annotations.ModelAnnotation;
 import org.pentaho.agilebi.modeler.models.annotations.ModelAnnotationGroup;
 import org.pentaho.agilebi.modeler.models.annotations.ModelAnnotationGroupXmlReader;
@@ -37,6 +41,9 @@ import org.pentaho.di.core.annotations.Step;
 import org.pentaho.di.core.database.DatabaseMeta;
 import org.pentaho.di.core.exception.KettleException;
 import org.pentaho.di.core.exception.KettleXMLException;
+import org.pentaho.di.core.injection.Injection;
+import org.pentaho.di.core.injection.InjectionDeep;
+import org.pentaho.di.core.injection.InjectionSupported;
 import org.pentaho.di.core.xml.XMLHandler;
 import org.pentaho.di.i18n.BaseMessages;
 import org.pentaho.di.repository.ObjectId;
@@ -63,6 +70,8 @@ import java.util.UUID;
 /**
  * @author Rowell Belen
  */
+@InjectionSupported( localizationPrefix = "AnnotateStream.Injection.",
+    groups = {"MEASURE", "ATTRIBUTE", "LINK_DIMENSION", "CALC_MEASURE"} )
 @Step( id = "FieldMetadataAnnotation", image = "ModelAnnotation.svg",
     i18nPackageName = "org.pentaho.di.trans.steps.annotation", name = "ModelAnnotation.TransName",
     description = "ModelAnnotation.TransDescription",
@@ -72,13 +81,33 @@ public class ModelAnnotationMeta extends BaseStepMeta implements StepMetaInterfa
 
   private static Class<?> PKG = ModelAnnotationMeta.class; // for i18n purposes, needed by Translator2!!
 
+  @Injection( name = "IS_SHARED" )
   private boolean sharedDimension; // need to know this before loading from the MetaStore
 
   private ModelAnnotationGroup modelAnnotations;
 
+  @Injection( name = "SHARED_ANNOTATION_GROUP" )
   private String modelAnnotationCategory;
 
   private String targetOutputStep;
+
+  /////////////////////////////////////////////////////
+  // Temp fields required to support metadata injection
+  // These will be injected via the annotation-based injection system.
+  // It's up to the init() method of the ModelAnnotationStep to take them and fill in the "real" fields they correspond to
+  @InjectionDeep
+  protected transient List<CreateMeasure> createMeasureAnnotations = new ArrayList<>();
+
+  @InjectionDeep
+  protected transient List<CreateAttribute> createAttributeAnnotations = new ArrayList<>();
+
+  @InjectionDeep
+  protected transient List<LinkDimension> createLinkDimensionAnnotations = new ArrayList<>();
+
+  @InjectionDeep
+  protected transient List<CreateCalculatedMember> createCalcMeasureAnnotations = new ArrayList<>();
+  // end temp fields
+  /////////////////////////////////////////////////////
 
   public ModelAnnotationGroup getModelAnnotations() {
     return modelAnnotations;
