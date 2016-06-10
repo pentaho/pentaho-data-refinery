@@ -219,6 +219,9 @@ public class ModelAnnotationStep extends BaseStep implements StepInterface {
       addInjectedAnnotations( modelAnnotations, meta.createMeasureAnnotations );
       addInjectedAnnotations( modelAnnotations, meta.createAttributeAnnotations );
       addInjectedAnnotations( modelAnnotations, meta.createLinkDimensionAnnotations );
+
+      // default all calc measure annotations to the Measures dimension
+      meta.createCalcMeasureAnnotations.stream().forEach( calc -> calc.setDimension( "Measures" ) );
       addInjectedAnnotations( modelAnnotations, meta.createCalcMeasureAnnotations );
     }
 
