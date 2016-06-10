@@ -81,7 +81,6 @@ public class ModelAnnotationMeta extends BaseStepMeta implements StepMetaInterfa
 
   private static Class<?> PKG = ModelAnnotationMeta.class; // for i18n purposes, needed by Translator2!!
 
-  @Injection( name = "IS_SHARED" )
   private boolean sharedDimension; // need to know this before loading from the MetaStore
 
   private ModelAnnotationGroup modelAnnotations;
