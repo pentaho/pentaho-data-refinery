@@ -209,8 +209,8 @@ public class ModelAnnotationStep extends BaseStep implements StepInterface {
 
     ModelAnnotationGroup modelAnnotations = meta.getModelAnnotations();
 
-    // if a shared dimension is referenced, assume we should not be injecting any annotations. they will come from there
-    if ( !meta.isSharedDimension() ) {
+    // if a shared group is referenced, assume we should not be injecting any annotations. they will come from there
+    if ( StringUtils.isEmpty( meta.getModelAnnotationCategory() ) ) {
       if ( modelAnnotations == null ) {
         modelAnnotations = new ModelAnnotationGroup();
         meta.setModelAnnotations( modelAnnotations );

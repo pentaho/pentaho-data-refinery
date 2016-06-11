@@ -456,7 +456,6 @@ public class ModelAnnotationStepTest {
     ModelAnnotationStep modelAnnotation = createOneShotStep( stepDataInterface, null, null );
     ModelAnnotationStep spyStep = spy( modelAnnotation );
 
-    // set up a linked group in the meta
     ModelAnnotationMeta meta = new ModelAnnotationMeta();
 
     List<CreateMeasure> measureAnnotations = new ArrayList<>();
@@ -490,13 +489,39 @@ public class ModelAnnotationStepTest {
   }
 
   @Test
+  public void testCalcMeasureAnnotationsGetSetToTheMeasuresDimension() throws Exception {
+    StepDataInterface stepDataInterface = new ModelAnnotationData();
+    ModelAnnotationStep modelAnnotation = createOneShotStep( stepDataInterface, null, null );
+    ModelAnnotationMeta meta = new ModelAnnotationMeta();
+
+    List<CreateCalculatedMember> calcAnnotations = new ArrayList<>();
+    CreateCalculatedMember calc1 = new CreateCalculatedMember();
+    calc1.setName( "one" );
+    calcAnnotations.add( calc1 );
+
+    CreateCalculatedMember calc2 = new CreateCalculatedMember();
+    calc1.setName( "two" );
+    calc2.setDimension( "this should get overridden in the init method to be 'Measures'" );
+    calcAnnotations.add( calc2 );
+
+    meta.createCalcMeasureAnnotations = calcAnnotations;
+
+    boolean status = modelAnnotation.init( meta, stepDataInterface );
+    assertTrue( status );
+    assertEquals( calcAnnotations.size(), meta.getModelAnnotations().size() );
+    meta.getModelAnnotations().stream().forEach( ma -> {
+      assertTrue( ma.getAnnotation() instanceof CreateCalculatedMember );
+      assertEquals( "Measures", ( (CreateCalculatedMember) ma.getAnnotation() ).getDimension() );
+    } );
+  }
+
+  @Test
   public void testSharedGroupDoesNotInjectAnyAnnotations() throws Exception {
     StepDataInterface stepDataInterface = new ModelAnnotationData();
     ModelAnnotationStep modelAnnotation = createOneShotStep( stepDataInterface, null, null );
     ModelAnnotationStep spyStep = spy( modelAnnotation );
 
     ModelAnnotationMeta meta = new ModelAnnotationMeta();
-    meta.setSharedDimension( true );
     meta.setModelAnnotationCategory( "This is a shared group" );
 
     // if there is a shared annotation group present, it is assumed that tat already exists and is what is being requested
