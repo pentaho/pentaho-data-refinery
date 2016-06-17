@@ -2,7 +2,7 @@
  *
  * Pentaho Community Edition Project: data-refinery-pdi-plugin
  *
- * Copyright (C) 2002-2015 by Pentaho : http://www.pentaho.com
+ * Copyright (C) 2002-2016 by Pentaho : http://www.pentaho.com
  *
  * *******************************************************************************
  *
@@ -35,7 +35,7 @@ import org.pentaho.di.core.util.StringUtil;
 import org.pentaho.di.i18n.BaseMessages;
 import org.pentaho.di.repository.Repository;
 import org.pentaho.di.trans.TransMeta;
-import org.pentaho.di.trans.steps.annotation.ModelAnnotationMeta;
+import org.pentaho.di.trans.steps.annotation.BaseAnnotationMeta;
 import org.pentaho.di.trans.steps.annotation.SharedDimensionGroupValidation;
 import org.pentaho.di.trans.util.TransUtil;
 import org.pentaho.di.ui.core.widget.ComboVar;
@@ -91,8 +91,8 @@ public class SharedDimensionComposite extends BaseComposite {
     groupComposite.setEnabled( enabled );
   }
 
-  public void populateOutputSteps( ModelAnnotationMeta input, TransMeta transMeta,
-      Repository repository, IMetaStore metaStore ) {
+  public void populateOutputSteps( BaseAnnotationMeta input, TransMeta transMeta,
+                                   Repository repository, IMetaStore metaStore ) {
     try {
       for ( String key : TransUtil.collectOutputStepInTrans( transMeta, repository, metaStore ).keySet() ) {
         wOutputSteps.add( key );
@@ -104,7 +104,7 @@ public class SharedDimensionComposite extends BaseComposite {
     }
   }
 
-  private void selectOutputStep( ModelAnnotationMeta input ) {
+  private void selectOutputStep( BaseAnnotationMeta input ) {
     String[] items = wOutputSteps.getItems();
     for ( int i = 0; i < items.length; i++ ) {
       String item = items[i];

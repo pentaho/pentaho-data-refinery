@@ -2,7 +2,7 @@
  *
  * Pentaho Community Edition Project: data-refinery-pdi-plugin
  *
- * Copyright (C) 2002-2015 by Pentaho : http://www.pentaho.com
+ * Copyright (C) 2002-2016 by Pentaho : http://www.pentaho.com
  *
  * *******************************************************************************
  *
@@ -58,6 +58,7 @@ import org.pentaho.di.trans.TransMeta;
 import org.pentaho.di.trans.step.StepDialogInterface;
 import org.pentaho.di.trans.step.StepMeta;
 import org.pentaho.di.trans.step.StepMetaInterface;
+import org.pentaho.di.trans.steps.annotation.BaseAnnotationMeta;
 import org.pentaho.di.trans.steps.annotation.ModelAnnotationMeta;
 import org.pentaho.di.trans.util.TransUtil;
 import org.pentaho.di.ui.core.gui.GUIResource;
@@ -93,7 +94,7 @@ public abstract class BaseAnnotationStepDialog extends BaseStepDialog implements
   protected Label wIcon;
   protected Label wBottomHorizontalSeparator;
 
-  protected ModelAnnotationMeta input;
+  protected BaseAnnotationMeta input;
   protected ModifyListener lsMod;
 
   protected Listener lsApply;
@@ -110,7 +111,7 @@ public abstract class BaseAnnotationStepDialog extends BaseStepDialog implements
   public BaseAnnotationStepDialog( Shell parent, Object baseStepMeta,
       TransMeta transMeta, String stepname ) {
     super( parent, (StepMetaInterface) baseStepMeta, transMeta, stepname );
-    input = (ModelAnnotationMeta) baseStepMeta;
+    input = (BaseAnnotationMeta) baseStepMeta;
     TransUtil.resetParams( transMeta, transMeta.getLogChannel() );
   }
 

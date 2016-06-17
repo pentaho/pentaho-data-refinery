@@ -2,7 +2,7 @@
  *
  * Pentaho Community Edition Project: data-refinery-pdi-plugin
  *
- * Copyright (C) 2002-2015 by Pentaho : http://www.pentaho.com
+ * Copyright (C) 2002-2016 by Pentaho : http://www.pentaho.com
  *
  * *******************************************************************************
  *
@@ -51,6 +51,7 @@ import org.pentaho.di.trans.TransMeta;
 import org.pentaho.di.trans.step.StepDialogInterface;
 import org.pentaho.di.trans.step.StepMeta;
 import org.pentaho.di.trans.step.StepMetaInterface;
+import org.pentaho.di.trans.steps.annotation.BaseAnnotationMeta;
 import org.pentaho.di.trans.steps.annotation.ModelAnnotationMeta;
 import org.pentaho.di.ui.trans.step.BaseStepDialog;
 import org.pentaho.di.ui.trans.steps.common.ModelAnnotationEvent;
@@ -79,13 +80,13 @@ public abstract class ModelAnnotationActionDialog extends BaseStepDialog impleme
   private Listener lsClose;
 
   private ModelAnnotation<AnnotationType> modelAnnotation;
-  private ModelAnnotationMeta modelAnnotationMeta;
+  private BaseAnnotationMeta modelAnnotationMeta;
   private ModelAnnotationGroup modelAnnotations;
   private ModelAnnotationGroup modelAnnotationsOrigCopy;
   private int selectionIndex;
   private boolean saved;
 
-  public ModelAnnotationActionDialog( final Shell parent, final ModelAnnotationMeta baseStepMeta,
+  public ModelAnnotationActionDialog( final Shell parent, final BaseAnnotationMeta baseStepMeta,
       final TransMeta transMeta, final String stepname, final IMetaStore metaStore ) {
     super( parent, (StepMetaInterface) baseStepMeta, transMeta, stepname );
     modelAnnotationMeta = baseStepMeta;

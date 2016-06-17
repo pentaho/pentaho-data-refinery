@@ -2,7 +2,7 @@
  *
  * Pentaho Community Edition Project: data-refinery-pdi-plugin
  *
- * Copyright (C) 2002-2015 by Pentaho : http://www.pentaho.com
+ * Copyright (C) 2002-2016 by Pentaho : http://www.pentaho.com
  *
  * *******************************************************************************
  *
@@ -51,6 +51,7 @@ import org.pentaho.di.core.refinery.publish.util.ObjectUtils;
 import org.pentaho.di.i18n.BaseMessages;
 import org.pentaho.di.trans.TransMeta;
 import org.pentaho.di.trans.step.StepMetaInterface;
+import org.pentaho.di.trans.steps.annotation.BaseAnnotationMeta;
 import org.pentaho.di.trans.steps.annotation.ModelAnnotationMeta;
 import org.pentaho.di.ui.core.PropsUI;
 import org.pentaho.di.ui.core.gui.GUIResource;
@@ -292,8 +293,8 @@ public abstract class ModelAnnotationsTableComposite extends BaseComposite {
     this.toggleDeleteEditButtons();
   }
 
-  public void editAnnotation( Shell shell, ModelAnnotationMeta input, TransMeta transMeta,
-      String stepName, IMetaStore metaStore, Listener onClose ) {
+  public void editAnnotation( Shell shell, BaseAnnotationMeta input, TransMeta transMeta,
+                              String stepName, IMetaStore metaStore, Listener onClose ) {
     if ( this.getTable().getSelectionIndex() < 0 ) {
       return;
     }

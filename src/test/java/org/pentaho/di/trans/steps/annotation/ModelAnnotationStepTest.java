@@ -453,8 +453,7 @@ public class ModelAnnotationStepTest {
   public void testInit() throws Exception {
     // step
     StepDataInterface stepDataInterface = new ModelAnnotationData();
-    ModelAnnotationStep modelAnnotation = createOneShotStep( stepDataInterface, null, null );
-    ModelAnnotationStep spyStep = spy( modelAnnotation );
+    ModelAnnotationStep modelAnnotationStep = createOneShotStep( stepDataInterface, null, null );
 
     ModelAnnotationMeta meta = new ModelAnnotationMeta();
 
@@ -477,14 +476,12 @@ public class ModelAnnotationStepTest {
     ModelAnnotationGroup modelAnnotationGroup = new ModelAnnotationGroup();
     meta.setModelAnnotations( modelAnnotationGroup );
 
-    boolean status = spyStep.init( meta, stepDataInterface );
-
-    // make sure we call inject once for each supported type of annotation
-    verify( spyStep, times( 1 ) ).addInjectedAnnotations( eq( modelAnnotationGroup ), eq( measureAnnotations ) );
-    verify( spyStep, times( 1 ) ).addInjectedAnnotations( eq( modelAnnotationGroup ), eq( attrAnnotations  ));
-    verify( spyStep, times( 1 ) ).addInjectedAnnotations( eq( modelAnnotationGroup ), eq( linkAnnotations ) );
-    verify( spyStep, times( 1 ) ).addInjectedAnnotations( eq( modelAnnotationGroup ), eq( calcAnnotations ) );
-
+    boolean status = modelAnnotationStep.init( meta, stepDataInterface );
+    assertEquals( 4, modelAnnotationGroup.size() );
+    assertEquals( ModelAnnotation.Type.CREATE_MEASURE, modelAnnotationGroup.get( 0 ).getType() );
+    assertEquals( ModelAnnotation.Type.CREATE_ATTRIBUTE, modelAnnotationGroup.get( 1 ).getType() );
+    assertEquals( ModelAnnotation.Type.LINK_DIMENSION, modelAnnotationGroup.get( 2 ).getType() );
+    assertEquals( ModelAnnotation.Type.CREATE_CALCULATED_MEMBER, modelAnnotationGroup.get( 3 ).getType() );
     assertTrue( status );
   }
 
@@ -518,101 +515,19 @@ public class ModelAnnotationStepTest {
   @Test
   public void testSharedGroupDoesNotInjectAnyAnnotations() throws Exception {
     StepDataInterface stepDataInterface = new ModelAnnotationData();
-    ModelAnnotationStep modelAnnotation = createOneShotStep( stepDataInterface, null, null );
-    ModelAnnotationStep spyStep = spy( modelAnnotation );
+    ModelAnnotationStep modelAnnotationStep = createOneShotStep( stepDataInterface, null, null );
 
     ModelAnnotationMeta meta = new ModelAnnotationMeta();
-    meta.setModelAnnotationCategory( "This is a shared group" );
+    meta.sharedAnnotationGroup = "This is a shared group";
+    meta.setModelAnnotations(  new ModelAnnotationGroup() );
 
     // if there is a shared annotation group present, it is assumed that tat already exists and is what is being requested
     // don't inject any annotations
-    boolean status = spyStep.init( meta, stepDataInterface );
+    boolean status = modelAnnotationStep.init( meta, stepDataInterface );
 
-    verify( spyStep, never() ).addInjectedAnnotations( any(), any() );
+    assertEquals( 0, meta.getModelAnnotations().size() );
+
     assertTrue( status );
-
-  }
-
-  @Test
-  public void testAddInjectedAnnotations_allNew() throws Exception {
-    StepDataInterface stepDataInterface = new ModelAnnotationData();
-    ModelAnnotationStep modelAnnotation = createOneShotStep( stepDataInterface, null, null );
-
-    List<CreateMeasure> injectedMeasures = new ArrayList<>();
-    CreateMeasure cm = buildMeasureAnnotation( "sales", "sales for our company", "sales", AggregationType.SUM, "$ #,###.00", false);
-
-    injectedMeasures.add( cm );
-
-    // these are the `templated` annotations. in this case we won't have any
-    ModelAnnotationGroup group = new ModelAnnotationGroup();
-
-
-    modelAnnotation.addInjectedAnnotations( group, injectedMeasures );
-
-
-    assertEquals( injectedMeasures.size(), group.size() );
-    assertEquals( cm, group.get(0).getAnnotation() );
-
-  }
-
-  @Test
-  public void testAddInjectedAnnotations_updatingTemplatedAnnotation() throws Exception {
-    StepDataInterface stepDataInterface = new ModelAnnotationData();
-    ModelAnnotationStep modelAnnotation = createOneShotStep( stepDataInterface, null, null );
-
-    List<CreateMeasure> injectedMeasures = new ArrayList<>();
-    CreateMeasure cm = buildMeasureAnnotation( "sales", "sales for our company", "sales", null, "$ #,###.00", false);
-    CreateMeasure cmOther = buildMeasureAnnotation( "xxx", "xxx", "xxx", AggregationType.AVERAGE, "0", false);
-
-    injectedMeasures.add( cm );
-    injectedMeasures.add( cmOther );
-
-    CreateMeasure templatedCm = buildMeasureAnnotation( "sales", null, "FIELD", AggregationType.AVERAGE, null, true);
-
-    // these are the `templated` annotations.
-    ModelAnnotationGroup group = new ModelAnnotationGroup();
-    group.add( new ModelAnnotation( templatedCm ) );
-
-    // measures are unique based on name, so the one we are injecting should match the name of templated one
-    modelAnnotation.addInjectedAnnotations( group, injectedMeasures );
-
-    // should only be 2 items in the group, not 3
-    assertEquals( 2, group.size() );
-
-    CreateMeasure cmInjected = (CreateMeasure) ( group.get( 0 ).getAnnotation() );
-
-    // the original item in the group should be logically equal to the first injected measure
-    assertTrue( cm.equalsLogically( cmInjected ) );
-    // but, they should not be the same object or equal to each other
-    assertNotEquals( cm, cmInjected );
-
-    // verify the non-null properties of cm have been set on the original object
-    assertEquals( cm.getName(), cmInjected.getName() );
-    assertEquals( cm.getDescription(), cmInjected.getDescription() );
-    assertEquals( cm.getField(), cmInjected.getField() );
-    assertEquals( cm.getFormatString(), cmInjected.getFormatString() );
-    assertEquals( cm.isHidden(), cmInjected.isHidden() );
-
-    // verify any props that were null (not set) in the injecting annotation did not override templated values
-    assertEquals( AggregationType.AVERAGE, cmInjected.getAggregateType() );
-  }
-
-  private CreateMeasure buildMeasureAnnotation(
-      String name,
-      String description,
-      String field,
-      AggregationType aggType,
-      String formatString,
-      boolean isHidden ) {
-
-    CreateMeasure cm = new CreateMeasure();
-    cm.setName( name );
-    cm.setDescription( description );
-    cm.setField( field );
-    cm.setAggregateType( aggType );
-    cm.setFormatString( formatString );
-    cm.setHidden( isHidden );
-    return cm;
-
+    assertEquals( meta.sharedAnnotationGroup, meta.getModelAnnotationCategory() );
   }
 }

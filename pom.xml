@@ -34,6 +34,7 @@
     <dependency.mockito.revision>1.8.4</dependency.mockito.revision>
     <dependency.pentaho-osgi-bundles.revision>7.0-SNAPSHOT</dependency.pentaho-osgi-bundles.revision>
     <dependency.commons.io.revision>1.4</dependency.commons.io.revision>
+    <dependency.commons.lang.revision>2.6</dependency.commons.lang.revision>
     <dependency.jersey.revision>1.16</dependency.jersey.revision>
     <dependency.jackson.revision>1.9.2</dependency.jackson.revision>
     <dependency.data-access-plugin.revision>7.0-SNAPSHOT</dependency.data-access-plugin.revision>
@@ -108,6 +109,11 @@
       <groupId>commons-io</groupId>
       <artifactId>commons-io</artifactId>
       <version>${dependency.commons.io.revision}</version>
+    </dependency>
+    <dependency>
+      <groupId>commons-lang</groupId>
+      <artifactId>commons-lang</artifactId>
+      <version>${dependency.commons.lang.revision}</version>
     </dependency>
     <dependency>
       <groupId>commons-collections</groupId>

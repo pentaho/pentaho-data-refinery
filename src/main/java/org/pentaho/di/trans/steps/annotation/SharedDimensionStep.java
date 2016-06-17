@@ -2,7 +2,7 @@
  *
  * Pentaho Community Edition Project: data-refinery-pdi-plugin
  *
- * Copyright (C) 2002-2015 by Pentaho : http://www.pentaho.com
+ * Copyright (C) 2002-2016 by Pentaho : http://www.pentaho.com
  *
  * *******************************************************************************
  *
@@ -22,6 +22,8 @@
 
 package org.pentaho.di.trans.steps.annotation;
 
+import org.apache.commons.lang.StringUtils;
+import org.pentaho.agilebi.modeler.models.annotations.ModelAnnotationGroup;
 import org.pentaho.di.core.exception.KettleException;
 import org.pentaho.di.trans.Trans;
 import org.pentaho.di.trans.TransMeta;
@@ -53,5 +55,35 @@ public class SharedDimensionStep extends BaseStep implements StepInterface {
     }
     putRow( getInputRowMeta(), row );
     return true;
+  }
+
+  @Override public boolean init( StepMetaInterface smi, StepDataInterface sdi ) {
+
+    SharedDimensionMeta meta = (SharedDimensionMeta) smi;
+    meta.setSharedDimension( true );
+    if ( StringUtils.isNotEmpty( meta.sharedDimensionName ) ) {
+      meta.setModelAnnotationCategory( meta.sharedDimensionName );
+      meta.getModelAnnotations().setName( meta.sharedDimensionName );
+    }
+    if ( StringUtils.isNotEmpty( meta.dataProviderStep ) ) {
+      meta.setTargetOutputStep( meta.dataProviderStep );
+    }
+
+    ModelAnnotationGroup modelAnnotations = meta.getModelAnnotations();
+    if ( modelAnnotations == null ) {
+      modelAnnotations = new ModelAnnotationGroup();
+      meta.setModelAnnotations( modelAnnotations );
+    }
+
+    modelAnnotations.addInjectedAnnotations( meta.createDimensionKeyAnnotations );
+    modelAnnotations.addInjectedAnnotations( meta.createAttributeAnnotations );
+
+    try {
+      meta.saveToMetaStore( getMetaStore() );
+    } catch ( Exception e ) {
+      logError( e.getMessage(), e );
+    }
+
+    return super.init( smi, sdi );
   }
 }
