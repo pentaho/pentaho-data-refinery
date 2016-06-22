@@ -51,7 +51,7 @@ import org.pentaho.di.core.row.RowMetaInterface;
 import org.pentaho.di.core.row.ValueMetaInterface;
 import org.pentaho.di.i18n.BaseMessages;
 import org.pentaho.di.trans.TransMeta;
-import org.pentaho.di.trans.steps.annotation.ModelAnnotationMeta;
+import org.pentaho.di.trans.steps.annotation.BaseAnnotationMeta;
 import org.pentaho.di.ui.core.PropsUI;
 import org.pentaho.di.ui.core.widget.ColumnInfo;
 import org.pentaho.di.ui.core.widget.ComboValuesSelectionListener;
@@ -81,7 +81,7 @@ public class ModelAnnotationActionPropertiesDialog extends ModelAnnotationAction
   private OptionsResolver optionsResolver;
 
   public ModelAnnotationActionPropertiesDialog( Shell parent,
-      ModelAnnotationMeta baseStepMeta,
+      BaseAnnotationMeta baseStepMeta,
       TransMeta transMeta, String stepname,
       IMetaStore metaStore ) {
     super( parent, baseStepMeta, transMeta, stepname, metaStore );

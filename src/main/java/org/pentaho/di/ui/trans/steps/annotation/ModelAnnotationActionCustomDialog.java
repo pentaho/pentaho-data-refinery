@@ -2,7 +2,7 @@
  *
  * Pentaho Community Edition Project: data-refinery-pdi-plugin
  *
- * Copyright (C) 2002-2015 by Pentaho : http://www.pentaho.com
+ * Copyright (C) 2002-2016 by Pentaho : http://www.pentaho.com
  *
  * *******************************************************************************
  *
@@ -34,7 +34,7 @@ import org.pentaho.agilebi.modeler.ModelerException;
 import org.pentaho.agilebi.modeler.models.annotations.CreateCalculatedMember;
 import org.pentaho.agilebi.modeler.models.annotations.ModelAnnotation;
 import org.pentaho.di.trans.TransMeta;
-import org.pentaho.di.trans.steps.annotation.ModelAnnotationMeta;
+import org.pentaho.di.trans.steps.annotation.BaseAnnotationMeta;
 import org.pentaho.di.ui.trans.steps.common.CalculatedMeasureComposite;
 import org.pentaho.metastore.api.IMetaStore;
 
@@ -48,8 +48,8 @@ public class ModelAnnotationActionCustomDialog extends ModelAnnotationActionProp
   protected CalculatedMeasureComposite calculatedMeasureComposite;
 
   public ModelAnnotationActionCustomDialog( Shell parent,
-      ModelAnnotationMeta baseStepMeta, TransMeta transMeta,
-      String stepname, IMetaStore metaStore ) {
+                                            BaseAnnotationMeta baseStepMeta, TransMeta transMeta,
+                                            String stepname, IMetaStore metaStore ) {
     super( parent, baseStepMeta, transMeta, stepname, metaStore );
   }
 
