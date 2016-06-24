@@ -74,7 +74,7 @@ public class ModelAnnotationStep extends BaseStep implements StepInterface {
     Object[] row = getRow();
     if ( first && row != null ) {
       first = false;
-      ModelAnnotationMeta modelAnnotationMeta = (ModelAnnotationMeta) smi;
+      BaseAnnotationMeta modelAnnotationMeta = (BaseAnnotationMeta) smi;
       ModelAnnotationData modelAnnotationData = (ModelAnnotationData) sdi;
       if ( modelAnnotationMeta.isSharedDimension()
           && !isOutputStepFound( modelAnnotationMeta.getTargetOutputStep() ) ) {
@@ -96,7 +96,7 @@ public class ModelAnnotationStep extends BaseStep implements StepInterface {
    * @param modelAnnotationMeta
    * @throws KettleException
    */
-  private ModelAnnotationGroup processAnnotations( ModelAnnotationMeta modelAnnotationMeta ) throws KettleException {
+  private ModelAnnotationGroup processAnnotations( BaseAnnotationMeta modelAnnotationMeta ) throws KettleException {
 
     ModelAnnotationGroup currentGroup;
     if ( isGroupLinked( modelAnnotationMeta ) ) {
@@ -121,11 +121,11 @@ public class ModelAnnotationStep extends BaseStep implements StepInterface {
     return currentGroup;
   }
 
-  private boolean isGroupLinked( ModelAnnotationMeta meta ) {
+  private boolean isGroupLinked( BaseAnnotationMeta meta ) {
     return !StringUtils.isBlank( environmentSubstitute( meta.getModelAnnotationCategory() ) );
   }
 
-  protected ModelAnnotationGroup fetchAnnotations( final String groupName, ModelAnnotationMeta modelAnnotationMeta )
+  protected ModelAnnotationGroup fetchAnnotations( final String groupName, BaseAnnotationMeta modelAnnotationMeta )
     throws KettleException {
     if ( StringUtils.isBlank( groupName ) ) {
       throw new IllegalArgumentException( "no group" );
@@ -148,7 +148,7 @@ public class ModelAnnotationStep extends BaseStep implements StepInterface {
     }
   }
 
-  protected ModelAnnotationManager getModelAnnotationsManager( ModelAnnotationMeta modelAnnotationMeta ) {
+  protected ModelAnnotationManager getModelAnnotationsManager( BaseAnnotationMeta modelAnnotationMeta ) {
     if ( modelAnnotationMeta.isSharedDimension() ) {
       return new ModelAnnotationManager( true );
     }
@@ -225,5 +225,9 @@ public class ModelAnnotationStep extends BaseStep implements StepInterface {
 
     final boolean superInit = super.init( smi, sdi );
     return superInit;
+  }
+
+  public boolean baseInit( final StepMetaInterface smi, final StepDataInterface sdi ) {
+    return super.init( smi, sdi );
   }
 }

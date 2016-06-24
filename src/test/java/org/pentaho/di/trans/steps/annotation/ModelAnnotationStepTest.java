@@ -435,7 +435,7 @@ public class ModelAnnotationStepTest {
       }
 
       @Override
-      protected ModelAnnotationManager getModelAnnotationsManager( ModelAnnotationMeta meta ) {
+      protected ModelAnnotationManager getModelAnnotationsManager( BaseAnnotationMeta meta ) {
         return manager;
       }
     };

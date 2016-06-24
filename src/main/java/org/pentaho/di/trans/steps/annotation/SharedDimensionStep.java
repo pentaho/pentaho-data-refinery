@@ -24,16 +24,14 @@ package org.pentaho.di.trans.steps.annotation;
 
 import org.apache.commons.lang.StringUtils;
 import org.pentaho.agilebi.modeler.models.annotations.ModelAnnotationGroup;
-import org.pentaho.di.core.exception.KettleException;
 import org.pentaho.di.trans.Trans;
 import org.pentaho.di.trans.TransMeta;
-import org.pentaho.di.trans.step.BaseStep;
 import org.pentaho.di.trans.step.StepDataInterface;
 import org.pentaho.di.trans.step.StepInterface;
 import org.pentaho.di.trans.step.StepMeta;
 import org.pentaho.di.trans.step.StepMetaInterface;
 
-public class SharedDimensionStep extends BaseStep implements StepInterface {
+public class SharedDimensionStep extends ModelAnnotationStep implements StepInterface {
 
   private static Class<?> PKG = SharedDimensionStep.class; // for i18n purposes, needed by Translator2!!
 
@@ -41,20 +39,6 @@ public class SharedDimensionStep extends BaseStep implements StepInterface {
       StepDataInterface stepDataInterface, int copyNr,
       TransMeta transMeta, Trans trans ) {
     super( stepMeta, stepDataInterface, copyNr, transMeta, trans );
-  }
-
-  @Override
-  public boolean processRow( final StepMetaInterface smi, final StepDataInterface sdi )
-    throws KettleException {
-
-    // Pass thru
-    Object[] row = getRow();
-    if ( row == null ) { // no more input to be expected...
-      setOutputDone();
-      return false;
-    }
-    putRow( getInputRowMeta(), row );
-    return true;
   }
 
   @Override public boolean init( StepMetaInterface smi, StepDataInterface sdi ) {
@@ -84,6 +68,6 @@ public class SharedDimensionStep extends BaseStep implements StepInterface {
       logError( e.getMessage(), e );
     }
 
-    return super.init( smi, sdi );
+    return super.baseInit( smi, sdi );
   }
 }
