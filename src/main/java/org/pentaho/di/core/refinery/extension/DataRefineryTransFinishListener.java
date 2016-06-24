@@ -2,7 +2,7 @@
  *
  * Pentaho Community Edition Project: data-refinery-pdi-plugin
  *
- * Copyright (C) 2002-2015 by Pentaho : http://www.pentaho.com
+ * Copyright (C) 2002-2016 by Pentaho : http://www.pentaho.com
  *
  * *******************************************************************************
  *
@@ -37,6 +37,7 @@ import org.pentaho.di.job.entry.JobEntryCopy;
 import org.pentaho.di.trans.Trans;
 import org.pentaho.di.trans.step.BaseStepData.StepExecutionStatus;
 import org.pentaho.di.trans.step.StepMetaDataCombi;
+import org.pentaho.di.trans.steps.annotation.BaseAnnotationMeta;
 import org.pentaho.di.trans.steps.annotation.ModelAnnotationData;
 import org.pentaho.di.trans.steps.annotation.ModelAnnotationMeta;
 import org.pentaho.metastore.api.IMetaStore;
@@ -109,7 +110,7 @@ public class DataRefineryTransFinishListener implements ExtensionPointInterface 
     boolean hasAnnotations = false;
 
     for ( StepMetaDataCombi combi : trans.getSteps() ) {
-      if ( combi.meta instanceof ModelAnnotationMeta ) {
+      if ( combi.meta instanceof BaseAnnotationMeta ) {
         hasAnnotations = true;
         log.logDebug( "found annotations step '" + combi.stepname + "'" );
         ModelAnnotationData maData = (ModelAnnotationData) combi.data;
@@ -155,9 +156,9 @@ public class DataRefineryTransFinishListener implements ExtensionPointInterface 
   }
 
   private String getOutputStepName( StepMetaDataCombi annotationCombi, final Trans trans ) throws KettleException {
-    if ( annotationCombi.meta instanceof ModelAnnotationMeta ) {
+    if ( annotationCombi.meta instanceof BaseAnnotationMeta ) {
       String outputStepName =
-          trans.environmentSubstitute( ( (ModelAnnotationMeta) annotationCombi.meta ).getTargetOutputStep() );
+          trans.environmentSubstitute( ( (BaseAnnotationMeta) annotationCombi.meta ).getTargetOutputStep() );
       if ( StringUtils.isNotBlank( outputStepName ) ) {
         return outputStepName;
       }

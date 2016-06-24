@@ -2,7 +2,7 @@
  *
  * Pentaho Community Edition Project: data-refinery-pdi-plugin
  *
- * Copyright (C) 2002-2015 by Pentaho : http://www.pentaho.com
+ * Copyright (C) 2002-2016 by Pentaho : http://www.pentaho.com
  *
  * *******************************************************************************
  *
@@ -74,6 +74,7 @@ import org.pentaho.di.trans.TransMeta;
 import org.pentaho.di.trans.step.StepMeta;
 import org.pentaho.di.trans.step.StepMetaDataCombi;
 import org.pentaho.di.trans.steps.annotation.ModelAnnotationMeta;
+import org.pentaho.di.trans.steps.annotation.SharedDimensionMeta;
 import org.pentaho.di.trans.steps.tableoutput.TableOutput;
 import org.pentaho.di.trans.steps.tableoutput.TableOutputMeta;
 import org.pentaho.metastore.api.IMetaStore;
@@ -128,7 +129,7 @@ public class DataRefineryTransFinishListenerTest {
     transMeta.setMetaStore( metaStore );
 
     // Annotating step
-    ModelAnnotationMeta annotationMeta = new ModelAnnotationMeta();
+    SharedDimensionMeta annotationMeta = new SharedDimensionMeta();
     annotationMeta.setDefault();
     annotationMeta.setModelAnnotationCategory( sharedGroup.getName() );
     annotationMeta.setTargetOutputStep( "${targetOutputStep}" );
