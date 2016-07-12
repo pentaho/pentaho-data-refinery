@@ -246,7 +246,7 @@
               org.osgi.service.cm,
               *</Import-Package>
             <DynamicImport-Package>*</DynamicImport-Package>
-            <Export-Package></Export-Package>
+            <Export-Package>org.pentaho.di.job.entries.build</Export-Package>
           </instructions>
         </configuration>
       </plugin>
