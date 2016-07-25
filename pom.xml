@@ -23,7 +23,7 @@
   </scm>
   <properties>
     <dependency.pdi-dataservice-plugin.revision>7.0-SNAPSHOT</dependency.pdi-dataservice-plugin.revision>
-    <dependency.jersey-apache-client.revision>1.14</dependency.jersey-apache-client.revision>
+    <dependency.jersey-apache-client.revision>1.19.1</dependency.jersey-apache-client.revision>
     <dependency.apache-xmlgraphics.revision>1.7</dependency.apache-xmlgraphics.revision>
     <dependency.pentaho-metadata.revision>7.0-SNAPSHOT</dependency.pentaho-metadata.revision>
     <dependency.osgi.version>4.3.1</dependency.osgi.version>
@@ -35,7 +35,7 @@
     <dependency.pentaho-osgi-bundles.revision>7.0-SNAPSHOT</dependency.pentaho-osgi-bundles.revision>
     <dependency.commons.io.revision>1.4</dependency.commons.io.revision>
     <dependency.commons.lang.revision>2.6</dependency.commons.lang.revision>
-    <dependency.jersey.revision>1.16</dependency.jersey.revision>
+    <dependency.jersey.revision>1.19.1</dependency.jersey.revision>
     <dependency.jackson.revision>1.9.2</dependency.jackson.revision>
     <dependency.data-access-plugin.revision>7.0-SNAPSHOT</dependency.data-access-plugin.revision>
     <dependency.pentaho-xul.revision>7.0-SNAPSHOT</dependency.pentaho-xul.revision>
@@ -238,7 +238,7 @@
           <instructions>
             <Bundle-SymbolicName>${project.artifactId}</Bundle-SymbolicName>
             <Bundle-Version>${project.version}</Bundle-Version>
-            <Import-Package>!com.sun.jersey.api.json;version="[1.16,2)",
+            <Import-Package>!com.sun.jersey.api.json;version="[1.19.1,2)",
               !org.codehaus.jackson.jaxrs,
               org.pentaho.di.osgi,
               org.pentaho.di.core.plugins,
