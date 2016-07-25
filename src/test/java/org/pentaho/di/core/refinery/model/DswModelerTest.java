@@ -2,7 +2,7 @@
  *
  * Pentaho Community Edition Project: data-refinery-pdi-plugin
  *
- * Copyright (C) 2002-2015 by Pentaho : http://www.pentaho.com
+ * Copyright (C) 2002-2016 by Pentaho : http://www.pentaho.com
  *
  * *******************************************************************************
  *
@@ -198,6 +198,22 @@ public class DswModelerTest {
     verify( log ).logBasic( "Successfully applied annotation: summary 2" );
   }
 
+  @Test
+  public void testCreateModelNoJndi() throws Exception {
+    DatabaseMeta dbMeta = createOrderfactDB();
+    TableModelerSource source = new TableModelerSource( dbMeta, "orderfact", "" );
+
+    final LogChannelInterface log = mock( LogChannelInterface.class );
+    when( log.isBasic() ).thenReturn( true );
+    DswModeler modeler = new DswModeler( log );
+    modeler.setUseJndi( false );
+    PhysicalTableImporter.ImportStrategy importStrategy = getImportStrategy();
+
+    Domain dsw =
+      modeler.createModel( "FromScratch", source, dbMeta, importStrategy, new ModelAnnotationGroup(), metaStore );
+    assertEquals( SqlDataSource.DataSourceType.NATIVE,
+      ( (SqlPhysicalModel) dsw.getPhysicalModels().get( 0 ) ).getDatasource().getType() );
+  }
   @Test
   public void testNullAnnotationsAreIgnored() throws Exception {
     DatabaseMeta dbMeta = createOrderfactDB();

@@ -2,7 +2,7 @@
  *
  * Pentaho Community Edition Project: data-refinery-pdi-plugin
  *
- * Copyright (C) 2002-2015 by Pentaho : http://www.pentaho.com
+ * Copyright (C) 2002-2016 by Pentaho : http://www.pentaho.com
  *
  * *******************************************************************************
  *
@@ -72,7 +72,9 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-import static org.pentaho.agilebi.modeler.models.annotations.ModelAnnotationGroup.ApplyStatus.*;
+import static org.pentaho.agilebi.modeler.models.annotations.ModelAnnotationGroup.ApplyStatus.FAILED;
+import static org.pentaho.agilebi.modeler.models.annotations.ModelAnnotationGroup.ApplyStatus.NULL_ANNOTATION;
+import static org.pentaho.agilebi.modeler.models.annotations.ModelAnnotationGroup.ApplyStatus.SUCCESS;
 
 public class DswModeler {
 
@@ -82,6 +84,8 @@ public class DswModeler {
 
   private static final String MONDRIAN_CATALOG_REF = "MondrianCatalogRef";
   private GeoContextConfigProvider geoContextConfigProvider;
+
+  private boolean useJndi = true;
 
   public DswModeler() {
 
@@ -97,6 +101,10 @@ public class DswModeler {
 
   public LogChannelInterface getLog() {
     return log;
+  }
+
+  public void setUseJndi( boolean useJndi ) {
+    this.useJndi = useJndi;
   }
 
   /**
@@ -148,8 +156,11 @@ public class DswModeler {
     applyAnnotations( model, modelAnnotations, metaStore );
 
     final Domain modeledDomain = model.getDomain();
-    // Swap data source before xmi generation
-    updateDatasourceAccess( modeledDomain, dbMeta );
+
+    if ( useJndi ) {
+      // Swap data source before xmi generation
+      updateDatasourceAccess( modeledDomain, dbMeta );
+    }
 
     return modeledDomain;
   }
