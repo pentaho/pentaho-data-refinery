@@ -47,7 +47,6 @@ public class SharedDimensionStep extends ModelAnnotationStep implements StepInte
     meta.setSharedDimension( true );
     if ( StringUtils.isNotEmpty( meta.sharedDimensionName ) ) {
       meta.setModelAnnotationCategory( meta.sharedDimensionName );
-      meta.getModelAnnotations().setName( meta.sharedDimensionName );
     }
     if ( StringUtils.isNotEmpty( meta.dataProviderStep ) ) {
       meta.setTargetOutputStep( meta.dataProviderStep );
@@ -59,6 +58,7 @@ public class SharedDimensionStep extends ModelAnnotationStep implements StepInte
       meta.setModelAnnotations( modelAnnotations );
     }
 
+    meta.getModelAnnotations().setName( meta.getModelAnnotationCategory() );
     modelAnnotations.addInjectedAnnotations( meta.createDimensionKeyAnnotations );
     modelAnnotations.addInjectedAnnotations( meta.createAttributeAnnotations );
 

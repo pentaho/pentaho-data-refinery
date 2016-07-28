@@ -78,9 +78,10 @@ public class ModelAnnotationStep extends BaseStep implements StepInterface {
       ModelAnnotationData modelAnnotationData = (ModelAnnotationData) sdi;
       if ( modelAnnotationMeta.isSharedDimension()
           && !isOutputStepFound( modelAnnotationMeta.getTargetOutputStep() ) ) {
-        throw new KettleException( BaseMessages.getString( PKG, "ModelAnnotation.Runtime.MissingDataProvider" ) );
+        log.logError( BaseMessages.getString( PKG, "ModelAnnotation.Runtime.MissingDataProvider" )  );
+      } else {
+        modelAnnotationData.annotations = processAnnotations( modelAnnotationMeta );
       }
-      modelAnnotationData.annotations = processAnnotations( modelAnnotationMeta );
     }
     if ( row == null ) { // no more input to be expected...
       setOutputDone();
