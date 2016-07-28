@@ -22,8 +22,13 @@
 
 package org.pentaho.di.trans.steps.annotation;
 
+import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Assert;
+import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
+import org.mockito.Mockito;
 import org.pentaho.agilebi.modeler.models.annotations.CreateAttribute;
 import org.pentaho.agilebi.modeler.models.annotations.CreateCalculatedMember;
 import org.pentaho.agilebi.modeler.models.annotations.CreateMeasure;
@@ -32,6 +37,9 @@ import org.pentaho.agilebi.modeler.models.annotations.ModelAnnotation;
 import org.pentaho.agilebi.modeler.models.annotations.ModelAnnotationGroup;
 import org.pentaho.agilebi.modeler.models.annotations.ModelAnnotationManager;
 import org.pentaho.di.core.exception.KettleException;
+import org.pentaho.di.core.logging.KettleLogStore;
+import org.pentaho.di.core.logging.LogChannelInterface;
+import org.pentaho.di.core.logging.LogChannelInterfaceFactory;
 import org.pentaho.di.core.logging.LogLevel;
 import org.pentaho.di.core.row.RowMeta;
 import org.pentaho.di.core.row.value.ValueMetaNumber;
@@ -54,6 +62,29 @@ import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
 public class ModelAnnotationStepTest {
+
+  private static LogChannelInterface mockLog;
+  private static LogChannelInterfaceFactory existingChannel;
+
+  @BeforeClass
+  public static void setUpClass() throws Exception {
+    LogChannelInterfaceFactory interfaceFactory = mock( LogChannelInterfaceFactory.class );
+    existingChannel = KettleLogStore.getLogChannelInterfaceFactory();
+    KettleLogStore.setLogChannelInterfaceFactory( interfaceFactory );
+    mockLog = mock( LogChannelInterface.class );
+    when( interfaceFactory.create( any(), any() ) ).thenReturn( mockLog );
+  }
+
+  @AfterClass
+  public static void tearDownClass() throws Exception {
+    KettleLogStore.setLogChannelInterfaceFactory( existingChannel );
+  }
+
+  @After
+  public void tearDown() throws Exception {
+    Mockito.reset( mockLog );
+  }
+
   @Test
   public void testPutsAnnotationGroupIntoTheExtensionMap() throws Exception {
     StepDataInterface stepDataInterface = new ModelAnnotationData();
@@ -355,7 +386,9 @@ public class ModelAnnotationStepTest {
 
     // step
     StepDataInterface stepDataInterface = new ModelAnnotationData();
-    ModelAnnotationStep modelAnnotation = createOneShotStep( stepDataInterface, null, null );
+
+    ModelAnnotationStep modelAnnotation = spy( createOneShotStep( stepDataInterface, null, null ) );
+    doNothing().when( modelAnnotation ).putRow( null, new Object[]{} );
 
     // set up a linked group in the meta
     ModelAnnotationMeta modelAnnotationMeta = new ModelAnnotationMeta();
@@ -363,13 +396,8 @@ public class ModelAnnotationStepTest {
     modelAnnotationMeta.setModelAnnotationCategory( "someGroup" );
     modelAnnotationMeta.setSharedDimension( true );
 
-    // run
-    try {
-      modelAnnotation.processRow( modelAnnotationMeta, stepDataInterface );
-      Assert.fail();
-    } catch ( KettleException e ) {
-      assertEquals( "Please select a valid data provider step.", e.getMessage().trim() );
-    }
+    modelAnnotation.processRow( modelAnnotationMeta, stepDataInterface );
+    verify( mockLog ).logError( "Please select a valid data provider step.");
   }
 
   @Test
@@ -385,7 +413,12 @@ public class ModelAnnotationStepTest {
 
     // step
     StepDataInterface stepDataInterface = new ModelAnnotationData();
-    ModelAnnotationStep modelAnnotation = createOneShotStep( stepDataInterface, null, null );
+    ModelAnnotationManager modelAnnotationManager = mock( ModelAnnotationManager.class );
+    IMetaStore metaStore = mock( IMetaStore.class );
+    when( modelAnnotationManager.readGroup( "someGroup", metaStore ) ).thenReturn( new ModelAnnotationGroup() );
+    ModelAnnotationStep modelAnnotation =
+      spy( createOneShotStep( stepDataInterface, metaStore, modelAnnotationManager ) );
+    doNothing().when( modelAnnotation ).putRow( null, new Object[]{} );
 
     // set up a linked group in the meta
     ModelAnnotationMeta modelAnnotationMeta = new ModelAnnotationMeta();
@@ -394,13 +427,8 @@ public class ModelAnnotationStepTest {
     modelAnnotationMeta.setModelAnnotationCategory( "someGroup" );
     modelAnnotationMeta.setSharedDimension( true );
 
-    // run
-    try {
-      modelAnnotation.processRow( modelAnnotationMeta, stepDataInterface );
-      Assert.fail();
-    } catch ( KettleException e ) {
-      assertEquals( "Please select a valid data provider step.", e.getMessage().trim() );
-    }
+    modelAnnotation.processRow( modelAnnotationMeta, stepDataInterface );
+    verify( mockLog ).logError( "Please select a valid data provider step." );
   }
 
   private ModelAnnotationStep createOneShotStep( StepDataInterface stepDataInterface, IMetaStore metaStore,

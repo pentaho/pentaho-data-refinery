@@ -41,8 +41,7 @@ import java.util.Collections;
 import java.util.List;
 
 import static org.junit.Assert.*;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 public class SharedDimensionStepTest {
 
@@ -89,6 +88,8 @@ public class SharedDimensionStepTest {
     attrAnnotations.add( new CreateAttribute() );
     meta.createAttributeAnnotations = attrAnnotations;
 
+    meta.sharedDimensionName = "myName";
+
     ModelAnnotationGroup modelAnnotationGroup = new ModelAnnotationGroup();
     meta.setModelAnnotations( modelAnnotationGroup );
 
@@ -96,6 +97,7 @@ public class SharedDimensionStepTest {
     assertEquals( 2, modelAnnotationGroup.size() );
     assertEquals( ModelAnnotation.Type.CREATE_DIMENSION_KEY, modelAnnotationGroup.get( 0 ).getType() );
     assertEquals( ModelAnnotation.Type.CREATE_ATTRIBUTE, modelAnnotationGroup.get( 1 ).getType() );
+    assertEquals( "myName", modelAnnotationGroup.getName() );
     assertTrue( status );
   }
 }
