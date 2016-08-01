@@ -36,7 +36,7 @@
     <dependency.jersey.revision>1.16</dependency.jersey.revision>
     <dependency.jersey-apache-client.revision>1.14</dependency.jersey-apache-client.revision>
     <dependency.jaxrs.revision>1.1.1</dependency.jaxrs.revision>
-    <dependency.xstream.revision>1.2.2</dependency.xstream.revision>
+    <dependency.xstream.revision>1.4.9</dependency.xstream.revision>
     <dependency.pentaho-metadata.revision>6.1-SNAPSHOT</dependency.pentaho-metadata.revision>
     <dependency.pentaho-modeler.revision>6.1-SNAPSHOT</dependency.pentaho-modeler.revision>
     <dependency.agile-bi.revision>6.1-SNAPSHOT</dependency.agile-bi.revision>
