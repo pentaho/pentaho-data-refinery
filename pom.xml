@@ -43,7 +43,7 @@
     <dependency.kettle.revision>7.0-SNAPSHOT</dependency.kettle.revision>
     <dependency.bi-platform.revision>7.0-SNAPSHOT</dependency.bi-platform.revision>
     <dependency.h2.revision>1.0.78</dependency.h2.revision>
-    <dependency.xstream.revision>1.2.2</dependency.xstream.revision>
+    <dependency.xstream.revision>1.4.9</dependency.xstream.revision>
     <dependency.commons.collections.revision>3.2.2</dependency.commons.collections.revision>
   </properties>
   <dependencies>
