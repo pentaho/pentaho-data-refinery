@@ -81,6 +81,11 @@
       <version>${dependency.kettle.revision}</version>
     </dependency>
     <dependency>
+      <groupId>org.pentaho</groupId>
+      <artifactId>meta-inject-plugin</artifactId>
+      <version>${dependency.kettle.revision}</version>
+    </dependency>
+    <dependency>
       <groupId>pentaho</groupId>
       <artifactId>pentaho-xul-core</artifactId>
       <version>${dependency.pentaho-xul.revision}</version>
