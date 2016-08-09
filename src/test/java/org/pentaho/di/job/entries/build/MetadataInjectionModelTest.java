@@ -28,8 +28,11 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.junit.After;
 import org.junit.Before;
@@ -42,6 +45,8 @@ import org.pentaho.di.core.database.Database;
 import org.pentaho.di.core.database.DatabaseMeta;
 import org.pentaho.di.core.extension.ExtensionPoint;
 import org.pentaho.di.core.extension.ExtensionPointPluginType;
+import org.pentaho.di.core.plugins.Plugin;
+import org.pentaho.di.core.plugins.PluginInterface;
 import org.pentaho.di.core.plugins.PluginRegistry;
 import org.pentaho.di.core.plugins.StepPluginType;
 import org.pentaho.di.core.refinery.extension.DataRefineryTransFinishListener;
@@ -52,6 +57,7 @@ import org.pentaho.di.job.JobMeta;
 import org.pentaho.di.job.entries.special.JobEntrySpecial;
 import org.pentaho.di.job.entries.trans.JobEntryTrans;
 import org.pentaho.di.job.entry.JobEntryCopy;
+import org.pentaho.di.trans.step.StepMetaInterface;
 import org.pentaho.metadata.model.Domain;
 import org.pentaho.metadata.model.LogicalModel;
 import org.pentaho.metadata.model.concept.types.AggregationType;
@@ -70,6 +76,16 @@ public class MetadataInjectionModelTest {
     if ( !KettleClientEnvironment.isInitialized() ) {
       KettleClientEnvironment.init();
     }
+
+    Map<Class<?>, String> classMap = new HashMap<>();
+    classMap.put( StepMetaInterface.class, "org.pentaho.di.trans.steps.metainject.MetaInjectMeta" );
+    List<String> libraries = new ArrayList<>();
+
+    PluginInterface plugin =
+      new Plugin( new String[] { "MetaInject" }, StepPluginType.class, StepMetaInterface.class, "Flow",
+        "MetaInjectMeta", null, null, false, false, classMap, libraries, null, null );
+    PluginRegistry.getInstance().registerPlugin( StepPluginType.class, plugin );
+
     PluginRegistry.addPluginType( StepPluginType.getInstance() );
 
     ExtensionPoint epAnnotation = DataRefineryTransFinishListener.class.getAnnotation( ExtensionPoint.class );
