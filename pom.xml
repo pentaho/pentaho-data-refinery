@@ -250,7 +250,6 @@
               org.pentaho.di.core.extension,
               org.osgi.service.cm,
               *</Import-Package>
-            <DynamicImport-Package>*</DynamicImport-Package>
             <Export-Package>org.pentaho.di.job.entries.build,org.pentaho.di.core.refinery.model</Export-Package>
           </instructions>
         </configuration>
