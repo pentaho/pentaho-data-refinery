@@ -29,6 +29,7 @@ import org.pentaho.agilebi.modeler.models.annotations.ModelAnnotationGroup;
 import org.pentaho.agilebi.modeler.models.annotations.ModelAnnotationManager;
 import org.pentaho.di.core.Const;
 import org.pentaho.di.core.exception.KettleException;
+import org.pentaho.di.core.row.RowMetaInterface;
 import org.pentaho.di.core.row.ValueMetaInterface;
 import org.pentaho.di.i18n.BaseMessages;
 import org.pentaho.di.job.entries.build.JobEntryBuildModel;
@@ -67,21 +68,53 @@ public class ModelAnnotationStep extends BaseStep implements StepInterface {
   }
 
   @Override
-  public boolean processRow( final StepMetaInterface smi, final StepDataInterface sdi )
-    throws KettleException {
+  public boolean init( StepMetaInterface smi, StepDataInterface sdi ) {
+    // SharedDimensionStep inherits from this but SharedDimensionMeta doesn't inherit from ModelAnnotationMeta
+    BaseAnnotationMeta bmeta = (BaseAnnotationMeta) smi;
 
+    if ( !bmeta.isSharedDimension() ) {
+      ModelAnnotationMeta meta = (ModelAnnotationMeta) bmeta;
+      if ( StringUtils.isNotEmpty( meta.sharedAnnotationGroup ) ) {
+        meta.setModelAnnotationCategory( meta.sharedAnnotationGroup );
+      }
+      ModelAnnotationGroup modelAnnotations = meta.getModelAnnotations();
+      // if a shared group is referenced, assume we should not be injecting any annotations. they will come from there
+      if ( StringUtils.isEmpty( meta.getModelAnnotationCategory() ) ) {
+        if ( modelAnnotations == null ) {
+          modelAnnotations = new ModelAnnotationGroup();
+          meta.setModelAnnotations( modelAnnotations );
+        }
 
+        modelAnnotations.addInjectedAnnotations( meta.createMeasureAnnotations );
+        modelAnnotations.addInjectedAnnotations( meta.createAttributeAnnotations );
+        modelAnnotations.addInjectedAnnotations( meta.createLinkDimensionAnnotations );
+
+        // default all calc measure annotations to the Measures dimension
+        meta.createCalcMeasureAnnotations.stream().forEach( calc -> calc.setDimension( "Measures" ) );
+        modelAnnotations.addInjectedAnnotations( meta.createCalcMeasureAnnotations );
+      }
+    }
+    try {
+      ModelAnnotationData modelAnnotationData = (ModelAnnotationData) sdi;
+      if ( bmeta.isSharedDimension()
+          && !isOutputStepFound( bmeta.getTargetOutputStep() ) ) {
+        log.logError( BaseMessages.getString( PKG, "ModelAnnotation.Runtime.MissingDataProvider" ) );
+      } else {
+        modelAnnotationData.annotations = processAnnotations( bmeta );
+      }
+    } catch ( KettleException e ) {
+      log.logError( e.getLocalizedMessage(), e );
+      return false;
+    }
+    final boolean superInit = super.init( smi, sdi );
+    return superInit;
+  }
+
+  @Override
+  public boolean processRow( final StepMetaInterface smi, final StepDataInterface sdi ) throws KettleException {
     Object[] row = getRow();
     if ( first && row != null ) {
       first = false;
-      BaseAnnotationMeta modelAnnotationMeta = (BaseAnnotationMeta) smi;
-      ModelAnnotationData modelAnnotationData = (ModelAnnotationData) sdi;
-      if ( modelAnnotationMeta.isSharedDimension()
-          && !isOutputStepFound( modelAnnotationMeta.getTargetOutputStep() ) ) {
-        log.logError( BaseMessages.getString( PKG, "ModelAnnotation.Runtime.MissingDataProvider" )  );
-      } else {
-        modelAnnotationData.annotations = processAnnotations( modelAnnotationMeta );
-      }
     }
     if ( row == null ) { // no more input to be expected...
       setOutputDone();
@@ -157,16 +190,20 @@ public class ModelAnnotationStep extends BaseStep implements StepInterface {
     return new ModelAnnotationManager();
   }
 
-  private void validateMeasuresNumeric( ModelAnnotationGroup annotations )
-    throws KettleException {
-    if ( getInputRowMeta() != null ) {
+
+  private void validateMeasuresNumeric( ModelAnnotationGroup annotations ) throws KettleException {
+    RowMetaInterface inputRowMeta = getInputRowMeta();
+    if (  inputRowMeta == null ) {
+      inputRowMeta = getTransMeta().getPrevStepFields( getStepMeta() );
+    }
+    if ( inputRowMeta != null ) {
       for ( ModelAnnotation<?> annotation : annotations ) {
         if ( annotation.getType() != null && annotation.getType().equals( ModelAnnotation.Type.CREATE_MEASURE ) ) {
-          for ( ValueMetaInterface valueMeta : getInputRowMeta().getValueMetaList() ) {
+          for ( ValueMetaInterface valueMeta : inputRowMeta.getValueMetaList() ) {
             if ( !valueMeta.isNumeric() && valueMeta.getName().equals( annotation.getAnnotation().getField() ) ) {
               CreateMeasure createMeasure = (CreateMeasure) annotation.getAnnotation();
-              if ( !createMeasure.getAggregateType().equals( AggregationType.COUNT )
-                  && !createMeasure.getAggregateType().equals( AggregationType.COUNT_DISTINCT ) ) {
+              if ( !createMeasure.getAggregateType().equals( AggregationType.COUNT ) && !createMeasure
+                  .getAggregateType().equals( AggregationType.COUNT_DISTINCT ) ) {
                 throw new KettleException( BaseMessages.getString( PKG, "ModelAnnotation.Runtime.NonNumericMeasure",
                     createMeasure.getAggregateType().name() ) );
               }
@@ -199,36 +236,4 @@ public class ModelAnnotationStep extends BaseStep implements StepInterface {
     return false;
   }
 
-  @Override public boolean init( StepMetaInterface smi, StepDataInterface sdi ) {
-    ModelAnnotationMeta meta = (ModelAnnotationMeta) smi;
-
-    if ( StringUtils.isNotEmpty( meta.sharedAnnotationGroup ) ) {
-      meta.setModelAnnotationCategory( meta.sharedAnnotationGroup );
-    }
-
-    ModelAnnotationGroup modelAnnotations = meta.getModelAnnotations();
-
-    // if a shared group is referenced, assume we should not be injecting any annotations. they will come from there
-    if ( StringUtils.isEmpty( meta.getModelAnnotationCategory() ) ) {
-      if ( modelAnnotations == null ) {
-        modelAnnotations = new ModelAnnotationGroup();
-        meta.setModelAnnotations( modelAnnotations );
-      }
-
-      modelAnnotations.addInjectedAnnotations( meta.createMeasureAnnotations );
-      modelAnnotations.addInjectedAnnotations( meta.createAttributeAnnotations );
-      modelAnnotations.addInjectedAnnotations( meta.createLinkDimensionAnnotations );
-
-      // default all calc measure annotations to the Measures dimension
-      meta.createCalcMeasureAnnotations.stream().forEach( calc -> calc.setDimension( "Measures" ) );
-      modelAnnotations.addInjectedAnnotations( meta.createCalcMeasureAnnotations );
-    }
-
-    final boolean superInit = super.init( smi, sdi );
-    return superInit;
-  }
-
-  public boolean baseInit( final StepMetaInterface smi, final StepDataInterface sdi ) {
-    return super.init( smi, sdi );
-  }
 }
