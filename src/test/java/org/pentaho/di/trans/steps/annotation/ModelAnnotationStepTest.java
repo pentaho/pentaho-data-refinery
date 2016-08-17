@@ -24,8 +24,6 @@ package org.pentaho.di.trans.steps.annotation;
 
 import org.junit.After;
 import org.junit.AfterClass;
-import org.junit.Assert;
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.mockito.Mockito;
@@ -98,6 +96,8 @@ public class ModelAnnotationStepTest {
     modelAnnotationMeta.setModelAnnotations( modelAnnotations );
     doNothing().when( modelAnnotation ).putRow( null, new Object[]{} );
 
+    boolean init = modelAnnotation.init( modelAnnotationMeta, stepDataInterface );
+    assertTrue( "init fail", init );
     modelAnnotation.processRow( modelAnnotationMeta, stepDataInterface );
     ModelAnnotationGroup actualAnnotations =
         (ModelAnnotationGroup) modelAnnotation.getExtensionDataMap().get( JobEntryBuildModel.KEY_MODEL_ANNOTATIONS );
@@ -109,6 +109,8 @@ public class ModelAnnotationStepTest {
     modelAnnotations.add( annotationMock2 );
     modelAnnotation.first = true;
 
+    init = modelAnnotation.init( modelAnnotationMeta, stepDataInterface );
+    assertTrue( "init fail", init );
     modelAnnotation.processRow( modelAnnotationMeta, stepDataInterface );
     actualAnnotations =
         (ModelAnnotationGroup) modelAnnotation.getExtensionDataMap().get( JobEntryBuildModel.KEY_MODEL_ANNOTATIONS );
@@ -132,6 +134,8 @@ public class ModelAnnotationStepTest {
     modelAnnotationMeta.setModelAnnotations( modelAnnotations );
     doNothing().when( modelAnnotation ).putRow( null, new Object[]{} );
 
+    boolean init = modelAnnotation.init( modelAnnotationMeta, stepDataInterface );
+    assertTrue( "init fail", init );
     modelAnnotation.processRow( modelAnnotationMeta, stepDataInterface );
     ModelAnnotationGroup actualAnnotations =
         (ModelAnnotationGroup) modelAnnotation.getExtensionDataMap().get( JobEntryBuildModel.KEY_MODEL_ANNOTATIONS );
@@ -143,6 +147,8 @@ public class ModelAnnotationStepTest {
     modelAnnotations.add( annotationMock2 );
     modelAnnotation.first = true;
 
+    init = modelAnnotation.init( modelAnnotationMeta, stepDataInterface );
+    assertTrue( "init fail", init );
     modelAnnotation.processRow( modelAnnotationMeta, stepDataInterface );
     actualAnnotations =
         (ModelAnnotationGroup) modelAnnotation.getExtensionDataMap().get( JobEntryBuildModel.KEY_MODEL_ANNOTATIONS );
@@ -189,7 +195,8 @@ public class ModelAnnotationStepTest {
     modelAnnotationMeta.setModelAnnotationCategory( groupName );
 
     // run
-    modelAnnotation.processRow( modelAnnotationMeta, stepDataInterface );
+    boolean init = modelAnnotation.init( modelAnnotationMeta, stepDataInterface );
+    assertTrue( "init fail", init );
     ModelAnnotationGroup actualAnnotations =
         (ModelAnnotationGroup) modelAnnotation.getExtensionDataMap().get( JobEntryBuildModel.KEY_MODEL_ANNOTATIONS );
 
@@ -237,6 +244,7 @@ public class ModelAnnotationStepTest {
     modelAnnotationMeta.setModelAnnotationCategory( groupName );
 
     // run
+    modelAnnotation.init( modelAnnotationMeta, stepDataInterface );
     modelAnnotation.processRow( modelAnnotationMeta, stepDataInterface );
     ModelAnnotationGroup actualAnnotations =
         (ModelAnnotationGroup) modelAnnotation.getExtensionDataMap().get( JobEntryBuildModel.KEY_MODEL_ANNOTATIONS );
@@ -267,13 +275,10 @@ public class ModelAnnotationStepTest {
     modelAnnotationMeta.setModelAnnotations( linkedGroup );
     modelAnnotationMeta.setModelAnnotationCategory( groupName );
 
-    // run
-    try {
-      modelAnnotation.processRow( modelAnnotationMeta, stepDataInterface );
-      Assert.fail();
-    } catch ( KettleException e ) {
-      assertEquals( "Shared annotation group someGroup is not found.", e.getMessage().trim() );
-    }
+    boolean init = modelAnnotation.init( modelAnnotationMeta, stepDataInterface );
+    verify( mockLog ).logError( contains( "Shared annotation group someGroup is not found." ),
+        any( KettleException.class ) );
+    assertFalse( "init not failed", init );
   }
 
   @Test
@@ -299,14 +304,11 @@ public class ModelAnnotationStepTest {
     modelAnnotationMeta.setModelAnnotationCategory( groupName );
     modelAnnotationMeta.setTargetOutputStep( "step name" );
 
-    // run
-    try {
-      modelAnnotation.processRow( modelAnnotationMeta, stepDataInterface );
-      Assert.fail();
-    } catch ( KettleException e ) {
-      assertEquals( "Shared dimension someGroup is not found.", e.getMessage().trim() );
-    }
+    boolean init = modelAnnotation.init( modelAnnotationMeta, stepDataInterface );
+    verify( mockLog ).logError( contains( "Shared dimension someGroup is not found." ), any( KettleException.class ) );
+    assertFalse( "init not failed", init );
   }
+
   @Test
   public void testFailNonNumericMeasure() throws Exception {
     ModelAnnotationGroup group = new ModelAnnotationGroup();
@@ -337,8 +339,9 @@ public class ModelAnnotationStepTest {
     okMeta.addValueMeta( new ValueMetaNumber( "f2" ) );
     when( modelAnnotation.getInputRowMeta() ).thenReturn( okMeta );
     doNothing().when( modelAnnotation ).putRow( okMeta, new Object[]{} );
-
+    boolean init = modelAnnotation.init( modelAnnotationMeta, stepDataInterface );
     modelAnnotation.processRow( modelAnnotationMeta, stepDataInterface );
+    assertTrue( "init fail", init );
 
     // fail
     RowMeta badMeta = new RowMeta();
@@ -347,18 +350,20 @@ public class ModelAnnotationStepTest {
     modelAnnotation = spy( createOneShotStep( stepDataInterface, null, null ) );
     when( modelAnnotation.getInputRowMeta() ).thenReturn( badMeta );
     doNothing().when( modelAnnotation ).putRow( badMeta, new Object[]{} );
-    try {
-      modelAnnotation.processRow( modelAnnotationMeta, stepDataInterface );
-      Assert.fail( "not validated" );
-    } catch ( KettleException e ) {
-      // ok
-    }
+
+    init = modelAnnotation.init( modelAnnotationMeta, stepDataInterface );
+    assertFalse( "init should fail", init );
+    verify( mockLog ).logError( contains( "Aggregation type SUM is not possible for non-numeric values." ),
+        any( KettleException.class ) );
+
 
     // count is fine for non-numeric
     modelAnnotation = spy( createOneShotStep( stepDataInterface, null, null ) );
     when( modelAnnotation.getInputRowMeta() ).thenReturn( badMeta );
     doNothing().when( modelAnnotation ).putRow( badMeta, new Object[]{} );
     cm.setAggregateType( AggregationType.COUNT );
+    init = modelAnnotation.init( modelAnnotationMeta, stepDataInterface );
+    assertTrue( "init fail", init );
     modelAnnotation.processRow( modelAnnotationMeta, stepDataInterface );
 
     // count distinct is fine for non-numeric
@@ -366,6 +371,8 @@ public class ModelAnnotationStepTest {
     when( modelAnnotation.getInputRowMeta() ).thenReturn( badMeta );
     doNothing().when( modelAnnotation ).putRow( badMeta, new Object[]{} );
     cm.setAggregateType( AggregationType.COUNT_DISTINCT );
+    init = modelAnnotation.init( modelAnnotationMeta, stepDataInterface );
+    assertTrue( "init fail", init );
     modelAnnotation.processRow( modelAnnotationMeta, stepDataInterface );
 
     // fail. does not support maximum
@@ -373,12 +380,11 @@ public class ModelAnnotationStepTest {
     when( modelAnnotation.getInputRowMeta() ).thenReturn( badMeta );
     doNothing().when( modelAnnotation ).putRow( badMeta, new Object[]{} );
     cm.setAggregateType( AggregationType.MAXIMUM );
-    try {
-      modelAnnotation.processRow( modelAnnotationMeta, stepDataInterface );
-      Assert.fail( "not validated" );
-    } catch ( KettleException e ) {
-      Assert.assertNotNull( e );
-    }
+
+    init = modelAnnotation.init( modelAnnotationMeta, stepDataInterface );
+    assertFalse( "init should fail", init );
+    verify( mockLog ).logError( contains( "Aggregation type MAXIMUM is not possible for non-numeric values." ),
+        any( KettleException.class ) );
   }
 
   @Test
@@ -396,8 +402,9 @@ public class ModelAnnotationStepTest {
     modelAnnotationMeta.setModelAnnotationCategory( "someGroup" );
     modelAnnotationMeta.setSharedDimension( true );
 
+    modelAnnotation.init( modelAnnotationMeta, stepDataInterface );
     modelAnnotation.processRow( modelAnnotationMeta, stepDataInterface );
-    verify( mockLog ).logError( "Please select a valid data provider step.");
+    verify( mockLog ).logError( "Please select a valid data provider step." );
   }
 
   @Test
@@ -427,6 +434,7 @@ public class ModelAnnotationStepTest {
     modelAnnotationMeta.setModelAnnotationCategory( "someGroup" );
     modelAnnotationMeta.setSharedDimension( true );
 
+    modelAnnotation.init( modelAnnotationMeta, stepDataInterface );
     modelAnnotation.processRow( modelAnnotationMeta, stepDataInterface );
     verify( mockLog ).logError( "Please select a valid data provider step." );
   }
@@ -543,11 +551,15 @@ public class ModelAnnotationStepTest {
   @Test
   public void testSharedGroupDoesNotInjectAnyAnnotations() throws Exception {
     StepDataInterface stepDataInterface = new ModelAnnotationData();
-    ModelAnnotationStep modelAnnotationStep = createOneShotStep( stepDataInterface, null, null );
+    IMetaStore metaStore = mock( IMetaStore.class );
+    final ModelAnnotationManager manager = mock( ModelAnnotationManager.class );
+    ModelAnnotationStep modelAnnotationStep = createOneShotStep( stepDataInterface, metaStore, manager );
 
     ModelAnnotationMeta meta = new ModelAnnotationMeta();
     meta.sharedAnnotationGroup = "This is a shared group";
-    meta.setModelAnnotations(  new ModelAnnotationGroup() );
+    ModelAnnotationGroup mag = new ModelAnnotationGroup();
+    meta.setModelAnnotations( mag );
+    when( manager.readGroup( meta.sharedAnnotationGroup, metaStore ) ).thenReturn( mag );
 
     // if there is a shared annotation group present, it is assumed that tat already exists and is what is being requested
     // don't inject any annotations

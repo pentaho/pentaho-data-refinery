@@ -33,8 +33,6 @@ import org.pentaho.di.trans.step.StepMetaInterface;
 
 public class SharedDimensionStep extends ModelAnnotationStep implements StepInterface {
 
-  private static Class<?> PKG = SharedDimensionStep.class; // for i18n purposes, needed by Translator2!!
-
   public SharedDimensionStep( StepMeta stepMeta,
       StepDataInterface stepDataInterface, int copyNr,
       TransMeta transMeta, Trans trans ) {
@@ -68,6 +66,6 @@ public class SharedDimensionStep extends ModelAnnotationStep implements StepInte
       logError( e.getMessage(), e );
     }
 
-    return super.baseInit( smi, sdi );
+    return super.init( smi, sdi );
   }
 }
