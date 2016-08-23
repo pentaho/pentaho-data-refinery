@@ -215,7 +215,7 @@ public abstract class BaseAnnotationStepDialog extends BaseStepDialog implements
       @Override
       public void handleEvent( final Event event ) {
         // need to detect if existing model changed, show warning if it does
-        if ( checkDirtyGroupDiscard() ) {
+        if ( event == null || checkDirtyGroupDiscard() ) {
           populateTableFromMetastore();
         }
         getWGroups().setEditable( false );
