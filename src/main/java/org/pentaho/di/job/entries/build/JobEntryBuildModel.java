@@ -182,7 +182,7 @@ public class JobEntryBuildModel extends JobEntryBase implements JobEntryInterfac
 
         TransMeta transMeta = trans.getTransMeta( jobMeta.getRepository(), jobMeta.getMetaStore(), jobMeta );
         stepNames.addAll( TransUtil.collectOutputStepInTrans( transMeta, getRepository(), getMetaStore() ).keySet() );
-        stepNames.addAll( dataServiceContext.getMetaStoreUtil().getDataServiceNames( transMeta ) );
+        stepNames.addAll( dataServiceContext.getMetaStoreUtil().getDataServiceNames( transMeta, true ) );
       }
     } catch ( Exception e ) {
       // UI aid, not a problem if it fails at this point
