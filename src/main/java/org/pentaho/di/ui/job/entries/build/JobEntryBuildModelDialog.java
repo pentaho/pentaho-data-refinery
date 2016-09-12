@@ -78,7 +78,7 @@ public class JobEntryBuildModelDialog extends JobEntryDialogBoilerplate<JobEntry
     throws KettleException {
     super( parent, jobEntry, rep, jobMeta );
     this.jobEntry = (JobEntryBuildModel) jobEntry;
-
+    this.jobEntry.setRepository( jobMeta.getRepository() );
     TransUtil.resetParams( jobMeta, jobEntry.getLogChannel() );
 
     PKG = JobEntryBuildModel.class;
