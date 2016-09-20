@@ -2,7 +2,7 @@
  *
  * Pentaho Community Edition Project: data-refinery-pdi-plugin
  *
- * Copyright (C) 2002-20156by Pentaho : http://www.pentaho.com
+ * Copyright (C) 2002-2016 by Pentaho : http://www.pentaho.com
  *
  * *******************************************************************************
  *
@@ -161,7 +161,6 @@ public class JobEntryDatasourcePublish extends JobEntryBase implements Cloneable
       // Publish Database Meta
       databaseMeta = discoverDatabaseMeta( getParentJob().getJobMeta() );
       if ( databaseMeta != null ) {
-
         // Cannot publish JNDI data sources at this time, we don't know if BIServer has access to it
         if ( DatabaseAccessType.values()[databaseMeta.getAccessType()] == DatabaseAccessType.JNDI ) {
           throw new KettleException(
@@ -352,6 +351,11 @@ public class JobEntryDatasourcePublish extends JobEntryBase implements Cloneable
     if ( isKettleThinLocal( databaseMeta ) ) {
       throw new KettleException( getMsg( "JobEntryDatasourcePublish.Publish.LocalPentahoDataService" ) );
     }
+
+    if ( isKettleThin( databaseMeta ) ) {
+      databaseMeta.setForcingIdentifiersToLowerCase( false );
+    }
+
     modelServerPublish.setDatabaseMeta( databaseMeta ); // provide database info
 
     // TODO Simple Check - Need to make this smarter and inspect the database connection
@@ -434,8 +438,12 @@ public class JobEntryDatasourcePublish extends JobEntryBase implements Cloneable
   }
 
   private boolean isKettleThinLocal( final DatabaseMeta databaseMeta ) {
-    return DataServiceConnectionInformation.KETTLE_THIN.equals( databaseMeta.getDatabaseInterface().getPluginId() )
+    return isKettleThin( databaseMeta )
       && "true".equals( databaseMeta.getExtraOptions().get( DataServiceConnectionInformation.KETTLE_THIN + ".local" ) );
+  }
+
+  private boolean isKettleThin( final DatabaseMeta databaseMeta ) {
+    return DataServiceConnectionInformation.KETTLE_THIN.equals( databaseMeta.getDatabaseInterface().getPluginId() );
   }
 
   protected void publishMondrianSchema( final String modelName, final ModelServerPublish modelServerPublish,
