@@ -31,6 +31,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.pentaho.database.model.DatabaseAccessType;
 import org.pentaho.database.model.DatabaseConnection;
+import org.pentaho.di.core.database.BaseDatabaseMeta;
 import org.pentaho.di.core.KettleClientEnvironment;
 import org.pentaho.di.core.ProvidesDatabaseConnectionInformation;
 import org.pentaho.di.core.Result;
@@ -61,6 +62,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.UUID;
 
 import static org.junit.Assert.*;
@@ -261,11 +263,16 @@ public class JobEntryDatasourcePublishTest {
     when( modelServerPublish.connectionNameExists( anyString() ) ).thenReturn( databaseConnection );
     when( modelServerPublish.publishDataSource( anyBoolean(), anyString() ) ).thenReturn( true );
     final DatabaseInterface databaseInterface = mock( DatabaseInterface.class );
+    Properties props = new Properties();
+    when( databaseInterface.getAttributes() ).thenReturn( props );
     when( databaseMeta.getDatabaseInterface() ).thenReturn( databaseInterface );
     when( databaseInterface.getPluginId() ).thenReturn( "KettleThin" );
     when( databaseMeta.getExtraOptions() ).thenReturn( new HashMap<String, String>() );
     try {
+      assertTrue( databaseMeta.getDatabaseInterface().getAttributes()
+          .getProperty( BaseDatabaseMeta.ATTRIBUTE_FORCE_IDENTIFIERS_TO_LOWERCASE ) == null );
       datasourcePublishSpy.publishDatabaseMeta( modelServerPublish, databaseMeta, false );
+      assertFalse( databaseMeta.isForcingIdentifiersToLowerCase() );
     } catch ( KettleException e ) {
       fail( "did not expect exception " + e.getMessage() );
     }
