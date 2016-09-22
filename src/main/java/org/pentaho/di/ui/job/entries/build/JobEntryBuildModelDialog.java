@@ -2,7 +2,7 @@
  *
  * Pentaho Community Edition Project: data-refinery-pdi-plugin
  *
- * Copyright (C) 2002-2015 by Pentaho : http://www.pentaho.com
+ * Copyright (C) 2002-2016 by Pentaho : http://www.pentaho.com
  *
  * *******************************************************************************
  *
@@ -41,10 +41,7 @@ import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.pentaho.di.core.exception.KettleException;
-import static org.pentaho.di.core.refinery.UIBuilder.BUTTON_MIN_WIDTH;
-import static org.pentaho.di.core.refinery.UIBuilder.DEFAULT_LABEL_INPUT_MARGIN;
-import static org.pentaho.di.core.refinery.UIBuilder.DEFAULT_TEXT_SIZE_REGULAR;
-import static org.pentaho.di.core.refinery.UIBuilder.SHELL_MIN_WIDTH;
+import org.pentaho.di.core.refinery.UIBuilder;
 import org.pentaho.di.job.JobMeta;
 import org.pentaho.di.job.entries.JobEntryDialogBoilerplate;
 import org.pentaho.di.job.entries.build.JobEntryBuildModel;
@@ -78,7 +75,7 @@ public class JobEntryBuildModelDialog extends JobEntryDialogBoilerplate<JobEntry
     throws KettleException {
     super( parent, jobEntry, rep, jobMeta );
     this.jobEntry = (JobEntryBuildModel) jobEntry;
-
+    this.jobEntry.setRepository( jobMeta.getRepository() );
     TransUtil.resetParams( jobMeta, jobEntry.getLogChannel() );
 
     PKG = JobEntryBuildModel.class;
@@ -116,7 +113,7 @@ public class JobEntryBuildModelDialog extends JobEntryDialogBoilerplate<JobEntry
     wlOutputStep = new Label( main, SWT.RIGHT );
     wlOutputStep.setText( getMsg( "BuildModelJob.OutputStep.Label" ) );
     widgetAbove = addLabelInputPairBelow( wlOutputStep, wOutputStep, widgetAbove,
-        DEFAULT_TEXT_SIZE_REGULAR + VAR_EXTRA_WIDTH );
+        UIBuilder.DEFAULT_TEXT_SIZE_REGULAR + VAR_EXTRA_WIDTH );
 
     // Model Name text box
     wModelName = new TextVar( jobMeta, main, SWT.SINGLE | SWT.LEFT | SWT.BORDER );
@@ -124,14 +121,14 @@ public class JobEntryBuildModelDialog extends JobEntryDialogBoilerplate<JobEntry
     wlModelName = new Label( main, SWT.RIGHT );
     wlModelName.setText( getMsg( "BuildModelJob.ModelName.Label" ) );
     widgetAbove = addLabelInputPairBelow( wlModelName, wModelName, widgetAbove,
-        DEFAULT_TEXT_SIZE_REGULAR + VAR_EXTRA_WIDTH );
+        UIBuilder.DEFAULT_TEXT_SIZE_REGULAR + VAR_EXTRA_WIDTH );
 
     addModelGroup( main, widgetAbove );
 
     // set a decent minimum
     final int minHeight = getMinHeight( shell );
-    shell.setMinimumSize( SHELL_MIN_WIDTH, minHeight );
-    shell.setSize( SHELL_MIN_WIDTH, minHeight );
+    shell.setMinimumSize( UIBuilder.SHELL_MIN_WIDTH, minHeight );
+    shell.setSize( UIBuilder.SHELL_MIN_WIDTH, minHeight );
   }
 
   /**
@@ -166,7 +163,7 @@ public class JobEntryBuildModelDialog extends JobEntryDialogBoilerplate<JobEntry
     wSelectExistingModel = new Button( wExistingModel, SWT.BUTTON1 );
     wSelectExistingModel.setText( getMsg( "BuildModelJob.SelectExistingModel" ) );
     props.setLook( wSelectExistingModel );
-    FormData fdSelectExisting = new FormData( BUTTON_MIN_WIDTH, SWT.DEFAULT );
+    FormData fdSelectExisting = new FormData( UIBuilder.BUTTON_MIN_WIDTH, SWT.DEFAULT );
     fdSelectExisting.right = new FormAttachment( 100 );
     wSelectExistingModel.setLayoutData( fdSelectExisting );
     wSelectExistingModel.addListener( SWT.Selection, new Listener() {
@@ -191,15 +188,15 @@ public class JobEntryBuildModelDialog extends JobEntryDialogBoilerplate<JobEntry
     props.setLook( wExistingModelName );
     // 'magic' offset...
     final int leftIndent = 18;
-    FormData fdExistingModelName = new FormData( DEFAULT_TEXT_SIZE_REGULAR, SWT.DEFAULT );
+    FormData fdExistingModelName = new FormData( UIBuilder.DEFAULT_TEXT_SIZE_REGULAR, SWT.DEFAULT );
     fdExistingModelName.top = new FormAttachment( wUseExistingModel );
     fdExistingModelName.left = new FormAttachment( 0, leftIndent );
-    fdExistingModelName.right = new FormAttachment( wSelectExistingModel, -DEFAULT_LABEL_INPUT_MARGIN );
+    fdExistingModelName.right = new FormAttachment( wSelectExistingModel, -UIBuilder.DEFAULT_LABEL_INPUT_MARGIN );
     wExistingModelName.setLayoutData( fdExistingModelName );
     wExistingModelName.setEditable( false );
     wlExistingModelExtra = new Label( wExistingModel, SWT.LEFT | SWT.WRAP );
     FormData fdExistingModelExtra = new FormData();
-    fdExistingModelExtra.top = new FormAttachment( wExistingModelName, DEFAULT_LABEL_INPUT_MARGIN );
+    fdExistingModelExtra.top = new FormAttachment( wExistingModelName, UIBuilder.DEFAULT_LABEL_INPUT_MARGIN );
     fdExistingModelExtra.left = new FormAttachment( 0, leftIndent );
     fdExistingModelExtra.bottom = new FormAttachment( 100 );
     fdExistingModelExtra.right = new FormAttachment( 100 );
@@ -208,8 +205,8 @@ public class JobEntryBuildModelDialog extends JobEntryDialogBoilerplate<JobEntry
     wlExistingModelExtra.setEnabled( false );
     props.setLook( wlExistingModelExtra );
     wSelectExistingModel.pack();
-    int width = leftIndent + DEFAULT_TEXT_SIZE_REGULAR + DEFAULT_LABEL_INPUT_MARGIN
-        + Math.max( BUTTON_MIN_WIDTH, wSelectExistingModel.getSize().x ) + 20;
+    int width = leftIndent + UIBuilder.DEFAULT_TEXT_SIZE_REGULAR + UIBuilder.DEFAULT_LABEL_INPUT_MARGIN
+        + Math.max( UIBuilder.BUTTON_MIN_WIDTH, wSelectExistingModel.getSize().x ) + 20;
     return addControlBelow( wExistingModel, widgetAbove, width );
   }
 
