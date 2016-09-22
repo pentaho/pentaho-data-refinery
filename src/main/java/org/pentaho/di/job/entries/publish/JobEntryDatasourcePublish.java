@@ -22,7 +22,6 @@
 
 package org.pentaho.di.job.entries.publish;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.BooleanUtils;
 import org.apache.commons.lang.StringUtils;
 import org.pentaho.database.model.DatabaseAccessType;
@@ -44,7 +43,6 @@ import org.pentaho.di.core.xml.XMLHandler;
 import org.pentaho.di.i18n.BaseMessages;
 import org.pentaho.di.job.JobHopMeta;
 import org.pentaho.di.job.JobMeta;
-import org.pentaho.di.job.entries.build.DataServiceConnectionInformation;
 import org.pentaho.di.job.entries.build.JobEntryBuildModel;
 import org.pentaho.di.job.entry.JobEntryBase;
 import org.pentaho.di.job.entry.JobEntryInterface;
@@ -54,26 +52,22 @@ import org.pentaho.di.ui.job.entries.common.ConnectionValidator;
 import org.pentaho.metastore.api.IMetaStore;
 import org.w3c.dom.Node;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
 import java.util.List;
 
 /**
  * @author Rowell Belen
  */
 @org.pentaho.di.core.annotations.JobEntry( id = "DATASOURCE_PUBLISH",
-    i18nPackageName = "org.pentaho.di.job.entries.publish", image = "publish.svg",
-    name = "JobEntryDatasourcePublish.JobName", description = "JobEntryDatasourcePublish.JobDescription",
-    documentationUrl = "0N0/060/0B0/020/0D0",
-    categoryDescription = "JobCategory.Category.Modeling" )
+  i18nPackageName = "org.pentaho.di.job.entries.publish", image = "publish.svg",
+  name = "JobEntryDatasourcePublish.JobName", description = "JobEntryDatasourcePublish.JobDescription",
+  documentationUrl = "0N0/060/0B0/020/0D0",
+  categoryDescription = "JobCategory.Category.Modeling" )
 public class JobEntryDatasourcePublish extends JobEntryBase implements Cloneable, JobEntryInterface {
 
   private static Class<?> PKG = JobEntryDatasourcePublish.class; // for i18n purposes, needed by Translator2!!
 
-  private static final String METADATA_EXTENSION = ".xmi";
-  private static final String ENCODING = "UTF-8";
-
   private DataSourcePublishModel dataSourcePublishModel;
+  private DatasourcePublishService datasourcePublishService;
 
   public final class Fields {
     public static final String LOGICAL_MODEL = "logical_model";
@@ -84,6 +78,10 @@ public class JobEntryDatasourcePublish extends JobEntryBase implements Cloneable
     public static final String BASERVER_PASSWORD = "ba_server_password";
     public static final String ACL_ACCESS_TYPE = "acl_access_type";
     public static final String ACL_USER_OR_ROLE = "acl_user_or_role";
+  }
+
+  public JobEntryDatasourcePublish( DatasourcePublishService datasourcePublishService ) {
+    this.datasourcePublishService = datasourcePublishService;
   }
 
   public DataSourcePublishModel getDataSourcePublishModel() {
@@ -133,8 +131,8 @@ public class JobEntryDatasourcePublish extends JobEntryBase implements Cloneable
 
       DataSourceAclModel datasourceAcl = new DataSourceAclModel();
       String accessType =
-          Const.isEmpty( dataSourcePublishModel.getAccessType() ) ? DataSourcePublishModel.ACCESS_TYPE_EVERYONE
-              : environmentSubstitute( dataSourcePublishModel.getAccessType() ).toLowerCase();
+        Const.isEmpty( dataSourcePublishModel.getAccessType() ) ? DataSourcePublishModel.ACCESS_TYPE_EVERYONE
+          : environmentSubstitute( dataSourcePublishModel.getAccessType() ).toLowerCase();
       String userOrRole = environmentSubstitute( dataSourcePublishModel.getUserOrRole() );
       if ( DataSourcePublishModel.ACCESS_TYPE_ROLE.equals( accessType ) ) {
         if ( StringUtils.isBlank( userOrRole ) ) {
@@ -162,9 +160,9 @@ public class JobEntryDatasourcePublish extends JobEntryBase implements Cloneable
       databaseMeta = discoverDatabaseMeta( getParentJob().getJobMeta() );
       if ( databaseMeta != null ) {
         // Cannot publish JNDI data sources at this time, we don't know if BIServer has access to it
-        if ( DatabaseAccessType.values()[databaseMeta.getAccessType()] == DatabaseAccessType.JNDI ) {
+        if ( DatabaseAccessType.values()[ databaseMeta.getAccessType() ] == DatabaseAccessType.JNDI ) {
           throw new KettleException(
-              this.getMsg( "JobEntryDatasourcePublish.Error.JNDIDatasource", databaseMeta.getName() ) );
+            this.getMsg( "JobEntryDatasourcePublish.Error.JNDIDatasource", databaseMeta.getName() ) );
         }
 
         // check overwrite condition
@@ -173,7 +171,7 @@ public class JobEntryDatasourcePublish extends JobEntryBase implements Cloneable
           throw new KettleException( this.getMsg( "JobEntryDatasourcePublish.Error.DBConnectionExists" ) );
         }
 
-        publishDatabaseMeta( modelServerPublish, databaseMeta, forceOverride );
+        datasourcePublishService.publishDatabaseMeta( modelServerPublish, databaseMeta, forceOverride );
       } else {
         throw new KettleException( this.getMsg( "JobEntryDatasourcePublish.Error.UnableToFindDBConnection" ) );
       }
@@ -182,26 +180,37 @@ public class JobEntryDatasourcePublish extends JobEntryBase implements Cloneable
       // Publish Metadata XMI
       dswFlag = getParentJob().getVariable( "JobEntryBuildModel.XMI.DSW." + modelName );
       log.logBasic( getMsg( "JobEntryDatasourcePublish.Publish.ReadVariable", "JobEntryBuildModel.XMI.DSW."
-          + modelName, dswFlag ) );
+        + modelName, dswFlag ) );
+      String xmiString = getParentJob().getVariable( "JobEntryBuildModel.XMI." + modelName );
+      log.logDetailed(
+        getMsg( "JobEntryDatasourcePublish.Publish.ReadVariable", "JobEntryBuildModel.XMI." + modelName, xmiString ) );
       if ( dswFlag != null && dswFlag.equalsIgnoreCase( "true" ) ) {
-        publishDswXmi( modelName, modelServerPublish, forceOverride );
+        datasourcePublishService.publishDswXmi( modelName, xmiString, modelServerPublish, forceOverride );
       } else {
-        publishMetadataXmi( modelName, modelServerPublish, forceOverride );
+        datasourcePublishService.publishMetadataXmi( modelName, xmiString, modelServerPublish, forceOverride );
       }
       metaPublished = true;
 
       // Publish Mondrian Schema
-      publishMondrianSchema( modelName, modelServerPublish, forceOverride );
+      String mondrianSchema = getParentJob().getVariable( "JobEntryBuildModel.Mondrian.Schema." + modelName );
+      log.logDetailed( getMsg( "JobEntryDatasourcePublish.Publish.ReadVariable", "JobEntryBuildModel.Mondrian.Schema."
+        + modelName, mondrianSchema ) );
+      String mondrianDatasource = getParentJob().getVariable( "JobEntryBuildModel.Mondrian.Datasource." + modelName );
+      log.logBasic( getMsg( "JobEntryDatasourcePublish.Publish.ReadVariable", "JobEntryBuildModel.Mondrian.Datasource."
+        + modelName, mondrianDatasource ) );
+
+      datasourcePublishService
+        .publishMondrianSchema( modelName, mondrianSchema, mondrianDatasource, modelServerPublish, forceOverride );
 
       result.setResult( true );
 
     } catch ( KettleException e ) {
       logBasic( this.getMsg( "JobEntryDatasourcePublish.Rollback" ) );
       if ( dsPublished && databaseMeta != null ) {
-        deleteDatabaseMeta( modelServerPublish, databaseMeta );
+        datasourcePublishService.deleteDatabaseMeta( modelServerPublish, databaseMeta );
       }
       if ( metaPublished && modelName != null ) {
-        deleteXMI( modelServerPublish, modelName, dswFlag );
+        datasourcePublishService.deleteXMI( modelServerPublish, modelName, dswFlag );
       }
       logError( e.getMessage(), e );
       result.setResult( false );
@@ -209,16 +218,6 @@ public class JobEntryDatasourcePublish extends JobEntryBase implements Cloneable
     }
 
     return result;
-  }
-
-  protected String checkDswId( String modelName ) {
-    if ( !modelName.endsWith( METADATA_EXTENSION ) ) {
-      if ( StringUtils.endsWithIgnoreCase( modelName, METADATA_EXTENSION ) ) {
-        modelName = StringUtils.removeEndIgnoreCase( modelName, METADATA_EXTENSION );
-      }
-      modelName += METADATA_EXTENSION;
-    }
-    return modelName;
   }
 
   @Override
@@ -237,16 +236,17 @@ public class JobEntryDatasourcePublish extends JobEntryBase implements Cloneable
       BiServerConnection biServerConnection = model.getBiServerConnection();
       if ( biServerConnection != null ) {
         xml.append( "      " ).append(
-            XMLHandler.addTagValue( Fields.BASERVER_NAME, Const.nullToEmpty( biServerConnection.getName() ) ) );
+          XMLHandler.addTagValue( Fields.BASERVER_NAME, Const.nullToEmpty( biServerConnection.getName() ) ) );
 
         // Encrypt password
         String password = Encr.encryptPasswordIfNotUsingVariables( biServerConnection.getPassword() );
-        xml.append( "      " ).append( XMLHandler.addTagValue( Fields.BASERVER_PASSWORD, Const.nullToEmpty( password ) ) );
+        xml.append( "      " )
+          .append( XMLHandler.addTagValue( Fields.BASERVER_PASSWORD, Const.nullToEmpty( password ) ) );
 
         xml.append( "      " ).append( XMLHandler.addTagValue(
-            Fields.BASERVER_URL, Const.nullToEmpty( biServerConnection.getUrl() ) ) );
+          Fields.BASERVER_URL, Const.nullToEmpty( biServerConnection.getUrl() ) ) );
         xml.append( "      " ).append(
-            XMLHandler.addTagValue( Fields.BASERVER_USERID, Const.nullToEmpty( biServerConnection.getUserId() ) ) );
+          XMLHandler.addTagValue( Fields.BASERVER_USERID, Const.nullToEmpty( biServerConnection.getUserId() ) ) );
       }
     }
 
@@ -255,7 +255,7 @@ public class JobEntryDatasourcePublish extends JobEntryBase implements Cloneable
 
   @Override
   public void loadXML( Node entrynode, List<DatabaseMeta> databases, List<SlaveServer> slaveServers, Repository rep,
-      IMetaStore metaStore ) throws KettleXMLException {
+                       IMetaStore metaStore ) throws KettleXMLException {
 
     super.loadXML( entrynode, databases, slaveServers );
     DataSourcePublishModel model = new DataSourcePublishModel();
@@ -267,8 +267,8 @@ public class JobEntryDatasourcePublish extends JobEntryBase implements Cloneable
 
     // Decrypt
     String password =
-        Encr.decryptPasswordOptionallyEncrypted(
-          Const.nullToEmpty( XMLHandler.getTagValue( entrynode, Fields.BASERVER_PASSWORD ) ) );
+      Encr.decryptPasswordOptionallyEncrypted(
+        Const.nullToEmpty( XMLHandler.getTagValue( entrynode, Fields.BASERVER_PASSWORD ) ) );
     biServerModel.setPassword( password );
 
     model.setBiServerConnection( biServerModel );
@@ -284,19 +284,20 @@ public class JobEntryDatasourcePublish extends JobEntryBase implements Cloneable
 
   @Override
   public void loadRep( Repository rep, IMetaStore metaStore, ObjectId id_jobentry, List<DatabaseMeta> databases,
-      List<SlaveServer> slaveServers ) throws KettleException {
+                       List<SlaveServer> slaveServers ) throws KettleException {
     super.loadRep( rep, metaStore, id_jobentry, databases, slaveServers );
     BiServerConnection biServerModel = new BiServerConnection();
     biServerModel.setName( rep.getJobEntryAttributeString( id_jobentry, Fields.BASERVER_NAME ) );
 
     // Decrypt
     String password =
-        Encr.decryptPasswordOptionallyEncrypted( rep
-            .getJobEntryAttributeString( id_jobentry, Fields.BASERVER_PASSWORD ) );
+      Encr.decryptPasswordOptionallyEncrypted( rep
+        .getJobEntryAttributeString( id_jobentry, Fields.BASERVER_PASSWORD ) );
     biServerModel.setPassword( Const.nullToEmpty( password ) );
 
     biServerModel.setUrl( Const.nullToEmpty( rep.getJobEntryAttributeString( id_jobentry, Fields.BASERVER_URL ) ) );
-    biServerModel.setUserId( Const.nullToEmpty( rep.getJobEntryAttributeString( id_jobentry, Fields.BASERVER_USERID ) ) );
+    biServerModel
+      .setUserId( Const.nullToEmpty( rep.getJobEntryAttributeString( id_jobentry, Fields.BASERVER_USERID ) ) );
 
     DataSourcePublishModel dsModel = new DataSourcePublishModel();
     dsModel.setModelName( rep.getJobEntryAttributeString( id_jobentry, Fields.LOGICAL_MODEL ) );
@@ -313,17 +314,20 @@ public class JobEntryDatasourcePublish extends JobEntryBase implements Cloneable
     if ( dataSourcePublishModel != null ) {
       BiServerConnection biServerConnection = dataSourcePublishModel.getBiServerConnection();
       rep.saveJobEntryAttribute( id_job, getObjectId(), Fields.BASERVER_NAME,
-          Const.nullToEmpty( biServerConnection.getName() ) );
+        Const.nullToEmpty( biServerConnection.getName() ) );
       // Encrypt password
       String password = Encr.encryptPasswordIfNotUsingVariables( biServerConnection.getPassword() );
       rep.saveJobEntryAttribute( id_job, getObjectId(), Fields.BASERVER_PASSWORD, Const.nullToEmpty( password ) );
-      rep.saveJobEntryAttribute( id_job, getObjectId(), Fields.BASERVER_URL, Const.nullToEmpty( biServerConnection.getUrl() ) );
+      rep.saveJobEntryAttribute( id_job, getObjectId(), Fields.BASERVER_URL,
+        Const.nullToEmpty( biServerConnection.getUrl() ) );
       rep.saveJobEntryAttribute( id_job, getObjectId(), Fields.BASERVER_USERID, Const.nullToEmpty( biServerConnection
-          .getUserId() ) );
+        .getUserId() ) );
       rep.saveJobEntryAttribute( id_job, getObjectId(), Fields.LOGICAL_MODEL, dataSourcePublishModel.getModelName() );
       rep.saveJobEntryAttribute( id_job, getObjectId(), Fields.OVERRIDE, dataSourcePublishModel.isOverride() );
-      rep.saveJobEntryAttribute( id_job, getObjectId(), Fields.ACL_ACCESS_TYPE, dataSourcePublishModel.getAccessType() );
-      rep.saveJobEntryAttribute( id_job, getObjectId(), Fields.ACL_USER_OR_ROLE, dataSourcePublishModel.getUserOrRole() );
+      rep
+        .saveJobEntryAttribute( id_job, getObjectId(), Fields.ACL_ACCESS_TYPE, dataSourcePublishModel.getAccessType() );
+      rep.saveJobEntryAttribute( id_job, getObjectId(), Fields.ACL_USER_OR_ROLE,
+        dataSourcePublishModel.getUserOrRole() );
     }
 
   }
@@ -343,193 +347,6 @@ public class JobEntryDatasourcePublish extends JobEntryBase implements Cloneable
     ConnectionValidator validator = new ConnectionValidator();
     validator.setConnection( connection );
     return validator;
-  }
-
-  protected void publishDatabaseMeta( final ModelServerPublish modelServerPublish, final DatabaseMeta databaseMeta,
-      final boolean forceOverride ) throws KettleException {
-
-    if ( isKettleThinLocal( databaseMeta ) ) {
-      throw new KettleException( getMsg( "JobEntryDatasourcePublish.Publish.LocalPentahoDataService" ) );
-    }
-
-    if ( isKettleThin( databaseMeta ) ) {
-      databaseMeta.setForcingIdentifiersToLowerCase( false );
-    }
-
-    modelServerPublish.setDatabaseMeta( databaseMeta ); // provide database info
-
-    // TODO Simple Check - Need to make this smarter and inspect the database connection
-    DatabaseConnection connection = modelServerPublish.connectionNameExists( databaseMeta.getName() );
-
-    try {
-      boolean success;
-      if ( forceOverride ) {
-        if ( connection != null ) {
-          success = modelServerPublish.publishDataSource( true, connection.getId() ); // update
-        } else {
-          success = modelServerPublish.publishDataSource( false, null ); // add
-        }
-      } else {
-        // always use add operation, will fail if exists
-        success = modelServerPublish.publishDataSource( false, connection != null ? connection.getId() : null );
-      }
-
-      if ( !success ) {
-        throw new Exception( this.getMsg( "JobEntryDatasourcePublish.Publish.DBConnection.Failed", databaseMeta
-            .getName() ) );
-      }
-
-    } catch ( KettleException ke ) {
-      throw ke;
-    } catch ( Exception e ) {
-      throw new KettleException( e );
-    }
-    logBasic( this.getMsg( "JobEntryDatasourcePublish.Publish.DBConnection.Success", databaseMeta.getName() ) );
-  }
-
-  protected void deleteDatabaseMeta( final ModelServerPublish modelServerPublish, final DatabaseMeta databaseMeta )
-      throws KettleException {
-
-    if ( isKettleThinLocal( databaseMeta ) ) {
-      throw new KettleException( getMsg( "JobEntryDatasourcePublish.Publish.LocalPentahoDataService" ) );
-    }
-    // TODO Simple Check - Need to make this smarter and inspect the database connection
-    DatabaseConnection connection = modelServerPublish.connectionNameExists( databaseMeta.getName() );
-
-    try {
-      boolean success = true;
-      if ( connection != null ) {
-        success = modelServerPublish.deleteConnection( connection.getName() );
-      }
-
-      if ( !success ) {
-        throw new Exception( this.getMsg( "JobEntryDatasourcePublish.Delete.DBConnection.Failed", databaseMeta
-            .getName() ) );
-      }
-
-    } catch ( KettleException ke ) {
-      throw ke;
-    } catch ( Exception e ) {
-      throw new KettleException( e );
-    }
-    logBasic( this.getMsg( "JobEntryDatasourcePublish.Delete.DBConnection.Success", databaseMeta.getName() ) );
-  }
-
-  protected void deleteXMI( final ModelServerPublish modelServerPublish, final String modelName, String dswFlag )
-      throws KettleException {
-    try {
-      boolean success = true;
-      if ( dswFlag != null && dswFlag.equalsIgnoreCase( "true" ) ) {
-        success = modelServerPublish.deleteDSWXmi( checkDswId( modelName ) );
-      } else {
-        success = modelServerPublish.deleteMetadataXmi( modelName );
-      }
-
-      if ( !success ) {
-        throw new Exception( this.getMsg( "JobEntryDatasourcePublish.Delete.XMI.Failed", modelName  ) );
-      }
-
-    } catch ( KettleException ke ) {
-      throw ke;
-    } catch ( Exception e ) {
-      throw new KettleException( e );
-    }
-    logBasic( this.getMsg( "JobEntryDatasourcePublish.Delete.XMI.Success", modelName ) );
-  }
-
-  private boolean isKettleThinLocal( final DatabaseMeta databaseMeta ) {
-    return isKettleThin( databaseMeta )
-      && "true".equals( databaseMeta.getExtraOptions().get( DataServiceConnectionInformation.KETTLE_THIN + ".local" ) );
-  }
-
-  private boolean isKettleThin( final DatabaseMeta databaseMeta ) {
-    return DataServiceConnectionInformation.KETTLE_THIN.equals( databaseMeta.getDatabaseInterface().getPluginId() );
-  }
-
-  protected void publishMondrianSchema( final String modelName, final ModelServerPublish modelServerPublish,
-      final boolean forceOverride ) throws KettleException {
-
-    String mondrianSchema = getParentJob().getVariable( "JobEntryBuildModel.Mondrian.Schema." + modelName );
-    log.logDetailed( getMsg( "JobEntryDatasourcePublish.Publish.ReadVariable", "JobEntryBuildModel.Mondrian.Schema."
-        + modelName, mondrianSchema ) );
-    String mondrianDatasource = getParentJob().getVariable( "JobEntryBuildModel.Mondrian.Datasource." + modelName );
-    log.logBasic( getMsg( "JobEntryDatasourcePublish.Publish.ReadVariable", "JobEntryBuildModel.Mondrian.Datasource."
-        + modelName, mondrianDatasource ) );
-
-    if ( mondrianSchema == null || mondrianDatasource == null ) {
-      return;
-    }
-
-    // Publish Mondrian Schema
-    InputStream mondrianInputStream = null;
-    try {
-      mondrianInputStream = new ByteArrayInputStream( mondrianSchema.getBytes( ENCODING ) );
-      modelServerPublish.setForceOverwrite( forceOverride );
-      int status =
-          modelServerPublish.publishMondrianSchema( mondrianInputStream, modelName, mondrianDatasource, forceOverride );
-      if ( status != ModelServerPublish.PUBLISH_SUCCESS ) {
-        throw new Exception( this.getMsg( "JobEntryDatasourcePublish.Publish.Mondrian.Failed", modelName ) );
-      }
-    } catch ( Exception e ) {
-      throw new KettleException( e );
-    } finally {
-      IOUtils.closeQuietly( mondrianInputStream );
-    }
-    logBasic( this.getMsg( "JobEntryDatasourcePublish.Publish.Mondrian.Success", modelName ) );
-  }
-
-  protected void publishMetadataXmi( final String modelName, final ModelServerPublish modelServerPublish,
-      final boolean forceOverride ) throws KettleException {
-
-    String xmiString = getParentJob().getVariable( "JobEntryBuildModel.XMI." + modelName );
-    log.logDetailed( getMsg( "JobEntryDatasourcePublish.Publish.ReadVariable", "JobEntryBuildModel.XMI." + modelName,
-        xmiString ) );
-    if ( xmiString == null ) {
-      return;
-    }
-
-    // Publish XMI
-    InputStream xmiInputStream = null;
-    try {
-      xmiInputStream = new ByteArrayInputStream( xmiString.getBytes( ENCODING ) );
-      modelServerPublish.setForceOverwrite( forceOverride );
-      int status = modelServerPublish.publishMetaDataFile( xmiInputStream, modelName );
-      if ( status != ModelServerPublish.PUBLISH_SUCCESS ) {
-        throw new Exception( this.getMsg( "JobEntryDatasourcePublish.Publish.Metadata.Failed", modelName ) );
-      }
-    } catch ( Exception e ) {
-      throw new KettleException( e );
-    } finally {
-      IOUtils.closeQuietly( xmiInputStream );
-    }
-    logBasic( this.getMsg( "JobEntryDatasourcePublish.Publish.Metadata.Success", modelName ) );
-  }
-
-  protected void publishDswXmi( final String modelName, final ModelServerPublish modelServerPublish,
-      final boolean forceOverride ) throws KettleException {
-
-    final String dswXmiVar = "JobEntryBuildModel.XMI." + modelName;
-    String xmiString = getParentJob().getVariable( dswXmiVar );
-    log.logDetailed( getMsg( "JobEntryDatasourcePublish.Publish.ReadVariable", dswXmiVar, xmiString ) );
-    if ( xmiString == null ) {
-      return;
-    }
-
-    // Publish XMI
-    InputStream xmiInputStream = null;
-    try {
-      xmiInputStream = IOUtils.toInputStream( xmiString, ENCODING );
-      modelServerPublish.setForceOverwrite( forceOverride );
-      int status = modelServerPublish.publishDsw( xmiInputStream, checkDswId( modelName ) );
-      if ( status != ModelServerPublish.PUBLISH_SUCCESS ) {
-        throw new Exception( this.getMsg( "JobEntryDatasourcePublish.Publish.Dsw.Failed", modelName ) );
-      }
-    } catch ( Exception e ) {
-      throw new KettleException( e );
-    } finally {
-      IOUtils.closeQuietly( xmiInputStream );
-    }
-    logBasic( this.getMsg( "JobEntryDatasourcePublish.Publish.Dsw.Success", modelName ) );
   }
 
   /**
@@ -586,6 +403,8 @@ public class JobEntryDatasourcePublish extends JobEntryBase implements Cloneable
     JobEntryInterface previous = getPreviousJobEntry( jobMeta, jobEntry );
 
     if ( previous == null ) {
+
+
       return null;
     }
 

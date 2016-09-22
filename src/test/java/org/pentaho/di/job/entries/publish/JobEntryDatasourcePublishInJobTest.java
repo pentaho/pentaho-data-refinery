@@ -2,7 +2,7 @@
  *
  * Pentaho Community Edition Project: data-refinery-pdi-plugin
  *
- * Copyright (C) 2002-2015 by Pentaho : http://www.pentaho.com
+ * Copyright (C) 2002-2016 by Pentaho : http://www.pentaho.com
  *
  * *******************************************************************************
  *
@@ -53,6 +53,7 @@ public class JobEntryDatasourcePublishInJobTest {
   private JobEntryCopy publishCopy;
   private DataSourcePublishModel model;
   private BiServerConnection serverModel;
+  private PublishService publishService;
 
   @BeforeClass
   public static void setUpBeforeClass() throws Exception {
@@ -82,7 +83,7 @@ public class JobEntryDatasourcePublishInJobTest {
     start.setParentJob( job );
 
     // Add Publish job entry
-    publishJobEntry = new JobEntryDatasourcePublish();
+    publishJobEntry = new JobEntryDatasourcePublish( new DatasourcePublishService( null ) );
     publishJobEntry.setName( "Publish Me" );
     publishJobEntry.setDataSourcePublishModel( model );
     publishCopy = new JobEntryCopy( publishJobEntry );
