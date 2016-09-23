@@ -38,6 +38,7 @@ import org.pentaho.di.core.Result;
 import org.pentaho.di.core.database.DatabaseInterface;
 import org.pentaho.di.core.database.DatabaseMeta;
 import org.pentaho.di.core.exception.KettleException;
+import org.pentaho.di.core.logging.LogChannelInterface;
 import org.pentaho.di.core.refinery.DataRefineryConfig;
 import org.pentaho.di.core.refinery.publish.agilebi.BiServerConnection;
 import org.pentaho.di.core.refinery.publish.agilebi.ModelServerPublish;
@@ -98,6 +99,8 @@ public class JobEntryDatasourcePublishTest {
   private DatabaseConnection databaseConnection;
   private ConnectionValidator connectionValidator;
   private ProvidesDatabaseConnectionInformation connectionInfo;
+  private DatasourcePublishService publishService;
+  private LogChannelInterface log;
 
   @Before
   public void init() throws Exception {
@@ -119,11 +122,13 @@ public class JobEntryDatasourcePublishTest {
     modelServerPublish = mock( ModelServerPublish.class );
     publishRestUtil = mock( PublishRestUtil.class );
     connectionValidator = mock( ConnectionValidator.class );
+    log = mock( LogChannelInterface.class );
 
     databaseConnection = new DatabaseConnection();
     databaseConnection.setId( UUID.randomUUID().toString() );
 
-    jobEntryDatasourcePublish = new JobEntryDatasourcePublish();
+    publishService = new DatasourcePublishService( log );
+    jobEntryDatasourcePublish = new JobEntryDatasourcePublish( spy( publishService ) );
   }
 
   @Test
@@ -139,7 +144,7 @@ public class JobEntryDatasourcePublishTest {
     assertNull( datasourcePublishSpy.discoverDatabaseMeta( jobMeta ) );
 
     doReturn( jobEntryBuildModel ).when( datasourcePublishSpy ).findPrecedingBuildModelJobEntry( jobMeta,
-        datasourcePublishSpy );
+      datasourcePublishSpy );
 
     // can't find database meta
     when( jobEntryBuildModel.getConnectionInfo() ).thenReturn( connectionInfo );
@@ -168,16 +173,18 @@ public class JobEntryDatasourcePublishTest {
 
     jobEntryDatasourcePublish.setDataSourcePublishModel( model );
     assertTrue( StringUtils.contains( jobEntryDatasourcePublish.getXML(),
-        "<logical_model>myLogicalModel</logical_model>" ) );
+      "<logical_model>myLogicalModel</logical_model>" ) );
     assertTrue( StringUtils.contains( jobEntryDatasourcePublish.getXML(), "<override>Y</override>" ) );
-    assertTrue( StringUtils.contains( jobEntryDatasourcePublish.getXML(), "<ba_server_name>default</ba_server_name>" ) );
+    assertTrue(
+      StringUtils.contains( jobEntryDatasourcePublish.getXML(), "<ba_server_name>default</ba_server_name>" ) );
 
     model.setBiServerConnection( null );
-    assertFalse( StringUtils.contains( jobEntryDatasourcePublish.getXML(), "<ba_server_name>default</ba_server_name>" ) );
+    assertFalse(
+      StringUtils.contains( jobEntryDatasourcePublish.getXML(), "<ba_server_name>default</ba_server_name>" ) );
 
     jobEntryDatasourcePublish.setDataSourcePublishModel( null );
     assertFalse( StringUtils.contains( jobEntryDatasourcePublish.getXML(),
-        "<logical_model>myLogicalModel</logical_model>" ) );
+      "<logical_model>myLogicalModel</logical_model>" ) );
   }
 
   @Test
@@ -219,25 +226,25 @@ public class JobEntryDatasourcePublishTest {
 
     verify( rep ).saveJobEntryAttribute( id_jobentry, id_jobentry, JobEntryDatasourcePublish.Fields.BASERVER_NAME, "" );
     verify( rep ).saveJobEntryAttribute(
-        id_jobentry, id_jobentry, JobEntryDatasourcePublish.Fields.ACL_ACCESS_TYPE, "User" );
+      id_jobentry, id_jobentry, JobEntryDatasourcePublish.Fields.ACL_ACCESS_TYPE, "User" );
     verify( rep ).saveJobEntryAttribute(
-        id_jobentry, id_jobentry, JobEntryDatasourcePublish.Fields.ACL_USER_OR_ROLE, "batman" );
+      id_jobentry, id_jobentry, JobEntryDatasourcePublish.Fields.ACL_USER_OR_ROLE, "batman" );
   }
 
   @Test( expected = KettleException.class )
   public void testPublishDatabaseMetaPublishError() throws Exception {
-    JobEntryDatasourcePublish datasourcePublishSpy = spy( jobEntryDatasourcePublish );
+    DatasourcePublishService datasourcePublishServiceSpy = spy( publishService );
 
     when( modelServerPublish.connectionNameExists( anyString() ) ).thenReturn( databaseConnection );
     final DatabaseInterface databaseInterface = mock( DatabaseInterface.class );
     when( databaseMeta.getDatabaseInterface() ).thenReturn( databaseInterface );
     when( databaseInterface.getPluginId() ).thenReturn( "Oracle" );
-    datasourcePublishSpy.publishDatabaseMeta( modelServerPublish, databaseMeta, false );
+    datasourcePublishServiceSpy.publishDatabaseMeta( modelServerPublish, databaseMeta, false );
   }
 
   @Test
   public void testCannotPublishKettleThinLocal() throws Exception {
-    JobEntryDatasourcePublish datasourcePublishSpy = spy( jobEntryDatasourcePublish );
+    DatasourcePublishService datasourcePublishServiceSpy = spy( publishService );
 
     when( modelServerPublish.connectionNameExists( anyString() ) ).thenReturn( databaseConnection );
     when( modelServerPublish.publishDataSource( anyBoolean(), anyString() ) ).thenReturn( true );
@@ -248,17 +255,19 @@ public class JobEntryDatasourcePublishTest {
     extraOptions.put( "KettleThin.local", "true" );
     when( databaseMeta.getExtraOptions() ).thenReturn( extraOptions );
     try {
-      datasourcePublishSpy.publishDatabaseMeta( modelServerPublish, databaseMeta, false );
+      datasourcePublishServiceSpy.publishDatabaseMeta( modelServerPublish, databaseMeta, false );
       fail( "expected Exception" );
     } catch ( KettleException e ) {
-      assertEquals( "We weren't able to publish the requested Pentaho Data Service connection. Make sure you are connected to a Pentaho Repository.",
+      assertEquals(
+        "We weren't able to publish the requested Pentaho Data Service connection. Make sure you are connected to a "
+          + "Pentaho Repository.",
         e.getMessage().trim() );
     }
   }
 
   @Test
   public void testCanPublishKettleThinRepository() throws Exception {
-    JobEntryDatasourcePublish datasourcePublishSpy = spy( jobEntryDatasourcePublish );
+    DatasourcePublishService datasourcePublishServiceSpy = spy( publishService );
 
     when( modelServerPublish.connectionNameExists( anyString() ) ).thenReturn( databaseConnection );
     when( modelServerPublish.publishDataSource( anyBoolean(), anyString() ) ).thenReturn( true );
@@ -270,8 +279,8 @@ public class JobEntryDatasourcePublishTest {
     when( databaseMeta.getExtraOptions() ).thenReturn( new HashMap<String, String>() );
     try {
       assertTrue( databaseMeta.getDatabaseInterface().getAttributes()
-          .getProperty( BaseDatabaseMeta.ATTRIBUTE_FORCE_IDENTIFIERS_TO_LOWERCASE ) == null );
-      datasourcePublishSpy.publishDatabaseMeta( modelServerPublish, databaseMeta, false );
+        .getProperty( BaseDatabaseMeta.ATTRIBUTE_FORCE_IDENTIFIERS_TO_LOWERCASE ) == null );
+      datasourcePublishServiceSpy.publishDatabaseMeta( modelServerPublish, databaseMeta, false );
       assertFalse( databaseMeta.isForcingIdentifiersToLowerCase() );
     } catch ( KettleException e ) {
       fail( "did not expect exception " + e.getMessage() );
@@ -280,43 +289,44 @@ public class JobEntryDatasourcePublishTest {
 
   @Test
   public void testPublishDatabaseMetaPublishSuccess() throws Exception {
-    JobEntryDatasourcePublish datasourcePublishSpy = spy( jobEntryDatasourcePublish );
+    DatasourcePublishService datasourcePublishServiceSpy = spy( publishService );
 
     when( modelServerPublish.connectionNameExists( anyString() ) ).thenReturn( databaseConnection );
     when( modelServerPublish.publishDataSource( anyBoolean(), anyString() ) ).thenReturn( true );
     final DatabaseInterface databaseInterface = mock( DatabaseInterface.class );
     when( databaseMeta.getDatabaseInterface() ).thenReturn( databaseInterface );
     when( databaseInterface.getPluginId() ).thenReturn( "Oracle" );
-    datasourcePublishSpy.publishDatabaseMeta( modelServerPublish, databaseMeta, false );
+    datasourcePublishServiceSpy.publishDatabaseMeta( modelServerPublish, databaseMeta, false );
   }
 
   @Test
   public void testPublishDatabaseMetaPublishForceOverrideUpdate() throws Exception {
-    JobEntryDatasourcePublish datasourcePublishSpy = spy( jobEntryDatasourcePublish );
+    DatasourcePublishService datasourcePublishServiceSpy = spy( publishService );
 
     when( modelServerPublish.connectionNameExists( anyString() ) ).thenReturn( databaseConnection );
     when( modelServerPublish.publishDataSource( anyBoolean(), anyString() ) ).thenReturn( true );
     final DatabaseInterface databaseInterface = mock( DatabaseInterface.class );
     when( databaseMeta.getDatabaseInterface() ).thenReturn( databaseInterface );
     when( databaseInterface.getPluginId() ).thenReturn( "Oracle" );
-    datasourcePublishSpy.publishDatabaseMeta( modelServerPublish, databaseMeta, true );
+    datasourcePublishServiceSpy.publishDatabaseMeta( modelServerPublish, databaseMeta, true );
   }
 
   @Test
   public void testPublishDatabaseMetaPublishForceOverrideAdd() throws Exception {
-    JobEntryDatasourcePublish datasourcePublishSpy = spy( jobEntryDatasourcePublish );
+    DatasourcePublishService datasourcePublishServiceSpy = spy( publishService );
 
     when( modelServerPublish.connectionNameExists( anyString() ) ).thenReturn( null );
     when( modelServerPublish.publishDataSource( anyBoolean(), anyString() ) ).thenReturn( true );
     final DatabaseInterface databaseInterface = mock( DatabaseInterface.class );
     when( databaseMeta.getDatabaseInterface() ).thenReturn( databaseInterface );
     when( databaseInterface.getPluginId() ).thenReturn( "Oracle" );
-    datasourcePublishSpy.publishDatabaseMeta( modelServerPublish, databaseMeta, true );
+    datasourcePublishServiceSpy.publishDatabaseMeta( modelServerPublish, databaseMeta, true );
   }
 
   @Test
   public void testPublishMetadataXmiError() throws Exception {
     JobEntryDatasourcePublish datasourcePublishSpy = spy( jobEntryDatasourcePublish );
+    DatasourcePublishService datasourcePublishServiceSpy = spy( publishService );
 
     // suppress log basic
     doNothing().when( datasourcePublishSpy ).logBasic( anyString() );
@@ -328,13 +338,15 @@ public class JobEntryDatasourcePublishTest {
     model.setModelName( "logicalModel" );
 
     datasourcePublishSpy.setDataSourcePublishModel( model );
+    String xmiString = datasourcePublishSpy.getParentJob().getVariable( "JobEntryBuildModel.XMI." + "logicalModel" );
 
-    datasourcePublishSpy.publishMetadataXmi( "logicalModel", modelServerPublish, false );
+    datasourcePublishServiceSpy.publishMetadataXmi( "logicalModel", xmiString, modelServerPublish, false );
   }
 
   @Test( expected = KettleException.class )
   public void testPublishMetadataXmiFail() throws Exception {
     JobEntryDatasourcePublish datasourcePublishSpy = spy( jobEntryDatasourcePublish );
+    DatasourcePublishService datasourcePublishServiceSpy = spy( publishService );
 
     // suppress log basic
     doNothing().when( datasourcePublishSpy ).logBasic( anyString() );
@@ -349,15 +361,18 @@ public class JobEntryDatasourcePublishTest {
     datasourcePublishSpy.setDataSourcePublishModel( model );
 
     when( modelServerPublish.publishMetaDataFile( any( InputStream.class ), anyString() ) ).thenThrow(
-        new KettleException() );
+      new KettleException() );
 
-    datasourcePublishSpy.publishMetadataXmi( "logicalModel", modelServerPublish, false );
+    String xmiString = datasourcePublishSpy.getParentJob().getVariable( "JobEntryBuildModel.XMI." + "logicalModel" );
+
+    datasourcePublishServiceSpy.publishMetadataXmi( "logicalModel", xmiString, modelServerPublish, false );
   }
 
   @Test
   public void testPublishMetadataXmi() throws Exception {
     final String modelName = "logicalModel";
     JobEntryDatasourcePublish datasourcePublishSpy = spy( jobEntryDatasourcePublish );
+    DatasourcePublishService datasourcePublishServiceSpy = spy( publishService );
 
     // suppress log basic
     doNothing().when( datasourcePublishSpy ).logBasic( anyString() );
@@ -371,9 +386,11 @@ public class JobEntryDatasourcePublishTest {
 
     datasourcePublishSpy.setDataSourcePublishModel( model );
     when( modelServerPublish.publishMetaDataFile( any( InputStream.class ), matches( modelName ) ) ).thenReturn(
-        ModelServerPublish.PUBLISH_SUCCESS );
+      ModelServerPublish.PUBLISH_SUCCESS );
 
-    datasourcePublishSpy.publishMetadataXmi( modelName, modelServerPublish, false );
+    String xmiString = datasourcePublishSpy.getParentJob().getVariable( "JobEntryBuildModel.XMI." + "logicalModel" );
+
+    datasourcePublishServiceSpy.publishMetadataXmi( modelName, xmiString, modelServerPublish, false );
   }
 
   @Test
@@ -480,7 +497,9 @@ public class JobEntryDatasourcePublishTest {
   @Test
   public void testExecute() throws Exception {
 
-    JobEntryDatasourcePublish datasourcePublishSpy = spy( jobEntryDatasourcePublish );
+    DatasourcePublishService datasourcePublishServiceSpy = spy( publishService );
+    JobEntryDatasourcePublish datasourcePublishSpy =
+      spy( new JobEntryDatasourcePublish( datasourcePublishServiceSpy ) );
 
     when( datasourcePublishSpy.getParentJob() ).thenReturn( parentJob );
 
@@ -490,7 +509,7 @@ public class JobEntryDatasourcePublishTest {
     // return mocks
     when( datasourcePublishSpy.getModelServerPublish() ).thenReturn( modelServerPublish );
     when( datasourcePublishSpy
-        .getConnectionValidator( any( BiServerConnection.class ) ) ).thenReturn( connectionValidator );
+      .getConnectionValidator( any( BiServerConnection.class ) ) ).thenReturn( connectionValidator );
 
     doReturn( true ).when( connectionValidator ).isPentahoServer();
     doReturn( true ).when( connectionValidator ).isUserInfoProvided();
@@ -506,16 +525,19 @@ public class JobEntryDatasourcePublishTest {
 
     datasourcePublishSpy.setDataSourcePublishModel( model );
 
-    doNothing().when( datasourcePublishSpy ).publishDatabaseMeta( any( ModelServerPublish.class ),
-        any( DatabaseMeta.class ), anyBoolean() );
-    doNothing().when( datasourcePublishSpy ).publishMetadataXmi( anyString(), any( ModelServerPublish.class ),
+    doNothing().when( datasourcePublishServiceSpy ).publishDatabaseMeta( any( ModelServerPublish.class ),
+      any( DatabaseMeta.class ), anyBoolean() );
+    doNothing().when( datasourcePublishServiceSpy )
+      .publishMetadataXmi( anyString(), anyString(), any( ModelServerPublish.class ),
         anyBoolean() );
-    doNothing().when( datasourcePublishSpy ).publishMondrianSchema( anyString(), any( ModelServerPublish.class ),
+    doNothing().when( datasourcePublishServiceSpy )
+      .publishMondrianSchema( anyString(), anyString(), anyString(), any( ModelServerPublish.class ),
         anyBoolean() );
 
     datasourcePublishSpy.execute( result, 0 );
     verify( modelServerPublish ).setAclModel( argThat( matchesUser( "suzy" ) ) );
-    verify( datasourcePublishSpy ).publishDatabaseMeta( any( ModelServerPublish.class ), any( DatabaseMeta.class ),
+    verify( datasourcePublishServiceSpy )
+      .publishDatabaseMeta( any( ModelServerPublish.class ), any( DatabaseMeta.class ),
         anyBoolean() );
 
     model.setAccessType( "role" );
@@ -539,7 +561,9 @@ public class JobEntryDatasourcePublishTest {
   @Test
   public void testRollback() throws Exception {
 
-    JobEntryDatasourcePublish datasourcePublishSpy = spy( jobEntryDatasourcePublish );
+    DatasourcePublishService datasourcePublishServiceSpy = spy( publishService );
+    JobEntryDatasourcePublish datasourcePublishSpy =
+      spy( new JobEntryDatasourcePublish( datasourcePublishServiceSpy ) );
 
     when( datasourcePublishSpy.getParentJob() ).thenReturn( parentJob );
 
@@ -549,7 +573,7 @@ public class JobEntryDatasourcePublishTest {
     // return mocks
     when( datasourcePublishSpy.getModelServerPublish() ).thenReturn( modelServerPublish );
     when( datasourcePublishSpy
-        .getConnectionValidator( any( BiServerConnection.class ) ) ).thenReturn( connectionValidator );
+      .getConnectionValidator( any( BiServerConnection.class ) ) ).thenReturn( connectionValidator );
 
     doReturn( true ).when( connectionValidator ).isPentahoServer();
     doReturn( true ).when( connectionValidator ).isUserInfoProvided();
@@ -563,30 +587,35 @@ public class JobEntryDatasourcePublishTest {
 
     datasourcePublishSpy.setDataSourcePublishModel( model );
 
-    doNothing().when( datasourcePublishSpy ).deleteDatabaseMeta( any( ModelServerPublish.class ),
-        any( DatabaseMeta.class ) );
-    doNothing().when( datasourcePublishSpy ).deleteXMI( any( ModelServerPublish.class ), anyString(),
-        anyString() );
-    doNothing().when( datasourcePublishSpy ).publishDatabaseMeta( any( ModelServerPublish.class ),
-        any( DatabaseMeta.class ), anyBoolean() );
-    doNothing().when( datasourcePublishSpy ).publishMetadataXmi( anyString(), any( ModelServerPublish.class ),
+    doNothing().when( datasourcePublishServiceSpy ).deleteDatabaseMeta( any( ModelServerPublish.class ),
+      any( DatabaseMeta.class ) );
+    doNothing().when( datasourcePublishServiceSpy ).deleteXMI( any( ModelServerPublish.class ), anyString(),
+      anyString() );
+    doNothing().when( datasourcePublishServiceSpy ).publishDatabaseMeta( any( ModelServerPublish.class ),
+      any( DatabaseMeta.class ), anyBoolean() );
+    doNothing().when( datasourcePublishServiceSpy )
+      .publishMetadataXmi( anyString(), anyString(), any( ModelServerPublish.class ),
         anyBoolean() );
-    doThrow( new KettleException() ).when( datasourcePublishSpy ).publishMondrianSchema( anyString(),
+    doThrow( new KettleException() ).when( datasourcePublishServiceSpy )
+      .publishMondrianSchema( anyString(), anyString(), anyString(),
         any( ModelServerPublish.class ), anyBoolean() );
 
     model.setAccessType( "user" );
     model.setUserOrRole( "admin" );
     Result r3 = datasourcePublishSpy.execute( new Result( 0 ), 0 );
     assertTrue( !r3.getResult() ); // Success
-    verify( datasourcePublishSpy, times( 1 ) ).deleteDatabaseMeta( any( ModelServerPublish.class ),
-        any( DatabaseMeta.class ) );
-    verify( datasourcePublishSpy, times( 1 ) ).deleteXMI( any( ModelServerPublish.class ), anyString(),
-        anyString() );
+    verify( datasourcePublishServiceSpy, times( 1 ) ).deleteDatabaseMeta( any( ModelServerPublish.class ),
+      any( DatabaseMeta.class ) );
+    verify( datasourcePublishServiceSpy, times( 1 ) ).deleteXMI( any( ModelServerPublish.class ), anyString(),
+      anyString() );
   }
 
   @Test
   public void testExecuteDoubleSlash() throws Exception {
-    JobEntryDatasourcePublish datasourcePublishSpy = spy( jobEntryDatasourcePublish );
+    DatasourcePublishService datasourcePublishServiceSpy = spy( publishService );
+    JobEntryDatasourcePublish datasourcePublishSpy =
+      spy( new JobEntryDatasourcePublish( datasourcePublishServiceSpy ) );
+
     when( datasourcePublishSpy.getParentJob() ).thenReturn( parentJob );
     // suppress log basic
     doNothing().when( datasourcePublishSpy ).logBasic( anyString() );
@@ -594,7 +623,7 @@ public class JobEntryDatasourcePublishTest {
     // return mocks
     when( datasourcePublishSpy.getModelServerPublish() ).thenReturn( modelServerPublish );
     when( datasourcePublishSpy
-        .getConnectionValidator( any( BiServerConnection.class ) ) ).thenReturn( connectionValidator );
+      .getConnectionValidator( any( BiServerConnection.class ) ) ).thenReturn( connectionValidator );
 
     doReturn( true ).when( connectionValidator ).isPentahoServer();
     doReturn( true ).when( connectionValidator ).isUserInfoProvided();
@@ -611,18 +640,21 @@ public class JobEntryDatasourcePublishTest {
 
     datasourcePublishSpy.setDataSourcePublishModel( model );
 
-    doNothing().when( datasourcePublishSpy ).publishDatabaseMeta( any( ModelServerPublish.class ),
-        any( DatabaseMeta.class ), anyBoolean() );
-    doNothing().when( datasourcePublishSpy ).publishMetadataXmi( anyString(), any( ModelServerPublish.class ),
+    doNothing().when( datasourcePublishServiceSpy ).publishDatabaseMeta( any( ModelServerPublish.class ),
+      any( DatabaseMeta.class ), anyBoolean() );
+    doNothing().when( datasourcePublishServiceSpy )
+      .publishMetadataXmi( anyString(), anyString(), any( ModelServerPublish.class ),
         anyBoolean() );
-    doNothing().when( datasourcePublishSpy ).publishMondrianSchema( anyString(), any( ModelServerPublish.class ),
+    doNothing().when( datasourcePublishServiceSpy )
+      .publishMondrianSchema( anyString(), anyString(), anyString(), any( ModelServerPublish.class ),
         anyBoolean() );
 
     assertTrue( biServerConnection.getUrl().endsWith( "//" ) );
 
     datasourcePublishSpy.execute( result, 0 );
     verify( modelServerPublish ).setAclModel( argThat( matchesUser( "suzy" ) ) );
-    verify( datasourcePublishSpy ).publishDatabaseMeta( any( ModelServerPublish.class ), any( DatabaseMeta.class ),
+    verify( datasourcePublishServiceSpy )
+      .publishDatabaseMeta( any( ModelServerPublish.class ), any( DatabaseMeta.class ),
         anyBoolean() );
     assertFalse( biServerConnection.getUrl().endsWith( "//" ) );
   }
@@ -632,8 +664,8 @@ public class JobEntryDatasourcePublishTest {
       @Override public boolean matches( final Object item ) {
         DataSourceAclModel acl = (DataSourceAclModel) item;
         return acl.getUsers().size() == 1
-            && acl.getUsers().get( 0 ).equals( userName )
-            && acl.getRoles() == null;
+          && acl.getUsers().get( 0 ).equals( userName )
+          && acl.getRoles() == null;
       }
 
       @Override public void describeTo( final Description description ) {
@@ -655,7 +687,7 @@ public class JobEntryDatasourcePublishTest {
     // return mocks
     when( datasourcePublishSpy.getModelServerPublish() ).thenReturn( modelServerPublish );
     when( datasourcePublishSpy
-        .getConnectionValidator( any( BiServerConnection.class ) ) ).thenReturn( connectionValidator );
+      .getConnectionValidator( any( BiServerConnection.class ) ) ).thenReturn( connectionValidator );
     doReturn( databaseConnection ).when( modelServerPublish ).connectionNameExists( anyString() );
 
     doReturn( true ).when( connectionValidator ).isPentahoServer();
@@ -688,7 +720,7 @@ public class JobEntryDatasourcePublishTest {
     // return mocks
     when( datasourcePublishSpy.getModelServerPublish() ).thenReturn( modelServerPublish );
     when( datasourcePublishSpy
-        .getConnectionValidator( any( BiServerConnection.class ) ) ).thenReturn( connectionValidator );
+      .getConnectionValidator( any( BiServerConnection.class ) ) ).thenReturn( connectionValidator );
 
     doReturn( true ).when( connectionValidator ).isPentahoServer();
     doReturn( true ).when( connectionValidator ).isUserInfoProvided();
@@ -799,6 +831,7 @@ public class JobEntryDatasourcePublishTest {
 
   @Test
   public void testXmlRoundtripEmptyBIServerConnectionElements() throws Exception {
+    DatasourcePublishService datasourcePublishServiceSpy = spy( publishService );
     // dialog assumes fields are never null
     DataSourcePublishModel model = new DataSourcePublishModel();
     BiServerConnection biServerConnection = new BiServerConnection();
@@ -809,7 +842,7 @@ public class JobEntryDatasourcePublishTest {
     jobEntryDatasourcePublish.setDataSourcePublishModel( model );
     final String entryXml = "<entry>" + jobEntryDatasourcePublish.getXML() + "</entry>";
     // load back
-    jobEntryDatasourcePublish = new JobEntryDatasourcePublish();
+    jobEntryDatasourcePublish = new JobEntryDatasourcePublish( datasourcePublishServiceSpy );
     DocumentBuilder builder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
     Node entryNode = builder.parse( IOUtils.toInputStream( entryXml, "UTF-8" ) ).getDocumentElement();
     jobEntryDatasourcePublish.loadXML( entryNode, null, null, null, null );
@@ -824,15 +857,15 @@ public class JobEntryDatasourcePublishTest {
   public void testCheckDswId() {
 
     String result;
-    JobEntryDatasourcePublish spy = spy( jobEntryDatasourcePublish );
+    DatasourcePublishService datasourcePublishServiceSpy = spy( publishService );
 
-    result = spy.checkDswId( "test.xmi" );
+    result = datasourcePublishServiceSpy.checkDswId( "test.xmi" );
     assertEquals( result, "test.xmi" );
 
-    spy.checkDswId( "test" );
+    datasourcePublishServiceSpy.checkDswId( "test" );
     assertEquals( result, "test.xmi" );
 
-    result = spy.checkDswId( "test.XMI" );
+    result = datasourcePublishServiceSpy.checkDswId( "test.XMI" );
     assertEquals( result, "test.xmi" );
   }
 
@@ -840,6 +873,7 @@ public class JobEntryDatasourcePublishTest {
   public void testPublishDswXmi() throws Exception {
 
     JobEntryDatasourcePublish datasourcePublishSpy = spy( jobEntryDatasourcePublish );
+    DatasourcePublishService datasourcePublishServiceSpy = spy( publishService );
 
     String xmiString = "<xmi></xmi>";
     String modelName = "MyModel";
@@ -848,27 +882,27 @@ public class JobEntryDatasourcePublishTest {
     // publish not called
     when( datasourcePublishSpy.getParentJob() ).thenReturn( parentJob );
     when( parentJob.getVariable( "JobEntryBuildModel.XMI.MyModel" ) ).thenReturn( null );
-    datasourcePublishSpy.publishDswXmi( modelName, modelServerPublish, true );
+    datasourcePublishServiceSpy.publishDswXmi( modelName, null, modelServerPublish, true );
     verify( modelServerPublish, times( 0 ) ).publishDsw( any( InputStream.class ), anyString() );
 
     // publish, mock success
     when( parentJob.getVariable( "JobEntryBuildModel.XMI.MyModel" ) ).thenReturn( xmiString );
-    when( datasourcePublishSpy.checkDswId( modelName ) ).thenReturn( "MyModel.xmi" );
+    when( datasourcePublishServiceSpy.checkDswId( modelName ) ).thenReturn( "MyModel.xmi" );
     when( modelServerPublish.publishDsw( any( InputStream.class ), anyString() ) )
-        .thenReturn( ModelServerPublish.PUBLISH_SUCCESS );
-    datasourcePublishSpy.publishDswXmi( modelName, modelServerPublish, true );
+      .thenReturn( ModelServerPublish.PUBLISH_SUCCESS );
+    datasourcePublishServiceSpy.publishDswXmi( modelName, xmiString, modelServerPublish, true );
     verify( modelServerPublish, times( 1 ) ).publishDsw( any( InputStream.class ), anyString() );
 
     // publish, mock error, throws exception
     when( modelServerPublish.publishDsw( any( InputStream.class ), anyString() ) )
-        .thenReturn( ModelServerPublish.PUBLISH_FAILED );
-    datasourcePublishSpy.publishDswXmi( modelName, modelServerPublish, true );
+      .thenReturn( ModelServerPublish.PUBLISH_FAILED );
+    datasourcePublishServiceSpy.publishDswXmi( modelName, xmiString, modelServerPublish, true );
     verify( modelServerPublish, times( 1 ) ).publishDsw( any( InputStream.class ), anyString() );
   }
 
   @Test( expected = KettleException.class )
   public void testPublishMondrianSchema() throws Exception {
-
+    DatasourcePublishService datasourcePublishServiceSpy = spy( publishService );
     DataRefineryConfig config = new DataRefineryConfig();
     assertNotNull( config );
 
@@ -883,44 +917,47 @@ public class JobEntryDatasourcePublishTest {
     when( datasourcePublishSpy.getParentJob() ).thenReturn( parentJob );
     when( parentJob.getVariable( "JobEntryBuildModel.Mondrian.Schema.MyModel" ) ).thenReturn( null );
     when( parentJob.getVariable( "JobEntryBuildModel.Mondrian.Datasource.MyModel" ) ).thenReturn( null );
-    datasourcePublishSpy.publishMondrianSchema( modelName, modelServerPublish, true );
+    datasourcePublishServiceSpy.publishMondrianSchema( modelName, null, null, modelServerPublish, true );
     verify( modelServerPublish, times( 0 ) )
-        .publishMondrianSchema( any( InputStream.class ), anyString(), anyString(), anyBoolean() );
+      .publishMondrianSchema( any( InputStream.class ), anyString(), anyString(), anyBoolean() );
 
     // publish not called - missing datasource
     when( parentJob.getVariable( "JobEntryBuildModel.Mondrian.Schema.MyModel" ) ).thenReturn( modelName );
     when( parentJob.getVariable( "JobEntryBuildModel.Mondrian.Datasource.MyModel" ) ).thenReturn( null );
-    datasourcePublishSpy.publishMondrianSchema( modelName, modelServerPublish, true );
+    datasourcePublishServiceSpy.publishMondrianSchema( modelName, null, null, modelServerPublish, true );
     verify( modelServerPublish, times( 0 ) )
-        .publishMondrianSchema( any( InputStream.class ), anyString(), anyString(), anyBoolean() );
+      .publishMondrianSchema( any( InputStream.class ), anyString(), anyString(), anyBoolean() );
 
     // publish not called - missing model
     when( parentJob.getVariable( "JobEntryBuildModel.Mondrian.Schema.MyModel" ) ).thenReturn( null );
     when( parentJob.getVariable( "JobEntryBuildModel.Mondrian.Datasource.MyModel" ) ).thenReturn( datasource );
-    datasourcePublishSpy.publishMondrianSchema( modelName, modelServerPublish, true );
+    datasourcePublishServiceSpy.publishMondrianSchema( modelName, null, null, modelServerPublish, true );
     verify( modelServerPublish, times( 0 ) )
-        .publishMondrianSchema( any( InputStream.class ), anyString(), anyString(), anyBoolean() );
+      .publishMondrianSchema( any( InputStream.class ), anyString(), anyString(), anyBoolean() );
 
 
     // publish, mock success
     when( parentJob.getVariable( "JobEntryBuildModel.Mondrian.Schema.MyModel" ) ).thenReturn( mondrianSchema );
     when( parentJob.getVariable( "JobEntryBuildModel.Mondrian.Datasource.MyModel" ) ).thenReturn( datasource );
     when( modelServerPublish.publishMondrianSchema( any( InputStream.class ), anyString(), anyString(), anyBoolean() ) )
-        .thenReturn( ModelServerPublish.PUBLISH_SUCCESS );
-    datasourcePublishSpy.publishMondrianSchema( modelName, modelServerPublish, true );
+      .thenReturn( ModelServerPublish.PUBLISH_SUCCESS );
+    datasourcePublishServiceSpy
+      .publishMondrianSchema( modelName, mondrianSchema, datasource, modelServerPublish, true );
     verify( modelServerPublish, times( 1 ) )
-        .publishMondrianSchema( any( InputStream.class ), anyString(), anyString(), anyBoolean() );
+      .publishMondrianSchema( any( InputStream.class ), anyString(), anyString(), anyBoolean() );
 
 
     // publish, mock error, throws exception
     when( modelServerPublish.publishMondrianSchema( any( InputStream.class ), anyString(), anyString(), anyBoolean() ) )
-        .thenReturn( ModelServerPublish.PUBLISH_FAILED );
-    datasourcePublishSpy.publishMondrianSchema( modelName, modelServerPublish, true );
+      .thenReturn( ModelServerPublish.PUBLISH_FAILED );
+    datasourcePublishServiceSpy
+      .publishMondrianSchema( modelName, mondrianSchema, datasource, modelServerPublish, true );
     verify( modelServerPublish, times( 1 ) )
-        .publishMondrianSchema( any( InputStream.class ), anyString(), anyString(), anyBoolean() );
-    datasourcePublishSpy.publishMondrianSchema( modelName, modelServerPublish, true );
+      .publishMondrianSchema( any( InputStream.class ), anyString(), anyString(), anyBoolean() );
+    datasourcePublishServiceSpy
+      .publishMondrianSchema( modelName, mondrianSchema, datasource, modelServerPublish, true );
     verify( modelServerPublish, times( 0 ) )
-        .publishMondrianSchema( any( InputStream.class ), anyString(), anyString(), anyBoolean() );
+      .publishMondrianSchema( any( InputStream.class ), anyString(), anyString(), anyBoolean() );
   }
 
   @Test
@@ -928,7 +965,7 @@ public class JobEntryDatasourcePublishTest {
     JobEntryDatasourcePublish datasourcePublishSpy = spy( jobEntryDatasourcePublish );
 
     when( datasourcePublishSpy
-        .getConnectionValidator( any( BiServerConnection.class ) ) ).thenReturn( connectionValidator );
+      .getConnectionValidator( any( BiServerConnection.class ) ) ).thenReturn( connectionValidator );
 
 
     DataSourcePublishModel model = new DataSourcePublishModel();
@@ -943,7 +980,8 @@ public class JobEntryDatasourcePublishTest {
 
     datasourcePublishSpy.setDataSourcePublishModel( model );
     datasourcePublishSpy.execute( result, 0 );
-    verify( datasourcePublishSpy ).logError( eq( "\nAccess Type 'other' not recognized\n" ), isA( KettleException.class ) );
+    verify( datasourcePublishSpy )
+      .logError( eq( "\nAccess Type 'other' not recognized\n" ), isA( KettleException.class ) );
   }
 
   @Test
@@ -951,7 +989,7 @@ public class JobEntryDatasourcePublishTest {
     JobEntryDatasourcePublish datasourcePublishSpy = spy( jobEntryDatasourcePublish );
 
     when( datasourcePublishSpy
-        .getConnectionValidator( any( BiServerConnection.class ) ) ).thenReturn( connectionValidator );
+      .getConnectionValidator( any( BiServerConnection.class ) ) ).thenReturn( connectionValidator );
     when( datasourcePublishSpy.getModelServerPublish() ).thenReturn( modelServerPublish );
 
     DataSourcePublishModel model = new DataSourcePublishModel();
@@ -977,7 +1015,7 @@ public class JobEntryDatasourcePublishTest {
   @Test
   public void testSaveRepEmpty() throws Exception {
 
-    JobEntryDatasourcePublish datasourcePublish = new JobEntryDatasourcePublish();
+    JobEntryDatasourcePublish datasourcePublish = new JobEntryDatasourcePublish( null );
 
     ObjectId id_jobentry = mock( ObjectId.class );
     Repository rep = mock( Repository.class );

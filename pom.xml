@@ -250,7 +250,11 @@
               org.pentaho.di.core.extension,
               org.osgi.service.cm,
               *</Import-Package>
-            <Export-Package>org.pentaho.di.job.entries.build,org.pentaho.di.core.refinery.model</Export-Package>
+            <Export-Package>org.pentaho.di.job.entries.build,
+              org.pentaho.di.core.refinery.model,
+              org.pentaho.di.core.refinery.publish.agilebi,
+              org.pentaho.di.job.entries.publish
+            </Export-Package>
           </instructions>
         </configuration>
       </plugin>

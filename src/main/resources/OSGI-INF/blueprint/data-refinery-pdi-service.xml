@@ -70,7 +70,17 @@
 
   <bean id="uiFactory" class="org.pentaho.di.trans.dataservice.ui.UIFactory" scope="singleton"/>
 
+  <bean id="datasourcePublishService" class="org.pentaho.di.job.entries.publish.DatasourcePublishService">
+    <argument>
+      <bean class="org.pentaho.di.core.logging.LogChannel">
+        <argument value="Data Source"/>
+      </bean>
+    </argument>
+  </bean>
+  <service interface="org.pentaho.di.job.entries.publish.PublishService" ref="datasourcePublishService" />
+
   <bean id="PublishModel_JobEntry" class="org.pentaho.di.job.entries.publish.JobEntryDatasourcePublish" scope="prototype">
+    <argument ref="datasourcePublishService"/>
     <pen:di-plugin type="org.pentaho.di.core.plugins.JobEntryPluginType" />
   </bean>
 
