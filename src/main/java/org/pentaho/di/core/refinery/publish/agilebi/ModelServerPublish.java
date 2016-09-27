@@ -35,10 +35,11 @@ import org.jfree.util.Log;
 import org.pentaho.database.model.DatabaseAccessType;
 import org.pentaho.database.model.DatabaseConnection;
 import org.pentaho.di.core.database.DatabaseInterface;
-import org.pentaho.di.core.exception.KettleDatabaseException;
+import org.pentaho.di.core.exception.KettleException;
 import org.pentaho.di.core.logging.LogChannelInterface;
 import org.pentaho.di.core.refinery.publish.model.DataSourceAclModel;
 import org.pentaho.di.core.refinery.publish.util.JAXBUtils;
+import org.pentaho.di.job.entries.publish.exception.DuplicateDataSourceException;
 
 import javax.ws.rs.core.MediaType;
 
@@ -53,6 +54,7 @@ public class ModelServerPublish extends ModelServerAction {
 
   public static final int PUBLISH_FAILED = 2;
   public static final int PUBLISH_SUCCESS = 3;
+  public static final int PUBLISH_CONFLICT = 4;
   public static final int PUBLISH_CATALOG_EXISTS = 8;
   private static final String REST_NAME_PARM = "?name=";
   private static final String MONDRIAN_POST_ANALYSIS_URL = "plugin/data-access/api/mondrian/postAnalysis";
@@ -76,7 +78,7 @@ public class ModelServerPublish extends ModelServerAction {
    * @return
    * @throws org.pentaho.di.core.exception.KettleDatabaseException
    */
-  public boolean publishDataSource( boolean update, String connectionId ) throws KettleDatabaseException {
+  public boolean publishDataSource( boolean update, String connectionId ) throws KettleException {
 
     // create a new connection object and populate it from the databaseMeta
     DatabaseConnection connection = new DatabaseConnection();
@@ -106,7 +108,7 @@ public class ModelServerPublish extends ModelServerAction {
    * @param update
    * @return
    */
-  protected boolean updateConnection( DatabaseConnection connection, boolean update ) {
+  protected boolean updateConnection( DatabaseConnection connection, boolean update ) throws KettleException {
     String storeDomainUrl;
     try {
       if ( update ) {
@@ -120,12 +122,16 @@ public class ModelServerPublish extends ModelServerAction {
           .entity( connection );
 
       ClientResponse resp = httpPost( builder );
-      if ( resp == null || resp.getStatus() != 200 ) {
+      if ( resp == null ) {
+        return false;
+      }
+      if ( resp.getStatus() == 409 ) {
+        throw new DuplicateDataSourceException();
+      } else if ( resp.getStatus() != 200 ) {
         return false;
       }
     } catch ( Exception ex ) {
-      Log.error( ex.getMessage() );
-      return false;
+      throw new KettleException( ex );
     }
     return true;
   }
@@ -305,6 +311,8 @@ public class ModelServerPublish extends ModelServerAction {
           case OK:
           case CREATED:
             return PUBLISH_SUCCESS;
+          case CONFLICT:
+            return PUBLISH_CONFLICT;
           default:
             return PUBLISH_FAILED;
         }
