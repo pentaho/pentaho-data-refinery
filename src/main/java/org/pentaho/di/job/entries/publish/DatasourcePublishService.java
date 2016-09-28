@@ -31,6 +31,7 @@ import org.pentaho.di.core.logging.LogChannelInterface;
 import org.pentaho.di.core.refinery.publish.agilebi.ModelServerPublish;
 import org.pentaho.di.i18n.BaseMessages;
 import org.pentaho.di.job.entries.build.DataServiceConnectionInformation;
+import org.pentaho.di.job.entries.publish.exception.DuplicateDataSourceException;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
@@ -218,7 +219,9 @@ public class DatasourcePublishService implements PublishService {
       xmiInputStream = IOUtils.toInputStream( xmiString, ENCODING );
       modelServerPublish.setForceOverwrite( forceOverride );
       int status = modelServerPublish.publishDsw( xmiInputStream, checkDswId( modelName ) );
-      if ( status != ModelServerPublish.PUBLISH_SUCCESS ) {
+      if ( status == ModelServerPublish.PUBLISH_CONFLICT ) {
+        throw new DuplicateDataSourceException( this.getMsg( "JobEntryDatasourcePublish.Publish.Dsw.Conflict", modelName ) );
+      } else if ( status != ModelServerPublish.PUBLISH_SUCCESS ) {
         throw new Exception( this.getMsg( "JobEntryDatasourcePublish.Publish.Dsw.Failed", modelName ) );
       }
     } catch ( Exception e ) {

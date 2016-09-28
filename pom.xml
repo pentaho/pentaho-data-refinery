@@ -253,7 +253,8 @@
             <Export-Package>org.pentaho.di.job.entries.build,
               org.pentaho.di.core.refinery.model,
               org.pentaho.di.core.refinery.publish.agilebi,
-              org.pentaho.di.job.entries.publish
+              org.pentaho.di.job.entries.publish,
+              org.pentaho.di.job.entries.publish.exception
             </Export-Package>
           </instructions>
         </configuration>

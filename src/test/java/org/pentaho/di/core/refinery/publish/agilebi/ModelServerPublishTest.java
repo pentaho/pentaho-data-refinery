@@ -44,6 +44,7 @@ import org.pentaho.database.model.IDatabaseType;
 import org.pentaho.database.util.DatabaseTypeHelper;
 import org.pentaho.di.core.database.DatabaseInterface;
 import org.pentaho.di.core.database.DatabaseMeta;
+import org.pentaho.di.core.exception.KettleException;
 import org.pentaho.di.core.logging.LogChannelInterface;
 import org.pentaho.di.core.refinery.publish.model.DataSourceAclModel;
 import org.pentaho.di.core.refinery.publish.util.JAXBUtils;
@@ -177,7 +178,11 @@ public class ModelServerPublishTest {
     doReturn( "Y" ).when( attributes ).getProperty( "QUOTE_ALL_FIELDS" );
     doReturn( databaseType ).when( modelServerPublishSpy ).getDatabaseType( databaseInterface );
 
-    modelServerPublishSpy.publishDataSource( true, "id" );
+    try {
+      modelServerPublishSpy.publishDataSource( true, "id" );
+    } catch ( KettleException e ) {
+      // Will hit this block
+    }
     verify( modelServerPublishSpy ).updateConnection( argThat( new ArgumentMatcher<DatabaseConnection>() {
       @Override public boolean matches( Object o ) {
         DatabaseConnection db = (DatabaseConnection) o;
@@ -195,7 +200,11 @@ public class ModelServerPublishTest {
     } ), anyBoolean() );
 
     doReturn( "N" ).when( attributes ).get( anyString() );
-    modelServerPublishSpy.publishDataSource( false, "id" );
+    try {
+      modelServerPublishSpy.publishDataSource( false, "id" );
+    } catch ( KettleException e ) {
+      // Will hit this block
+    }
   }
 
   @Test
@@ -213,7 +222,11 @@ public class ModelServerPublishTest {
     doReturn( "8080" ).when( databaseMeta ).environmentSubstitute( "${DB_PORT}" );
     doReturn( databaseType ).when( modelServerPublishSpy ).getDatabaseType( databaseInterface );
 
-    modelServerPublishSpy.publishDataSource( true, "id" );
+    try {
+      modelServerPublishSpy.publishDataSource( true, "id" );
+    } catch ( KettleException e ) {
+      // Will hit this block
+    }
     verify( modelServerPublishSpy ).updateConnection( argThat( new ArgumentMatcher<DatabaseConnection>( ) {
         @Override
         public boolean matches( Object o ) {
