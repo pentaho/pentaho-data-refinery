@@ -56,7 +56,7 @@ public class SharedDimensionStep extends ModelAnnotationStep implements StepInte
       meta.setModelAnnotations( modelAnnotations );
     }
 
-    meta.getModelAnnotations().setName( meta.getModelAnnotationCategory() );
+    meta.getModelAnnotations().setName( environmentSubstitute( meta.getModelAnnotationCategory() ) );
     modelAnnotations.addInjectedAnnotations( meta.createDimensionKeyAnnotations );
     modelAnnotations.addInjectedAnnotations( meta.createAttributeAnnotations );
 
