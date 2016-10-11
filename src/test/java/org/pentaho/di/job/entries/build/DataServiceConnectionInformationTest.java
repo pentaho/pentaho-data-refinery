@@ -117,7 +117,7 @@ public class DataServiceConnectionInformationTest {
         + "  <id>PentahoEnterpriseRepository</id>\n"
         + "  <name>local</name>\n"
         + "  <description>a</description>\n"
-        + "  <repository_location_url>http&#x3a;&#x2f;&#x2f;farfaraway&#x3a;12345&#x2f;pentaho-di</repository_location_url>\n"
+        + "  <repository_location_url>http&#x3a;&#x2f;&#x2f;farfaraway&#x3a;12345&#x2f;pentaho</repository_location_url>\n"
         + "  <version_comment_mandatory>N</version_comment_mandatory>\n"
         + "</repository>"
     );
@@ -131,7 +131,7 @@ public class DataServiceConnectionInformationTest {
     assertEquals( "Kettle", connectInfo.getSchemaName() );
     DatabaseMeta databaseMeta = connectInfo.getDatabaseMeta();
     assertEquals( "org.pentaho.di.trans.dataservice.jdbc.ThinDriver", databaseMeta.getDriverClass() );
-    assertEquals( "pentaho-di", databaseMeta.getDatabaseName() );
+    assertEquals( "pentaho", databaseMeta.getDatabaseName() );
     assertEquals( dataServiceName, databaseMeta.getName() );
     assertNull( databaseMeta.getExtraOptions().get( "KettleThin.local" ) );
     assertEquals( "farfaraway", databaseMeta.getHostname() );
@@ -148,7 +148,7 @@ public class DataServiceConnectionInformationTest {
       + "  <id>KettleFileRepository</id>\n"
       + "  <name>local</name>\n"
       + "  <description>a</description>\n"
-      + "  <repository_location_url>http&#x3a;&#x2f;&#x2f;farfaraway&#x3a;12345&#x2f;pentaho-di</repository_location_url>\n"
+      + "  <repository_location_url>http&#x3a;&#x2f;&#x2f;farfaraway&#x3a;12345&#x2f;pentaho</repository_location_url>\n"
       + "  <version_comment_mandatory>N</version_comment_mandatory>\n"
       + "</repository>" );
     DataServiceConnectionInformation connectInfo = new DataServiceConnectionInformation( dataServiceName, repository,
@@ -164,7 +164,7 @@ public class DataServiceConnectionInformationTest {
       + "  <id>PentahoEnterpriseRepository</id>\n"
       + "  <name>local</name>\n"
       + "  <description>a</description>\n"
-      + "  <repository_location>http&#x3a;&#x2f;&#x2f;farfaraway&#x3a;12345&#x2f;pentaho-di</repository_location>\n"
+      + "  <repository_location>http&#x3a;&#x2f;&#x2f;farfaraway&#x3a;12345&#x2f;pentaho</repository_location>\n"
       + "  <version_comment_mandatory>N</version_comment_mandatory>\n"
       + "</repository>" );
     DataServiceConnectionInformation connectInfo =
