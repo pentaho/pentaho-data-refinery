@@ -159,7 +159,6 @@ public class ModelServerPublishTest {
     final String dbName = "dbName";
     final String dbPort = "dbPort";
     final String hostname = "hostname";
-    final String webAppName = "pentaho-di";
 
     doReturn( extraOptions ).when( databaseMeta ).getExtraOptions();
     doReturn( username ).when( databaseMeta ).getUsername();
