@@ -100,4 +100,22 @@ public class SharedDimensionStepTest {
     assertEquals( "myName", modelAnnotationGroup.getName() );
     assertTrue( status );
   }
+
+  @Test
+  public void testNoInjectionDoesNotSaveToMetastore() throws Exception {
+    // step
+    StepDataInterface stepDataInterface = new ModelAnnotationData();
+    SharedDimensionStep modelAnnotationStep = createSharedDimensionStep( stepDataInterface, null );
+
+    SharedDimensionMeta meta = new SharedDimensionMeta() {
+      @Override public void saveToMetaStore( IMetaStore metaStore )
+        throws Exception {
+        fail( "should not try and save to metastore because not meta injected" );
+      }
+    };
+
+    meta.sharedDimensionName = "myName";
+    boolean status = modelAnnotationStep.init( meta, stepDataInterface );
+    assertTrue( status );
+  }
 }
