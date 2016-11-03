@@ -44,7 +44,6 @@
     <dependency.bi-platform.revision>7.1-SNAPSHOT</dependency.bi-platform.revision>
     <dependency.commons.lang.revision>2.6</dependency.commons.lang.revision>
     <dependency.h2.revision>1.0.78</dependency.h2.revision>
-    <dependency.xstream.revision>1.4.9</dependency.xstream.revision>
   </properties>
   <dependencies>
     <dependency>
@@ -165,11 +164,6 @@
       <groupId>javax.ws.rs</groupId>
       <artifactId>jsr311-api</artifactId>
       <version>${dependency.jaxrs.revision}</version>
-    </dependency>
-    <dependency>
-      <groupId>com.thoughtworks.xstream</groupId>
-      <artifactId>xstream</artifactId>
-      <version>${dependency.xstream.revision}</version>
     </dependency>
     <dependency>
       <groupId>org.osgi</groupId>
