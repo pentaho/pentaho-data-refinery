@@ -2,7 +2,7 @@
  *
  * Pentaho Community Edition Project: data-refinery-pdi-plugin
  *
- * Copyright (C) 2002-2015 by Pentaho : http://www.pentaho.com
+ * Copyright (C) 2002-2016 by Pentaho : http://www.pentaho.com
  *
  * *******************************************************************************
  *
@@ -22,9 +22,6 @@
 
 package org.pentaho.di.core.refinery.publish.util;
 
-import com.thoughtworks.xstream.XStream;
-import com.thoughtworks.xstream.io.xml.DomDriver;
-
 import java.util.logging.Logger;
 
 /**
@@ -32,12 +29,7 @@ import java.util.logging.Logger;
  */
 public class ObjectUtils {
 
-  private static XStream xStream = new XStream( new DomDriver() );
   private static Logger logger = Logger.getLogger( ObjectUtils.class.getName() );
-
-  static {
-    xStream.setClassLoader( ObjectUtils.class.getClassLoader() );
-  }
 
   @SuppressWarnings( "unchecked" )
   public static <T> T deepClone( T object ) {
@@ -45,16 +37,25 @@ public class ObjectUtils {
     if ( object == null ) {
       return null;
     }
-
-    return (T) xStream.fromXML( xStream.toXML( object ) );
-
+    try {
+      String t= JAXBUtils.marshallToJson( object );
+      Class c = object.getClass();
+      return (T) JAXBUtils.unmarshalFromJson( t, c );
+    } catch ( Exception ex ){
+      logger.severe( ex.getMessage() );
+      throw new RuntimeException( ex );
+    }
   }
 
   public static String toXml( Object object ) {
-    if ( object != null ) {
-      return xStream.toXML( object );
+    try {
+      if ( object != null ) {
+        return JAXBUtils.marshallToXml( object );
+      }
+    } catch ( Exception ex ) {
+      logger.severe( ex.getMessage() );
+      throw new RuntimeException( ex );
     }
-
     return null;
   }
 
