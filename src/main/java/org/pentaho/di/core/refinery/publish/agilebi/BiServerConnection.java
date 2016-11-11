@@ -2,7 +2,7 @@
  *
  * Pentaho Community Edition Project: data-refinery-pdi-plugin
  *
- * Copyright (C) 2002-2015 by Pentaho : http://www.pentaho.com
+ * Copyright (C) 2002-2016 by Pentaho : http://www.pentaho.com
  *
  * *******************************************************************************
  *
@@ -39,6 +39,8 @@
 
 package org.pentaho.di.core.refinery.publish.agilebi;
 
+import java.io.Serializable;
+
 import javax.xml.bind.annotation.XmlRootElement;
 
 import org.pentaho.di.core.Const;
@@ -52,7 +54,9 @@ import org.pentaho.platform.api.repository2.unified.RepositoryFile;
  *
  */
 @XmlRootElement
-public class BiServerConnection {
+public class BiServerConnection implements Serializable {
+
+  private static final long serialVersionUID = 938485134641425825L;
 
   private String url;
 

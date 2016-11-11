@@ -2,7 +2,7 @@
  *
  * Pentaho Community Edition Project: data-refinery-pdi-plugin
  *
- * Copyright (C) 2002-2015 by Pentaho : http://www.pentaho.com
+ * Copyright (C) 2002-2016 by Pentaho : http://www.pentaho.com
  *
  * *******************************************************************************
  *
@@ -22,13 +22,16 @@
 
 package org.pentaho.di.core.refinery.publish.model;
 
+import java.io.Serializable;
+
 import org.pentaho.di.core.refinery.publish.agilebi.BiServerConnection;
 
 /**
  * @author Rowell Belen
  */
-public class DataSourcePublishModel {
+public class DataSourcePublishModel implements Serializable {
 
+  private static final long serialVersionUID = 7797060550124837560L;
   public static final String ACCESS_TYPE_EVERYONE = "everyone";
   public static final String ACCESS_TYPE_USER = "user";
   public static final String ACCESS_TYPE_ROLE = "role";
