@@ -62,7 +62,6 @@
       <groupId>pentaho</groupId>
       <artifactId>pdi-dataservice-client-plugin</artifactId>
       <version>${dependency.pdi-dataservice-plugin.revision}</version>
-      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>pentaho-kettle</groupId>

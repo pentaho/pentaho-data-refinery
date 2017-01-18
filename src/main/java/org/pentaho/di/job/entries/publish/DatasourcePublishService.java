@@ -2,7 +2,7 @@
  *
  * Pentaho Community Edition Project: data-refinery-pdi-plugin
  *
- * Copyright (C) 2002-2016 by Pentaho : http://www.pentaho.com
+ * Copyright (C) 2002-2017 by Pentaho : http://www.pentaho.com
  *
  * *******************************************************************************
  *
@@ -30,8 +30,8 @@ import org.pentaho.di.core.exception.KettleException;
 import org.pentaho.di.core.logging.LogChannelInterface;
 import org.pentaho.di.core.refinery.publish.agilebi.ModelServerPublish;
 import org.pentaho.di.i18n.BaseMessages;
-import org.pentaho.di.job.entries.build.DataServiceConnectionInformation;
 import org.pentaho.di.job.entries.publish.exception.DuplicateDataSourceException;
+import org.pentaho.di.trans.dataservice.client.DataServiceConnectionInformation;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
