@@ -2,7 +2,7 @@
  *
  * Pentaho Community Edition Project: data-refinery-pdi-plugin
  *
- * Copyright (C) 2002-2016 by Pentaho : http://www.pentaho.com
+ * Copyright (C) 2002-2017 by Pentaho : http://www.pentaho.com
  *
  * *******************************************************************************
  *
@@ -148,8 +148,8 @@ public class OptionsResolver {
     return new String[] { "True", "False" };
   }
 
-  public String[] resolveOrdinalFieldOptions( final TransMeta transMeta, final String stepName,
-      ModelAnnotation modelAnnotation ) {
+  public String[] resolveAvailableFieldsOptions( final TransMeta transMeta, final String stepName,
+                                                 ModelAnnotation modelAnnotation ) {
     LinkedHashSet<String> names = new LinkedHashSet<String>();
     try {
       RowMetaInterface prevStepFields = transMeta.getPrevStepFields( stepName );
