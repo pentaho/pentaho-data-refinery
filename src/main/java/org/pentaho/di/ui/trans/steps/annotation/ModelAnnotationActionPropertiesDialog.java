@@ -2,7 +2,7 @@
  *
  * Pentaho Community Edition Project: data-refinery-pdi-plugin
  *
- * Copyright (C) 2002-2016 by Pentaho : http://www.pentaho.com
+ * Copyright (C) 2002-2017 by Pentaho : http://www.pentaho.com
  *
  * *******************************************************************************
  *
@@ -186,6 +186,11 @@ public class ModelAnnotationActionPropertiesDialog extends ModelAnnotationAction
               return ModelAnnotation.GeoType.names();
             }
 
+            if ( CreateAttribute.LATITUDE_FIELD_NAME.equals( name )
+                || CreateAttribute.LONGITUDE_FIELD_NAME.equals( name ) ) {
+              return optionsResolver.resolveAvailableFieldsOptions( transMeta, stepname, getModelAnnotation() );
+            }
+
             // Time Format String options
             if ( name.equals( CreateAttribute.TIME_FORMAT_NAME ) ) {
               String timeType = StringUtils.defaultIfBlank( findTableItemValue( CreateAttribute.TIME_TYPE_NAME ), "" );
@@ -194,7 +199,7 @@ public class ModelAnnotationActionPropertiesDialog extends ModelAnnotationAction
 
             // Ordinal Field options
             if ( name.equals( CreateAttribute.ORDINAL_FIELD_NAME ) ) {
-              return optionsResolver.resolveOrdinalFieldOptions( transMeta, stepname, getModelAnnotation() );
+              return optionsResolver.resolveAvailableFieldsOptions( transMeta, stepname, getModelAnnotation() );
             }
 
             // Measure Format String options

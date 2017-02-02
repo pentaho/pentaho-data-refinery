@@ -2,7 +2,7 @@
  *
  * Pentaho Community Edition Project: data-refinery-pdi-plugin
  *
- * Copyright (C) 2002-2016 by Pentaho : http://www.pentaho.com
+ * Copyright (C) 2002-2017 by Pentaho : http://www.pentaho.com
  *
  * *******************************************************************************
  *
@@ -27,8 +27,10 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import org.junit.Before;
 import org.junit.Test;
+
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+
 import org.pentaho.agilebi.modeler.models.annotations.CreateAttribute;
 import org.pentaho.agilebi.modeler.models.annotations.CreateMeasure;
 import org.pentaho.agilebi.modeler.models.annotations.ModelAnnotation;
@@ -135,12 +137,12 @@ public class OptionsResolverTest {
     ModelAnnotation<CreateAttribute> modelAnnotation =
         new ModelAnnotation<CreateAttribute>( ca );
 
-    String[] options = optionsResolver.resolveOrdinalFieldOptions( transMeta, "myStep", modelAnnotation );
+    String[] options = optionsResolver.resolveAvailableFieldsOptions( transMeta, "myStep", modelAnnotation );
 
     assertNotNull( options );
     assertTrue( options.length == 2 );
 
-    options = optionsResolver.resolveOrdinalFieldOptions( transMeta, "myStepError", modelAnnotation ); // error
+    options = optionsResolver.resolveAvailableFieldsOptions( transMeta, "myStepError", modelAnnotation ); // error
     assertTrue( options.length == 0 );
   }
 
