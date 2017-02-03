@@ -29,7 +29,7 @@
   </scm>
   <properties>
     <dependency.commons.io.revision>1.4</dependency.commons.io.revision>
-    <dependency.apache-xmlgraphics.revision>1.7</dependency.apache-xmlgraphics.revision>
+    <dependency.apache-xmlgraphics.revision>1.7.1</dependency.apache-xmlgraphics.revision>
     <dependency.kettle.revision>6.1-SNAPSHOT</dependency.kettle.revision>
     <dependency.bi-platform.revision>6.1-SNAPSHOT</dependency.bi-platform.revision>
     <dependency.data-access-plugin.revision>6.1-SNAPSHOT</dependency.data-access-plugin.revision>
