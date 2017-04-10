@@ -11,3 +11,4 @@ obf-lib/
 bin/
 dist/
 lib/
+.idea
