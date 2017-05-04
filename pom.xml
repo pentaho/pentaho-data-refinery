@@ -79,7 +79,7 @@
       <version>${dependency.kettle.revision}</version>
     </dependency>
     <dependency>
-      <groupId>org.pentaho</groupId>
+      <groupId>org.pentaho.kettle.plugins</groupId>
       <artifactId>meta-inject-plugin</artifactId>
       <version>${dependency.kettle.revision}</version>
     </dependency>
