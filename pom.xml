@@ -39,7 +39,6 @@
     <dependency.jackson.revision>1.9.2</dependency.jackson.revision>
     <dependency.data-access-plugin.revision>8.0-SNAPSHOT</dependency.data-access-plugin.revision>
     <dependency.pentaho-xul.revision>8.0-SNAPSHOT</dependency.pentaho-xul.revision>
-    <dependency.agile-bi.revision>8.0-SNAPSHOT</dependency.agile-bi.revision>
     <dependency.kettle.revision>8.0-SNAPSHOT</dependency.kettle.revision>
     <dependency.bi-platform.revision>8.0-SNAPSHOT</dependency.bi-platform.revision>
     <dependency.commons.lang.revision>2.6</dependency.commons.lang.revision>
