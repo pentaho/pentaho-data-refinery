@@ -2,7 +2,7 @@
  *
  * Pentaho Community Edition Project: data-refinery-pdi-plugin
  *
- * Copyright (C) 2002-2015 by Pentaho : http://www.pentaho.com
+ * Copyright (C) 2002-2017 by Pentaho : http://www.pentaho.com
  *
  * *******************************************************************************
  *
@@ -35,8 +35,10 @@ import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.UsernamePasswordCredentials;
 import org.apache.commons.httpclient.auth.AuthScope;
 import org.apache.commons.httpclient.methods.GetMethod;
+import org.pentaho.di.core.Const;
 import org.pentaho.di.core.refinery.publish.agilebi.BiServerConnection;
 import org.pentaho.di.core.refinery.publish.model.ResponseStatus;
+import org.pentaho.di.core.util.EnvUtil;
 
 import javax.ws.rs.core.MediaType;
 import java.io.File;
@@ -49,11 +51,14 @@ import java.net.URLEncoder;
  */
 public abstract class BaseRestUtil {
 
+  protected static final String KETTLE_DATA_REFINERY_HTTP_CLIENT_TIMEOUT = "KETTLE_DATA_REFINERY_HTTP_CLIENT_TIMEOUT";
+
   protected Client getAnonymousClient() {
     ClientConfig clientConfig = new DefaultClientConfig();
     clientConfig.getFeatures().put( JSONConfiguration.FEATURE_POJO_MAPPING, Boolean.TRUE );
     clientConfig.getProperties().put(
-        ClientConfig.PROPERTY_READ_TIMEOUT, 2000 ); // 2 sec. timeout
+        ClientConfig.PROPERTY_READ_TIMEOUT,
+            Const.toInt( EnvUtil.getSystemProperty( KETTLE_DATA_REFINERY_HTTP_CLIENT_TIMEOUT ), 2000 ) );  // 2 sec. timeout
     return Client.create( clientConfig );
   }
 
