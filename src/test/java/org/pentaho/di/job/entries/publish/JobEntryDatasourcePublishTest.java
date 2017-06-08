@@ -2,7 +2,7 @@
  *
  * Pentaho Community Edition Project: data-refinery-pdi-plugin
  *
- * Copyright (C) 2002-2016 by Pentaho : http://www.pentaho.com
+ * Copyright (C) 2002-2017 by Pentaho : http://www.pentaho.com
  *
  * *******************************************************************************
  *
@@ -39,7 +39,6 @@ import org.pentaho.di.core.database.DatabaseInterface;
 import org.pentaho.di.core.database.DatabaseMeta;
 import org.pentaho.di.core.exception.KettleException;
 import org.pentaho.di.core.logging.LogChannelInterface;
-import org.pentaho.di.core.refinery.DataRefineryConfig;
 import org.pentaho.di.core.refinery.publish.agilebi.BiServerConnection;
 import org.pentaho.di.core.refinery.publish.agilebi.ModelServerPublish;
 import org.pentaho.di.core.refinery.publish.model.DataSourceAclModel;
@@ -903,8 +902,6 @@ public class JobEntryDatasourcePublishTest {
   @Test( expected = KettleException.class )
   public void testPublishMondrianSchema() throws Exception {
     DatasourcePublishService datasourcePublishServiceSpy = spy( publishService );
-    DataRefineryConfig config = new DataRefineryConfig();
-    assertNotNull( config );
 
     JobEntryDatasourcePublish datasourcePublishSpy = spy( jobEntryDatasourcePublish );
 
