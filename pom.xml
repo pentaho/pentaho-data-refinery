@@ -78,7 +78,7 @@
       <version>${dependency.kettle.revision}</version>
     </dependency>
     <dependency>
-      <groupId>org.pentaho.kettle.plugins</groupId>
+      <groupId>org.pentaho.di.plugins</groupId>
       <artifactId>meta-inject-plugin</artifactId>
       <version>${dependency.kettle.revision}</version>
     </dependency>
@@ -213,8 +213,9 @@
     </dependency>
     <dependency>
       <groupId>pentaho-kettle</groupId>
-      <artifactId>kettle-engine-test</artifactId>
+      <artifactId>kettle-engine</artifactId>
       <version>${dependency.kettle.revision}</version>
+      <classifier>tests</classifier>
       <scope>test</scope>
     </dependency>
     <dependency>
