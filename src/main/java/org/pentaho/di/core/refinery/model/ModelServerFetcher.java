@@ -2,7 +2,7 @@
  *
  * Pentaho Community Edition Project: data-refinery-pdi-plugin
  *
- * Copyright (C) 2002-2017 by Pentaho : http://www.pentaho.com
+ * Copyright (C) 2002-2015 by Pentaho : http://www.pentaho.com
  *
  * *******************************************************************************
  *
@@ -22,9 +22,10 @@
 
 package org.pentaho.di.core.refinery.model;
 
-import com.google.gwt.safehtml.shared.UriUtils;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
+import org.apache.commons.httpclient.URIException;
+import org.apache.commons.httpclient.util.URIUtil;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.pentaho.di.core.exception.KettleException;
@@ -42,7 +43,6 @@ import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.zip.ZipEntry;
@@ -143,8 +143,8 @@ public class ModelServerFetcher extends ModelServerAction {
   }
 
   public String downloadAnalysisFile( String analysisId )
-          throws KettleException, AuthorizationException, ServerException, UnsupportedEncodingException {
-    String encodedId =  UriUtils.encode( analysisId );
+    throws KettleException, AuthorizationException, ServerException, URIException {
+    String encodedId = URIUtil.encodePath( analysisId );
     ClientResponse response =
         getResource( DataSourceType.ANALYSIS.getDownloadPath( encodedId ) ).get( ClientResponse.class );
     if ( isSuccess( response ) ) {
@@ -176,8 +176,8 @@ public class ModelServerFetcher extends ModelServerAction {
    * @throws ServerException 
    */
   public Domain downloadDswFile( String dswId )
-          throws KettleException, AuthorizationException, ServerException, UnsupportedEncodingException {
-    String encodedId = UriUtils.encode( dswId );
+    throws KettleException, AuthorizationException, ServerException, URIException {
+    String encodedId = URIUtil.encodePath( dswId );
     ClientResponse response = getResource( DataSourceType.DSW.getDownloadPath( encodedId ) ).get( ClientResponse.class );
     if ( isSuccess( response ) ) {
       try ( ZipInputStream zipInputStream = extractFromZip( dswId, response ) ) {
