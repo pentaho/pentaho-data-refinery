@@ -22,6 +22,7 @@
 
 package org.pentaho.di.core.refinery.publish.util;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
@@ -31,18 +32,21 @@ import com.sun.jersey.api.client.filter.HTTPBasicAuthFilter;
 import com.sun.jersey.api.json.JSONConfiguration;
 import com.sun.jersey.core.header.FormDataContentDisposition;
 import com.sun.jersey.multipart.FormDataMultiPart;
-import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.UsernamePasswordCredentials;
-import org.apache.commons.httpclient.auth.AuthScope;
-import org.apache.commons.httpclient.methods.GetMethod;
+import org.apache.http.HttpResponse;
+import org.apache.http.auth.AuthScope;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
 import org.pentaho.di.core.Const;
 import org.pentaho.di.core.refinery.publish.agilebi.BiServerConnection;
 import org.pentaho.di.core.refinery.publish.model.ResponseStatus;
 import org.pentaho.di.core.util.EnvUtil;
+import org.pentaho.di.core.util.HttpClientManager;
+import org.pentaho.di.core.util.HttpClientUtil;
 
 import javax.ws.rs.core.MediaType;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.URLEncoder;
 
@@ -119,20 +123,16 @@ public abstract class BaseRestUtil {
   }
 
   protected HttpClient getSimpleHttpClient( final BiServerConnection connection, boolean authenticate ) {
-
-    HttpClient client = new HttpClient();
+    HttpClientManager.HttpClientBuilderFacade clientBuilder = HttpClientManager.getInstance().createBuilder();
     if ( authenticate ) {
-      client.getState().setCredentials(
-          new AuthScope( AuthScope.ANY_HOST, AuthScope.ANY_PORT ),
-          new UsernamePasswordCredentials( connection.getUserId(), connection.getPassword() ) );
+      clientBuilder.setCredentials( connection.getUserId(), connection.getPassword(),
+              new AuthScope( AuthScope.ANY_HOST, AuthScope.ANY_PORT ) );
     }
-
-    return client;
+    return clientBuilder.build();
   }
 
-  protected GetMethod createGetMethod( final String url, final boolean authenticate ) {
-    GetMethod get = new GetMethod( url );
-    get.setDoAuthentication( authenticate );
+  protected HttpGet createGetMethod( final String url, final boolean authenticate ) {
+    HttpGet get = new HttpGet( url );
     return get;
   }
 
@@ -147,26 +147,26 @@ public abstract class BaseRestUtil {
         connection.getUrl().endsWith( "/" ) ? ( connection.getUrl() + restUrl )
             : ( connection.getUrl() + "/" + restUrl );
 
-    GetMethod get = createGetMethod( url, authenticate );
+    HttpGet get = createGetMethod( url, authenticate );
 
     try {
       // execute the GET
-      client.executeMethod( get );
+      HttpResponse response = client.execute( get );
 
-      responseStatus.setStatus( get.getStatusCode() );
-      responseStatus.setMessage( get.getResponseBodyAsString() );
+      responseStatus.setStatus( response.getStatusLine().getStatusCode() );
+      responseStatus.setMessage( getResponseString( response ) );
 
     } catch ( Exception e ) {
-
       responseStatus.setStatus( -1 );
       responseStatus.setMessage( e.getMessage() );
-
-    } finally {
-      // release any connection resources used by the method
-      get.releaseConnection();
     }
 
     return responseStatus;
+  }
+
+  @VisibleForTesting
+  String getResponseString( HttpResponse response ) throws IOException {
+    return HttpClientUtil.responseToString( response );
   }
 
   protected WebResource.Builder getDefaultWebResourceBuilder( WebResource webResource ) {

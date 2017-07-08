@@ -2,7 +2,7 @@
  *
  * Pentaho Community Edition Project: data-refinery-pdi-plugin
  *
- * Copyright (C) 2002-2016 by Pentaho : http://www.pentaho.com
+ * Copyright (C) 2002-2017 by Pentaho : http://www.pentaho.com
  *
  * *******************************************************************************
  *
@@ -29,7 +29,6 @@ import com.sun.jersey.api.client.WebResource.Builder;
 import com.sun.jersey.core.header.FormDataContentDisposition;
 import com.sun.jersey.multipart.FormDataMultiPart;
 
-import org.apache.commons.httpclient.util.URIUtil;
 import org.apache.commons.lang.StringUtils;
 import org.jfree.util.Log;
 import org.pentaho.database.model.DatabaseAccessType;
@@ -155,7 +154,6 @@ public class ModelServerPublish extends ModelServerAction {
   /**
    * Jersey call to delete connection
    *
-   * @param connectionName
    * @return
    */
   public boolean deleteMetadataXmi( String domainId ) {
@@ -166,7 +164,6 @@ public class ModelServerPublish extends ModelServerAction {
   /**
    * Jersey call to delete connection
    *
-   * @param connectionName
    * @return
    */
   public boolean deleteDSWXmi( String domainId ) {
@@ -341,7 +338,7 @@ public class ModelServerPublish extends ModelServerAction {
     try {
       String storeDomainUrl =
           biServerConnection.getUrl() + DATA_ACCESS_API_CONNECTION_GET + REST_NAME_PARM + connectionName;
-      storeDomainUrl = URIUtil.encodeQuery( storeDomainUrl );
+      storeDomainUrl =  URLEncoder.encode( storeDomainUrl, "UTF-8" );
       WebResource resource = getClient().resource( storeDomainUrl );
       Builder builder = resource
           .type( MediaType.APPLICATION_JSON )
