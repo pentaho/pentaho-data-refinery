@@ -2,7 +2,7 @@
  *
  * Pentaho Community Edition Project: data-refinery-pdi-plugin
  *
- * Copyright (C) 2002-2017 by Pentaho : http://www.pentaho.com
+ * Copyright (C) 2002-2015 by Pentaho : http://www.pentaho.com
  *
  * *******************************************************************************
  *
@@ -28,14 +28,13 @@ import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.client.filter.HTTPBasicAuthFilter;
 import com.sun.jersey.client.urlconnection.URLConnectionClientHandler;
 import com.sun.jersey.multipart.FormDataMultiPart;
+import org.apache.commons.httpclient.HttpClient;
+import org.apache.commons.httpclient.methods.GetMethod;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.*;
 
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -420,8 +419,8 @@ public class PublishRestUtilTest {
     publishRestUtil.simpleHttpGet( connection, "", false );
 
     HttpClient mockHttpClient = mock( HttpClient.class );
-    HttpGet getMethod = mock( HttpGet.class );
-    doReturn( "true" ).when( publishRestUtil ).getResponseString( any(HttpResponse.class) );
+    GetMethod getMethod = mock( GetMethod.class );
+    when( getMethod.getResponseBodyAsString() ).thenReturn( "true" );
     doReturn( mockHttpClient ).when( publishRestUtil ).getSimpleHttpClient( connection, false );
     doReturn( getMethod ).when( publishRestUtil ).createGetMethod( anyString(), anyBoolean() );
     publishRestUtil.simpleHttpGet( connection, "", false );
