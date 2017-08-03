@@ -42,7 +42,8 @@ import javax.xml.xpath.XPathFactory;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.zip.ZipEntry;
@@ -144,7 +145,12 @@ public class ModelServerFetcher extends ModelServerAction {
 
   public String downloadAnalysisFile( String analysisId )
           throws KettleException, AuthorizationException, ServerException, UnsupportedEncodingException {
-    String encodedId =  URLEncoder.encode( analysisId, "UTF-8" ).replace( "+", "%20" );
+    String encodedId;
+    try {
+      encodedId = new URI( null, null, analysisId, null ).getRawPath();
+    } catch ( URISyntaxException e ) {
+      throw new KettleException( e );
+    }
     ClientResponse response =
         getResource( DataSourceType.ANALYSIS.getDownloadPath( encodedId ) ).get( ClientResponse.class );
     if ( isSuccess( response ) ) {
@@ -177,7 +183,12 @@ public class ModelServerFetcher extends ModelServerAction {
    */
   public Domain downloadDswFile( String dswId )
           throws KettleException, AuthorizationException, ServerException, UnsupportedEncodingException {
-    String encodedId = URLEncoder.encode( dswId, "UTF-8" ).replace( "+", "%20" );
+    String encodedId;
+    try {
+      encodedId = new URI( null, null, dswId, null ).getRawPath();
+    } catch ( URISyntaxException e ) {
+      throw new KettleException( e );
+    }
     ClientResponse response = getResource( DataSourceType.DSW.getDownloadPath( encodedId ) ).get( ClientResponse.class );
     if ( isSuccess( response ) ) {
       try ( ZipInputStream zipInputStream = extractFromZip( dswId, response ) ) {
