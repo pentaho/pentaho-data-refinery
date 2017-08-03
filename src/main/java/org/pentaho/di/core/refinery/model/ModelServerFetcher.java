@@ -22,7 +22,6 @@
 
 package org.pentaho.di.core.refinery.model;
 
-import com.google.gwt.safehtml.shared.UriUtils;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
 import org.apache.commons.io.IOUtils;
@@ -43,6 +42,7 @@ import javax.xml.xpath.XPathFactory;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.zip.ZipEntry;
@@ -144,7 +144,7 @@ public class ModelServerFetcher extends ModelServerAction {
 
   public String downloadAnalysisFile( String analysisId )
           throws KettleException, AuthorizationException, ServerException, UnsupportedEncodingException {
-    String encodedId =  UriUtils.encode( analysisId );
+    String encodedId =  URLEncoder.encode( analysisId, "UTF-8" ).replace( "+", "%20" );
     ClientResponse response =
         getResource( DataSourceType.ANALYSIS.getDownloadPath( encodedId ) ).get( ClientResponse.class );
     if ( isSuccess( response ) ) {
@@ -177,7 +177,7 @@ public class ModelServerFetcher extends ModelServerAction {
    */
   public Domain downloadDswFile( String dswId )
           throws KettleException, AuthorizationException, ServerException, UnsupportedEncodingException {
-    String encodedId = UriUtils.encode( dswId );
+    String encodedId = URLEncoder.encode( dswId, "UTF-8" ).replace( "+", "%20" );
     ClientResponse response = getResource( DataSourceType.DSW.getDownloadPath( encodedId ) ).get( ClientResponse.class );
     if ( isSuccess( response ) ) {
       try ( ZipInputStream zipInputStream = extractFromZip( dswId, response ) ) {
