@@ -28,11 +28,6 @@ import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.client.filter.HTTPBasicAuthFilter;
 import com.sun.jersey.client.urlconnection.URLConnectionClientHandler;
 import com.sun.jersey.multipart.FormDataMultiPart;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.*;
-
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
@@ -47,6 +42,20 @@ import org.pentaho.di.core.refinery.publish.agilebi.BiServerConnection;
 import org.pentaho.di.core.refinery.publish.model.ResponseStatus;
 
 import java.io.File;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.doCallRealMethod;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.stub;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /**
  * @author Rowell Belen
@@ -163,7 +172,7 @@ public class PublishRestUtilTest {
     publishRestUtil.isUnauthenticatedUser( connection );
 
     verify( publishRestUtil ).simpleHttpGet( connection, PublishRestUtil.CAN_PUBLISH_PATH, true );
-    verify( publishRestUtil ).getSimpleHttpClient( connection, true );
+    verify( publishRestUtil ).getAuthenticateHttpClient( connection );
   }
 
   @Test
@@ -422,8 +431,8 @@ public class PublishRestUtilTest {
     HttpClient mockHttpClient = mock( HttpClient.class );
     HttpGet getMethod = mock( HttpGet.class );
     doReturn( "true" ).when( publishRestUtil ).getResponseString( any(HttpResponse.class) );
-    doReturn( mockHttpClient ).when( publishRestUtil ).getSimpleHttpClient( connection, false );
-    doReturn( getMethod ).when( publishRestUtil ).createGetMethod( anyString(), anyBoolean() );
+    doReturn( mockHttpClient ).when( publishRestUtil ).getSimpleHttpClient();
+    doReturn( getMethod ).when( publishRestUtil ).createGetMethod( anyString() );
     publishRestUtil.simpleHttpGet( connection, "", false );
   }
 

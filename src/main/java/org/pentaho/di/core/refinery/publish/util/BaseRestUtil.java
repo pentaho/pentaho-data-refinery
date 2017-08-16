@@ -34,8 +34,12 @@ import com.sun.jersey.core.header.FormDataContentDisposition;
 import com.sun.jersey.multipart.FormDataMultiPart;
 import org.apache.http.HttpResponse;
 import org.apache.http.auth.AuthScope;
+import org.apache.http.auth.UsernamePasswordCredentials;
+import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.protocol.HttpClientContext;
+import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.pentaho.di.core.Const;
 import org.pentaho.di.core.refinery.publish.agilebi.BiServerConnection;
 import org.pentaho.di.core.refinery.publish.model.ResponseStatus;
@@ -122,16 +126,7 @@ public abstract class BaseRestUtil {
     return part;
   }
 
-  protected HttpClient getSimpleHttpClient( final BiServerConnection connection, boolean authenticate ) {
-    HttpClientManager.HttpClientBuilderFacade clientBuilder = HttpClientManager.getInstance().createBuilder();
-    if ( authenticate ) {
-      clientBuilder.setCredentials( connection.getUserId(), connection.getPassword(),
-              new AuthScope( AuthScope.ANY_HOST, AuthScope.ANY_PORT ) );
-    }
-    return clientBuilder.build();
-  }
-
-  protected HttpGet createGetMethod( final String url, final boolean authenticate ) {
+  protected HttpGet createGetMethod( final String url ) {
     HttpGet get = new HttpGet( url );
     return get;
   }
@@ -141,17 +136,25 @@ public abstract class BaseRestUtil {
 
     ResponseStatus responseStatus = new ResponseStatus();
 
-    HttpClient client = getSimpleHttpClient( connection, authenticate );
+    HttpClientContext authContext = null;
+    HttpClient client = null;
+
+    if ( authenticate ) {
+      //authContext = createAuthContext( connection );
+      client = getAuthenticateHttpClient( connection );
+    } else {
+      client = getSimpleHttpClient();
+    }
 
     final String url =
         connection.getUrl().endsWith( "/" ) ? ( connection.getUrl() + restUrl )
             : ( connection.getUrl() + "/" + restUrl );
 
-    HttpGet get = createGetMethod( url, authenticate );
+    HttpGet get = createGetMethod( url );
 
     try {
       // execute the GET
-      HttpResponse response = client.execute( get );
+      HttpResponse response = ( authContext == null ) ? client.execute( get ) : client.execute( get, authContext );
 
       responseStatus.setStatus( response.getStatusLine().getStatusCode() );
       responseStatus.setMessage( getResponseString( response ) );
@@ -165,6 +168,18 @@ public abstract class BaseRestUtil {
   }
 
   @VisibleForTesting
+  HttpClient getSimpleHttpClient() {
+    return HttpClientManager.getInstance().createDefaultClient();
+  }
+
+  @VisibleForTesting
+  HttpClient getAuthenticateHttpClient( BiServerConnection connection ) {
+    HttpClientManager.HttpClientBuilderFacade clientBuilder = HttpClientManager.getInstance().createBuilder();
+    clientBuilder.setCredentials( connection.getUserId(), connection.getPassword() );
+    return clientBuilder.build();
+  }
+
+  @VisibleForTesting
   String getResponseString( HttpResponse response ) throws IOException {
     return HttpClientUtil.responseToString( response );
   }
@@ -174,5 +189,15 @@ public abstract class BaseRestUtil {
         .type( MediaType.APPLICATION_JSON )
         .type( MediaType.APPLICATION_XML )
         .accept( MediaType.WILDCARD );
+  }
+
+  private HttpClientContext createAuthContext( BiServerConnection connection ) {
+    HttpClientContext context = HttpClientContext.create();
+    CredentialsProvider provider = new BasicCredentialsProvider();
+    UsernamePasswordCredentials credentials =
+        new UsernamePasswordCredentials( connection.getUserId(), connection.getPassword() );
+    provider.setCredentials( AuthScope.ANY, credentials );
+    context.setCredentialsProvider( provider );
+    return context;
   }
 }
