@@ -183,6 +183,7 @@ public class JobEntryBuildModelTest {
         return connectionValidator;
       }
 
+      @Override public void setParentJobMeta ( JobMeta jb ) { }
       @Override public ProvidesDatabaseConnectionInformation getConnectionInfo() {
         return connectionInfo;
       }
