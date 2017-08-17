@@ -2,7 +2,7 @@
  *
  * Pentaho Community Edition Project: data-refinery-pdi-plugin
  *
- * Copyright (C) 2002-2016 by Pentaho : http://www.pentaho.com
+ * Copyright (C) 2002-2017 by Pentaho : http://www.pentaho.com
  *
  * *******************************************************************************
  *
@@ -27,10 +27,6 @@ import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.multipart.BodyPart;
 import com.sun.jersey.multipart.FormDataMultiPart;
-import java.io.InputStream;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Properties;
 import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
@@ -48,6 +44,11 @@ import org.pentaho.di.core.exception.KettleException;
 import org.pentaho.di.core.logging.LogChannelInterface;
 import org.pentaho.di.core.refinery.publish.model.DataSourceAclModel;
 import org.pentaho.di.core.refinery.publish.util.JAXBUtils;
+
+import java.io.InputStream;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Properties;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -146,6 +147,15 @@ public class ModelServerPublishTest {
     when( clientResponse.getStatus() ).thenReturn( 200 );
     when( clientResponse.getEntity( String.class ) ).thenReturn( json );
     assertNotNull( modelServerPublishSpy.connectionNameExists( "test" ) );
+  }
+
+  @Test
+  public void testConstructAbsoluteUrl() throws Exception {
+    String connectionName = "local pentaho";
+    String actual = modelServerPublishSpy.constructAbsoluteUrl( connectionName );
+    String expected
+      = "http://localhost:8080/pentaho/plugin/data-access/api/connection/getresponse?name=local%20pentaho";
+    assertEquals( expected, actual );
   }
 
   @Test

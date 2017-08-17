@@ -23,6 +23,7 @@
 
 package org.pentaho.di.core.refinery.publish.agilebi;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.client.WebResource.Builder;
@@ -336,9 +337,7 @@ public class ModelServerPublish extends ModelServerAction {
     }
 
     try {
-      String storeDomainUrl =
-          biServerConnection.getUrl() + DATA_ACCESS_API_CONNECTION_GET + REST_NAME_PARM + connectionName;
-      storeDomainUrl =  URLEncoder.encode( storeDomainUrl, "UTF-8" );
+      String storeDomainUrl = constructAbsoluteUrl( connectionName );
       WebResource resource = getClient().resource( storeDomainUrl );
       Builder builder = resource
           .type( MediaType.APPLICATION_JSON )
@@ -372,5 +371,11 @@ public class ModelServerPublish extends ModelServerAction {
 
   public void setAclModel( DataSourceAclModel aclModel ) {
     this.aclModel = aclModel;
+  }
+
+  @VisibleForTesting
+  String constructAbsoluteUrl( String connectionName ) {
+    String url = biServerConnection.getUrl() + DATA_ACCESS_API_CONNECTION_GET + REST_NAME_PARM + connectionName;
+    return url.replace( " ", "%20" );
   }
 }
