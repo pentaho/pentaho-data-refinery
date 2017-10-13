@@ -54,13 +54,10 @@ import org.w3c.dom.Node;
 
 import java.util.List;
 
-/**
- * @author Rowell Belen
- */
 @org.pentaho.di.core.annotations.JobEntry( id = "DATASOURCE_PUBLISH",
   i18nPackageName = "org.pentaho.di.job.entries.publish", image = "publish.svg",
   name = "JobEntryDatasourcePublish.JobName", description = "JobEntryDatasourcePublish.JobDescription",
-  documentationUrl = "0N0/060/0B0/020/0D0",
+  documentationUrl = "Data/Streamlined_Data_Refinery/0B0/020/0D0",
   categoryDescription = "JobCategory.Category.Modeling" )
 public class JobEntryDatasourcePublish extends JobEntryBase implements Cloneable, JobEntryInterface {
 

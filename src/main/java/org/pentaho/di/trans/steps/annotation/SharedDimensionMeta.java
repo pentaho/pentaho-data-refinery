@@ -20,7 +20,6 @@
  *
  ********************************************************************************/
 
-
 package org.pentaho.di.trans.steps.annotation;
 
 import org.pentaho.agilebi.modeler.models.annotations.CreateAttribute;
@@ -43,7 +42,7 @@ import java.util.List;
 @Step( id = "CreateSharedDimensions", image = "SharedDimensions.svg",
     i18nPackageName = "org.pentaho.di.trans.steps.annotation", name = "SharedDimension.TransName",
     description = "SharedDimension.TransDescription",
-    documentationUrl = "0N0/060/0B0/020/0C0",
+    documentationUrl = "Data/Streamlined_Data_Refinery/0B0/020/0C0",
     categoryDescription = "i18n:org.pentaho.di.trans.step:BaseStep.Category.Flow" )
 public class SharedDimensionMeta extends BaseAnnotationMeta {
 
