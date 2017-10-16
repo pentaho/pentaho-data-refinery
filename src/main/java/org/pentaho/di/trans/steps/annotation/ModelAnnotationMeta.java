@@ -32,15 +32,12 @@ import org.pentaho.di.core.injection.InjectionSupported;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Created by rfellows on 6/17/16.
- */
 @InjectionSupported( localizationPrefix = "AnnotateStream.Injection.",
   groups = {"MEASURE", "ATTRIBUTE", "LINK_DIMENSION", "CALC_MEASURE"} )
 @Step( id = "FieldMetadataAnnotation", image = "ModelAnnotation.svg",
   i18nPackageName = "org.pentaho.di.trans.steps.annotation", name = "ModelAnnotation.TransName",
   description = "ModelAnnotation.TransDescription",
-  documentationUrl = "0N0/060/0B0/020/0B0",
+  documentationUrl = "Data/Streamlined_Data_Refinery/0B0/020/0B0",
   categoryDescription = "i18n:org.pentaho.di.trans.step:BaseStep.Category.Flow" )
 public class ModelAnnotationMeta extends BaseAnnotationMeta {
   private static Class<?> PKG = ModelAnnotationMeta.class; // for i18n purposes, needed by Translator2!!

@@ -78,7 +78,7 @@ import static org.pentaho.platform.util.StringUtil.isEmpty;
 
 @org.pentaho.di.core.annotations.JobEntry( id = JobEntryBuildModel.PLUGIN_ID,
     categoryDescription = "JobCategory.Category.Modeling", i18nPackageName = "org.pentaho.di.job.entries.build",
-    documentationUrl = "0N0/060/0B0/020/0A0", image = "model_entry.svg",
+    documentationUrl = "Data/Streamlined_Data_Refinery/0B0/020/0A0", image = "model_entry.svg",
     name = "BuildModelJob.Name", description = "BuildModelJob.Description" )
 public class JobEntryBuildModel extends JobEntryBase implements JobEntryInterface, Cloneable {
 
