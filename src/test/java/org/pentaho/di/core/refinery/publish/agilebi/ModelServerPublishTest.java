@@ -46,6 +46,7 @@ import org.pentaho.di.core.refinery.publish.model.DataSourceAclModel;
 import org.pentaho.di.core.refinery.publish.util.JAXBUtils;
 
 import java.io.InputStream;
+import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Properties;
@@ -147,6 +148,11 @@ public class ModelServerPublishTest {
     when( clientResponse.getStatus() ).thenReturn( 200 );
     when( clientResponse.getEntity( String.class ) ).thenReturn( json );
     assertNotNull( modelServerPublishSpy.connectionNameExists( "test" ) );
+
+    // valid
+    String testStr = "クイズ";
+    modelServerPublishSpy.connectionNameExists( testStr );
+    verify( modelServerPublishSpy ).constructAbsoluteUrl( URLEncoder.encode( testStr, "UTF-8" ) );
   }
 
   @Test
