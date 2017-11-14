@@ -337,7 +337,7 @@ public class ModelServerPublish extends ModelServerAction {
     }
 
     try {
-      String storeDomainUrl = constructAbsoluteUrl( connectionName );
+      String storeDomainUrl = constructAbsoluteUrl( URLEncoder.encode( connectionName, "UTF-8" ) );
       WebResource resource = getClient().resource( storeDomainUrl );
       Builder builder = resource
           .type( MediaType.APPLICATION_JSON )
