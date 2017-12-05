@@ -426,12 +426,25 @@ public class DswModeler {
     }
 
     public boolean equals( ColumnKey other ) {
-      return this.dataType.equals( other.dataType )
-          && this.columnName.equals( other.columnName );
+      return this.columnName.equals( other.columnName ) && ( this.dataType.equals( other.dataType ) || (
+        DataType.TIMESTAMP.equals( this.dataType ) && DataType.DATE.equals( other.dataType )
+          || DataType.DATE.equals( this.dataType ) && DataType.TIMESTAMP.equals( other.dataType ) ) );
     }
 
     public int hashCode() {
-      return columnName.hashCode() + 31 * dataType.hashCode();
+      int hash;
+      switch ( dataType ) {
+        case TIMESTAMP:
+        case DATE: {
+          hash = DataType.DATE.hashCode();
+          break;
+        }
+        default: {
+          hash = dataType.hashCode();
+          break;
+        }
+      }
+      return columnName.hashCode() + 31 * hash;
     }
 
     public String getColumnName() {
