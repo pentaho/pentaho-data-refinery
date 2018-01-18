@@ -38,7 +38,7 @@
     <dependency.jersey.revision>1.19.1</dependency.jersey.revision>
     <dependency.jackson.revision>1.9.2</dependency.jackson.revision>
     <pentaho-data-access.version>8.1.0.0-SNAPSHOT</pentaho-data-access.version>
-    <pentaho-xul.version>8.1.0.0-SNAPSHOT</pentaho-xul.version>
+    <commons-xul.version>8.1.0.0-SNAPSHOT</commons-xul.version>
     <pdi.version>8.1.0.0-SNAPSHOT</pdi.version>
     <platform.version>8.1.0.0-SNAPSHOT</platform.version>
     <dependency.commons.lang.revision>2.6</dependency.commons.lang.revision>
@@ -83,14 +83,14 @@
       <version>${pdi.version}</version>
     </dependency>
     <dependency>
-      <groupId>pentaho</groupId>
-      <artifactId>pentaho-xul-core</artifactId>
-      <version>${pentaho-xul.version}</version>
+      <groupId>org.pentaho</groupId>
+      <artifactId>commons-xul-core</artifactId>
+      <version>${commons-xul.version}</version>
     </dependency>
     <dependency>
-      <groupId>pentaho</groupId>
-      <artifactId>pentaho-xul-swt</artifactId>
-      <version>${pentaho-xul.version}</version>
+      <groupId>org.pentaho</groupId>
+      <artifactId>commons-xul-swt</artifactId>
+      <version>${commons-xul.version}</version>
     </dependency>
     <dependency>
       <groupId>pentaho</groupId>
