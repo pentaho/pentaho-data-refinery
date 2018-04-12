@@ -2,7 +2,7 @@
  *
  * Pentaho Community Edition Project: data-refinery-pdi-plugin
  *
- * Copyright (C) 2002-2017 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2018 by Hitachi Vantara : http://www.pentaho.com
  *
  * *******************************************************************************
  *
@@ -22,12 +22,11 @@
 
 package org.pentaho.di.core.refinery.publish.util;
 
-import com.sun.jersey.api.json.JSONJAXBContext;
-import com.sun.jersey.api.json.JSONMarshaller;
-import com.sun.jersey.api.json.JSONUnmarshaller;
+import com.fasterxml.jackson.databind.MapperFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.module.jaxb.JaxbAnnotationModule;
 
 import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBElement;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 
@@ -38,6 +37,14 @@ import java.io.StringWriter;
  * @author Rowell Belen
  */
 public class JAXBUtils {
+
+  private static ObjectMapper mapper = new ObjectMapper();
+  private static JaxbAnnotationModule module = new JaxbAnnotationModule();
+
+  static {
+    mapper.configure( MapperFeature.USE_STD_BEAN_NAMING, true );
+    mapper.registerModule( module );
+  }
 
   public static String marshallToXml( Object source ) throws Exception {
     JAXBContext jaxbContext = JAXBContext.newInstance( source.getClass() );
@@ -57,22 +64,11 @@ public class JAXBUtils {
   }
 
   public static String marshallToJson( Object source ) throws Exception {
-    JAXBContext jaxbContext = JAXBContext.newInstance( source.getClass() );
-    Marshaller marshaller = jaxbContext.createMarshaller();
-    marshaller.setProperty( Marshaller.JAXB_FORMATTED_OUTPUT, Boolean.TRUE );
-    JSONMarshaller jsonMarshaller = JSONJAXBContext.getJSONMarshaller( marshaller, jaxbContext );
-    StringWriter writer = new StringWriter();
-    jsonMarshaller.marshallToJSON( source, writer );
-    return writer.toString();
+    return mapper.writeValueAsString( source );
   }
 
   public static <T> T unmarshalFromJson( final String json, Class<T> destinationClass ) throws Exception {
-    JAXBContext jaxbContext = JAXBContext.newInstance( destinationClass );
-    Unmarshaller unmarshaller = jaxbContext.createUnmarshaller();
-    JSONUnmarshaller jsonUnmarshaller = JSONJAXBContext.getJSONUnmarshaller( unmarshaller, jaxbContext );
-    StringReader reader = new StringReader( json );
-    JAXBElement<T> element = jsonUnmarshaller.unmarshalJAXBElementFromJSON( reader, destinationClass );
-    return element.getValue();
+    return mapper.readValue( json, destinationClass );
   }
 
 }
