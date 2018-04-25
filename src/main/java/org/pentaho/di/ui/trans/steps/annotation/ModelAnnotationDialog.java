@@ -2,7 +2,7 @@
  *
  * Pentaho Community Edition Project: data-refinery-pdi-plugin
  *
- * Copyright (C) 2002-2017 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2018 by Hitachi Vantara : http://www.pentaho.com
  *
  * *******************************************************************************
  *
@@ -429,7 +429,7 @@ public class ModelAnnotationDialog extends BaseAnnotationStepDialog {
   @Override
   protected Image getImageIcon() {
     return SwtSvgImageUtil.getImage( shell.getDisplay(), getClass().getClassLoader(), "ModelAnnotation.svg",
-        ConstUI.ICON_SIZE, ConstUI.ICON_SIZE );
+        ConstUI.LARGE_ICON_SIZE, ConstUI.LARGE_ICON_SIZE );
   }
 
   @Override

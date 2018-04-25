@@ -2,7 +2,7 @@
  *
  * Pentaho Community Edition Project: data-refinery-pdi-plugin
  *
- * Copyright (C) 2002-2017 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2018 by Hitachi Vantara : http://www.pentaho.com
  *
  * *******************************************************************************
  *
@@ -72,7 +72,7 @@ public class SharedDimensionDialog extends BaseAnnotationStepDialog {
   protected Image getImageIcon() {
     return SwtSvgImageUtil
         .getUniversalImage( shell.getDisplay(), getClass().getClassLoader(), "SharedDimensions.svg" )
-        .getAsBitmapForSize( shell.getDisplay(), ConstUI.ICON_SIZE, ConstUI.ICON_SIZE );
+        .getAsBitmapForSize( shell.getDisplay(), ConstUI.LARGE_ICON_SIZE, ConstUI.LARGE_ICON_SIZE );
   }
 
   @Override
