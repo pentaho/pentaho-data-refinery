@@ -2,7 +2,7 @@
  *
  * Pentaho Community Edition Project: data-refinery-pdi-plugin
  *
- * Copyright (C) 2002-2017 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2018 by Hitachi Vantara : http://www.pentaho.com
  *
  * *******************************************************************************
  *
@@ -59,7 +59,15 @@ import org.pentaho.di.ui.core.gui.WindowProperty;
 import org.pentaho.di.ui.job.dialog.JobDialog;
 import org.pentaho.di.ui.job.entry.JobEntryDialog;
 import org.pentaho.di.ui.util.SwtSvgImageUtil;
-import static org.pentaho.di.core.refinery.UIBuilder.*;
+import static org.pentaho.di.core.refinery.UIBuilder.DEFAULT_CONTROLS_TOP_MARGIN;
+import static org.pentaho.di.core.refinery.UIBuilder.SHELL_MARGIN_WIDTH;
+import static org.pentaho.di.core.refinery.UIBuilder.DEFAULT_LABEL_INPUT_MARGIN;
+import static org.pentaho.di.core.refinery.UIBuilder.SHELL_MIN_WIDTH;
+import static org.pentaho.di.core.refinery.UIBuilder.SHELL_MARGIN_HEIGHT;
+import static org.pentaho.di.core.refinery.UIBuilder.GROUP_MARGIN_WIDTH;
+import static org.pentaho.di.core.refinery.UIBuilder.GROUP_MARGIN_HEIGHT;
+import static org.pentaho.di.core.refinery.UIBuilder.DEFAULT_TEXT_SIZE_REGULAR;
+import static org.pentaho.di.core.refinery.UIBuilder.createFormComposite;
 
 /**
  * boilerplate goes here.
@@ -248,10 +256,10 @@ public abstract class JobEntryDialogBoilerplate<T extends JobEntryInterface>
     if ( StringUtils.isNotBlank( getJobIcon() ) ) {
       wIcon = new Label( parent, SWT.CENTER );
       Image img = SwtSvgImageUtil.getImage( shell.getDisplay(), getClass().getClassLoader(),
-          getJobIcon(), ConstUI.ICON_SIZE, ConstUI.ICON_SIZE );
+          getJobIcon(), ConstUI.LARGE_ICON_SIZE, ConstUI.LARGE_ICON_SIZE );
       wIcon.setImage( img );
       FormData fdIcon = new FormData();
-      fdIcon.top = new FormAttachment( 0, 5 );
+      fdIcon.top = new FormAttachment( 0, 0 );
       fdIcon.right = new FormAttachment( 100 );
       wIcon.setLayoutData( fdIcon );
       PropsUI.getInstance().setLook( wIcon );
