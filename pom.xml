@@ -36,7 +36,7 @@
     <pentaho-osgi-bundles.version>9.0.0.0-SNAPSHOT</pentaho-osgi-bundles.version>
     <dependency.commons.io.revision>1.4</dependency.commons.io.revision>
     <dependency.jersey.revision>1.19.1</dependency.jersey.revision>
-    <dependency.jackson.revision>2.9.5</dependency.jackson.revision>
+    <dependency.jackson.revision>2.9.4</dependency.jackson.revision>
     <pentaho-data-access.version>9.0.0.0-SNAPSHOT</pentaho-data-access.version>
     <commons-xul.version>9.0.0.0-SNAPSHOT</commons-xul.version>
     <pdi.version>9.0.0.0-SNAPSHOT</pdi.version>
