@@ -2,7 +2,7 @@
  *
  * Pentaho Community Edition Project: data-refinery-pdi-plugin
  *
- * Copyright (C) 2002-2017 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2018 by Hitachi Vantara : http://www.pentaho.com
  *
  * *******************************************************************************
  *
@@ -31,7 +31,6 @@ import org.pentaho.di.core.parameters.UnknownParamException;
 import org.pentaho.di.repository.Repository;
 import org.pentaho.di.trans.TransMeta;
 import org.pentaho.di.trans.step.StepMeta;
-import org.pentaho.di.trans.steps.metainject.MetaInjectMeta;
 import org.pentaho.metastore.api.IMetaStore;
 
 import java.util.HashMap;
@@ -45,13 +44,17 @@ public class TransUtil {
         new HashMap<String, ProvidesDatabaseConnectionInformation>();
     for ( StepMeta stepMeta : transMeta.getSteps() ) {
       ProvidesDatabaseConnectionInformation info = getDatabaseConnectionInformation( stepMeta.getStepMetaInterface() );
+
       if ( info != null ) {
         stepMap.put( StringUtils.trimToEmpty( stepMeta.getName() ), info );
-      } else if ( stepMeta.getStepMetaInterface() instanceof MetaInjectMeta ) {
-        MetaInjectMeta metaInject = ( (MetaInjectMeta) stepMeta.getStepMetaInterface() );
-        TransMeta injectedTransMeta =
-            MetaInjectMeta.loadTransformationMeta( metaInject, repository, metastore, transMeta );
-        stepMap.putAll( collectOutputStepInTrans( injectedTransMeta, repository, metastore ) );
+      } else if ( stepMeta != null && stepMeta.getStepMetaInterface() != null ) {
+
+        TransMeta relatedTransMeta = stepMeta.getStepMetaInterface().fetchTransMeta( stepMeta.getStepMetaInterface(),
+            repository, metastore, transMeta );
+
+        if ( relatedTransMeta != null ) {
+          stepMap.putAll( collectOutputStepInTrans( relatedTransMeta, repository, metastore ) );
+        }
       }
     }
     return stepMap;
