@@ -2,7 +2,7 @@
  *
  * Pentaho Community Edition Project: data-refinery-pdi-plugin
  *
- * Copyright (C) 2002-2017 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2018 by Hitachi Vantara : http://www.pentaho.com
  *
  * *******************************************************************************
  *
@@ -27,7 +27,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.mockito.Mockito;
 import org.pentaho.agilebi.modeler.ModelerException;
 import org.pentaho.agilebi.modeler.models.annotations.CreateMeasure;
 import org.pentaho.agilebi.modeler.models.annotations.ModelAnnotation;
@@ -85,11 +84,20 @@ import java.io.InputStream;
 import java.util.List;
 
 import static java.util.Arrays.asList;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 public class JobEntryBuildModelTest {
   private LogChannelInterface mockLog;
@@ -151,6 +159,9 @@ public class JobEntryBuildModelTest {
     // Call transformation to load table
     trans = new JobEntryTrans();
     trans.setName( "Load Market Data Table" );
+    trans.parameters = new String[0];
+    trans.parameterFieldNames = new String[0];
+    trans.parameterValues = new String[0];
     JobEntryCopy transCopy = new JobEntryCopy( trans );
     transCopy.setDrawn();
     job.getJobMeta().addJobEntry( transCopy );
@@ -183,7 +194,7 @@ public class JobEntryBuildModelTest {
         return connectionValidator;
       }
 
-      @Override public void setParentJobMeta ( JobMeta jb ) { }
+      @Override public void setParentJobMeta( JobMeta jb ) { }
       @Override public ProvidesDatabaseConnectionInformation getConnectionInfo() {
         return connectionInfo;
       }
@@ -201,7 +212,7 @@ public class JobEntryBuildModelTest {
 
     setJobMeta();
     setAnnotations();
-    mockLog = Mockito.mock( LogChannelInterface.class );
+    mockLog = mock( LogChannelInterface.class );
   }
 
   private void setAnnotations() {
@@ -362,12 +373,12 @@ public class JobEntryBuildModelTest {
         .thenReturn( existingSchema );
     String expectedSchema = IOUtils.toString(
         getClass().getResourceAsStream( "/org/pentaho/di/core/refinery/model/resources/salesTestAnalysisSchema.xml" ) );
-    Mockito.when( modelServerFetcher.downloadAnalysisFile( someModelName ) )
+    when( modelServerFetcher.downloadAnalysisFile( someModelName ) )
         .thenReturn( IOUtils
             .toString(
                 getClass().getResourceAsStream( "/org/pentaho/di/core/refinery/model/resources/testAnalysisSchema.xml" ) ) );
 
-    Mockito.when( modelServerFetcher.fetchAnalysisList() ).thenReturn( asList( "someModelName" ) );
+    when( modelServerFetcher.fetchAnalysisList() ).thenReturn( asList( "someModelName" ) );
 
     when( analysisModeler.replaceTableAndSchemaNames(
         eq( existingSchema ), eq( "Car Sales Analysis" ) ) )
@@ -434,7 +445,7 @@ public class JobEntryBuildModelTest {
     buildJobEntry.setSelectedModel( "someModelName" );
     buildJobEntry.setUseExistingModel( true );
 
-    Mockito.when( modelServerFetcher.fetchAnalysisList() ).thenReturn( asList( "otherModel" ) );
+    when( modelServerFetcher.fetchAnalysisList() ).thenReturn( asList( "otherModel" ) );
 
     doNothing().when( connectionValidator ).validateConnectionInRuntime();
     job.run();
@@ -587,7 +598,7 @@ public class JobEntryBuildModelTest {
 
     JobEntryBuildModel jobEntry = new JobEntryBuildModelForTest( jobCopies );
     jobEntry.setOutputStep( "service two" );
-    DataServiceContext dataServiceContext = Mockito.mock( DataServiceContext.class );
+    DataServiceContext dataServiceContext = mock( DataServiceContext.class );
     jobEntry.setDataServiceContext( dataServiceContext );
     final DataServiceMetaStoreUtil metaStoreUtil = mock( DataServiceMetaStoreUtil.class );
     when( dataServiceContext.getMetaStoreUtil() ).thenReturn( metaStoreUtil );

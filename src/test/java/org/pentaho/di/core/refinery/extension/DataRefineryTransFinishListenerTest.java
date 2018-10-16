@@ -2,7 +2,7 @@
  *
  * Pentaho Community Edition Project: data-refinery-pdi-plugin
  *
- * Copyright (C) 2002-2017 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2018 by Hitachi Vantara : http://www.pentaho.com
  *
  * *******************************************************************************
  *
@@ -338,6 +338,9 @@ public class DataRefineryTransFinishListenerTest {
     JobEntryTrans jeTrans = getTransAsJobEntry( transMeta, annotStepMeta, rowMetaDb,
         new Object[] { "a", 42d } );
     jeTrans.setName( "trans" );
+    jeTrans.parameters = new String[0];
+    jeTrans.parameterFieldNames = new String[0];
+    jeTrans.parameterValues = new String[0];
     JobEntryCopy jeTransCopy = new JobEntryCopy( jeTrans );
     jeTransCopy.setDrawn();
     jobMeta.addJobEntry( jeTransCopy );

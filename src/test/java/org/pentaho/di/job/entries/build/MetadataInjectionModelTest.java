@@ -2,7 +2,7 @@
  *
  * Pentaho Community Edition Project: data-refinery-pdi-plugin
  *
- * Copyright (C) 2002-2017 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2018 by Hitachi Vantara : http://www.pentaho.com
  *
  * *******************************************************************************
  *
@@ -28,7 +28,6 @@ import static org.junit.Assert.assertTrue;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -45,8 +44,6 @@ import org.pentaho.di.core.database.Database;
 import org.pentaho.di.core.database.DatabaseMeta;
 import org.pentaho.di.core.extension.ExtensionPoint;
 import org.pentaho.di.core.extension.ExtensionPointPluginType;
-import org.pentaho.di.core.plugins.Plugin;
-import org.pentaho.di.core.plugins.PluginInterface;
 import org.pentaho.di.core.plugins.PluginRegistry;
 import org.pentaho.di.core.plugins.StepPluginType;
 import org.pentaho.di.core.refinery.extension.DataRefineryTransFinishListener;
@@ -58,6 +55,7 @@ import org.pentaho.di.job.entries.special.JobEntrySpecial;
 import org.pentaho.di.job.entries.trans.JobEntryTrans;
 import org.pentaho.di.job.entry.JobEntryCopy;
 import org.pentaho.di.trans.step.StepMetaInterface;
+import org.pentaho.di.trans.steps.metainject.MetaInjectMeta;
 import org.pentaho.metadata.model.Domain;
 import org.pentaho.metadata.model.LogicalModel;
 import org.pentaho.metadata.model.concept.types.AggregationType;
@@ -79,14 +77,13 @@ public class MetadataInjectionModelTest {
 
     Map<Class<?>, String> classMap = new HashMap<>();
     classMap.put( StepMetaInterface.class, "org.pentaho.di.trans.steps.metainject.MetaInjectMeta" );
-    List<String> libraries = new ArrayList<>();
-
-    PluginInterface plugin =
-      new Plugin( new String[] { "MetaInject" }, StepPluginType.class, StepMetaInterface.class, "Flow",
-        "MetaInjectMeta", null, null, false, false, classMap, libraries, null, null );
-    PluginRegistry.getInstance().registerPlugin( StepPluginType.class, plugin );
 
     PluginRegistry.addPluginType( StepPluginType.getInstance() );
+
+    StepPluginType.getInstance().handlePluginAnnotation(
+      MetaInjectMeta.class,
+      MetaInjectMeta.class.getAnnotation( org.pentaho.di.core.annotations.Step.class ),
+      Collections.emptyList(), false, null );
 
     ExtensionPoint epAnnotation = DataRefineryTransFinishListener.class.getAnnotation( ExtensionPoint.class );
     ExtensionPointPluginType.getInstance().handlePluginAnnotation(
@@ -126,6 +123,9 @@ public class MetadataInjectionModelTest {
     // Call transformation to load table
     trans = new JobEntryTrans();
     trans.setName( "Call Transformation" );
+    trans.parameters = new String[0];
+    trans.parameterFieldNames = new String[0];
+    trans.parameterValues = new String[0];
     JobEntryCopy transCopy = new JobEntryCopy( trans );
     transCopy.setDrawn();
     job.getJobMeta().addJobEntry( transCopy );
