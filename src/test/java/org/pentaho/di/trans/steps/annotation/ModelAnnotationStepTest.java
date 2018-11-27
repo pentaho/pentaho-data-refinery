@@ -59,24 +59,7 @@ import java.util.List;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
-public class ModelAnnotationStepTest {
-
-  private static LogChannelInterface mockLog;
-  private static LogChannelInterfaceFactory existingChannel;
-
-  @BeforeClass
-  public static void setUpClass() throws Exception {
-    LogChannelInterfaceFactory interfaceFactory = mock( LogChannelInterfaceFactory.class );
-    existingChannel = KettleLogStore.getLogChannelInterfaceFactory();
-    KettleLogStore.setLogChannelInterfaceFactory( interfaceFactory );
-    mockLog = mock( LogChannelInterface.class );
-    when( interfaceFactory.create( any(), any() ) ).thenReturn( mockLog );
-  }
-
-  @AfterClass
-  public static void tearDownClass() throws Exception {
-    KettleLogStore.setLogChannelInterfaceFactory( existingChannel );
-  }
+public class ModelAnnotationStepTest extends InitializeLogging {
 
   @After
   public void tearDown() throws Exception {
