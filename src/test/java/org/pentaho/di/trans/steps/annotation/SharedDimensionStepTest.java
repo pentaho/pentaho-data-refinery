@@ -2,7 +2,7 @@
  *
  * Pentaho Community Edition Project: data-refinery-pdi-plugin
  *
- * Copyright (C) 2002-2017 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2018 by Hitachi Vantara : http://www.pentaho.com
  *
  * *******************************************************************************
  *
@@ -43,7 +43,7 @@ import java.util.List;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
-public class SharedDimensionStepTest {
+public class SharedDimensionStepTest extends InitializeLogging {
 
   private SharedDimensionStep createSharedDimensionStep( StepDataInterface stepDataInterface, IMetaStore metaStore ) {
     StepMeta stepMeta = mock( StepMeta.class );

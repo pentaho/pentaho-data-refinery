@@ -2,7 +2,7 @@
  *
  * Pentaho Community Edition Project: data-refinery-pdi-plugin
  *
- * Copyright (C) 2002-2017 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2018 by Hitachi Vantara : http://www.pentaho.com
  *
  * *******************************************************************************
  *
@@ -22,11 +22,7 @@
 
 package org.pentaho.di.trans.steps.annotation;
 
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
 import org.junit.Test;
-import org.mockito.Mockito;
 import org.pentaho.agilebi.modeler.models.annotations.CreateAttribute;
 import org.pentaho.agilebi.modeler.models.annotations.CreateCalculatedMember;
 import org.pentaho.agilebi.modeler.models.annotations.CreateMeasure;
@@ -35,9 +31,6 @@ import org.pentaho.agilebi.modeler.models.annotations.ModelAnnotation;
 import org.pentaho.agilebi.modeler.models.annotations.ModelAnnotationGroup;
 import org.pentaho.agilebi.modeler.models.annotations.ModelAnnotationManager;
 import org.pentaho.di.core.exception.KettleException;
-import org.pentaho.di.core.logging.KettleLogStore;
-import org.pentaho.di.core.logging.LogChannelInterface;
-import org.pentaho.di.core.logging.LogChannelInterfaceFactory;
 import org.pentaho.di.core.logging.LogLevel;
 import org.pentaho.di.core.row.RowMeta;
 import org.pentaho.di.core.row.value.ValueMetaNumber;
@@ -59,29 +52,7 @@ import java.util.List;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
-public class ModelAnnotationStepTest {
-
-  private static LogChannelInterface mockLog;
-  private static LogChannelInterfaceFactory existingChannel;
-
-  @BeforeClass
-  public static void setUpClass() throws Exception {
-    LogChannelInterfaceFactory interfaceFactory = mock( LogChannelInterfaceFactory.class );
-    existingChannel = KettleLogStore.getLogChannelInterfaceFactory();
-    KettleLogStore.setLogChannelInterfaceFactory( interfaceFactory );
-    mockLog = mock( LogChannelInterface.class );
-    when( interfaceFactory.create( any(), any() ) ).thenReturn( mockLog );
-  }
-
-  @AfterClass
-  public static void tearDownClass() throws Exception {
-    KettleLogStore.setLogChannelInterfaceFactory( existingChannel );
-  }
-
-  @After
-  public void tearDown() throws Exception {
-    Mockito.reset( mockLog );
-  }
+public class ModelAnnotationStepTest extends InitializeLogging {
 
   @Test
   public void testPutsAnnotationGroupIntoTheExtensionMap() throws Exception {
