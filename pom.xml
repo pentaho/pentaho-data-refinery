@@ -5,11 +5,11 @@
   <parent>
     <groupId>org.pentaho</groupId>
     <artifactId>pentaho-ce-jar-parent-pom</artifactId>
-    <version>7.1-SNAPSHOT</version>
+    <version>7.1.0.20-183</version>
   </parent>
   <groupId>pentaho</groupId>
   <artifactId>data-refinery-pdi-plugin</artifactId>
-  <version>7.1-SNAPSHOT</version>
+  <version>7.1.0.20-183</version>
   <packaging>bundle</packaging>
   <name>Pentaho Community Edition Project: ${project.artifactId}</name>
   <description>Provides PDI job enteries for building and publishing analytic data models.
@@ -22,26 +22,26 @@
     <url>scm:git:git@github.com:pentaho/${project.artifactId}.git</url>
   </scm>
   <properties>
-    <dependency.pdi-dataservice-plugin.revision>7.1-SNAPSHOT</dependency.pdi-dataservice-plugin.revision>
+    <dependency.pdi-dataservice-plugin.revision>7.1.0.20-183</dependency.pdi-dataservice-plugin.revision>
     <dependency.jersey-apache-client.revision>1.19.1</dependency.jersey-apache-client.revision>
     <dependency.apache-xmlgraphics.revision>1.8</dependency.apache-xmlgraphics.revision>
-    <dependency.pentaho-metadata.revision>7.1-SNAPSHOT</dependency.pentaho-metadata.revision>
+    <dependency.pentaho-metadata.revision>7.1.0.20-183</dependency.pentaho-metadata.revision>
     <dependency.commons.collections.revision>3.2.2</dependency.commons.collections.revision>
     <dependency.osgi.version>4.3.1</dependency.osgi.version>
     <dependency.jaxrs.revision>1.1.1</dependency.jaxrs.revision>
     <maven-bundle-plugin.version>2.4.0</maven-bundle-plugin.version>
     <dependency.junit.revision>4.7</dependency.junit.revision>
-    <dependency.pentaho-modeler.revision>7.1-SNAPSHOT</dependency.pentaho-modeler.revision>
+    <dependency.pentaho-modeler.revision>7.1.0.20-183</dependency.pentaho-modeler.revision>
     <dependency.mockito.revision>1.8.4</dependency.mockito.revision>
-    <dependency.pentaho-osgi-bundles.revision>7.1-SNAPSHOT</dependency.pentaho-osgi-bundles.revision>
+    <dependency.pentaho-osgi-bundles.revision>7.1.0.20-183</dependency.pentaho-osgi-bundles.revision>
     <dependency.commons.io.revision>1.4</dependency.commons.io.revision>
     <dependency.jersey.revision>1.19.1</dependency.jersey.revision>
     <dependency.jackson.revision>1.9.2</dependency.jackson.revision>
-    <dependency.data-access-plugin.revision>7.1-SNAPSHOT</dependency.data-access-plugin.revision>
-    <dependency.pentaho-xul.revision>7.1-SNAPSHOT</dependency.pentaho-xul.revision>
-    <dependency.agile-bi.revision>7.1-SNAPSHOT</dependency.agile-bi.revision>
-    <dependency.kettle.revision>7.1-SNAPSHOT</dependency.kettle.revision>
-    <dependency.bi-platform.revision>7.1-SNAPSHOT</dependency.bi-platform.revision>
+    <dependency.data-access-plugin.revision>7.1.0.20-183</dependency.data-access-plugin.revision>
+    <dependency.pentaho-xul.revision>7.1.0.20-183</dependency.pentaho-xul.revision>
+    <dependency.agile-bi.revision>7.1.0.20-183</dependency.agile-bi.revision>
+    <dependency.kettle.revision>7.1.0.20-183</dependency.kettle.revision>
+    <dependency.bi-platform.revision>7.1.0.20-183</dependency.bi-platform.revision>
     <dependency.commons.lang.revision>2.6</dependency.commons.lang.revision>
     <dependency.h2.revision>1.0.78</dependency.h2.revision>
   </properties>
