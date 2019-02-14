@@ -27,7 +27,6 @@
     <dependency.apache-xmlgraphics.revision>1.8</dependency.apache-xmlgraphics.revision>
     <pentaho-metadata.version>8.3.0.0-SNAPSHOT</pentaho-metadata.version>
     <dependency.commons.collections.revision>3.2.2</dependency.commons.collections.revision>
-    <dependency.osgi.version>4.3.1</dependency.osgi.version>
     <dependency.jaxrs.revision>1.1.1</dependency.jaxrs.revision>
     <maven-bundle-plugin.version>2.4.0</maven-bundle-plugin.version>
     <dependency.junit.revision>4.7</dependency.junit.revision>
@@ -198,13 +197,11 @@
     <dependency>
       <groupId>org.osgi</groupId>
       <artifactId>org.osgi.core</artifactId>
-      <version>${dependency.osgi.version}</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.osgi</groupId>
       <artifactId>org.osgi.compendium</artifactId>
-      <version>${dependency.osgi.version}</version>
       <scope>provided</scope>
     </dependency>
     <dependency>
