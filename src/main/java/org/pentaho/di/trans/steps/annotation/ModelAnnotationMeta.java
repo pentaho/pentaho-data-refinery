@@ -1,7 +1,7 @@
 /*
  * ******************************************************************************
  *
- * Copyright (C) 2002-2017 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2019 by Hitachi Vantara : http://www.pentaho.com
  *
  * ******************************************************************************
  *
@@ -37,7 +37,7 @@ import java.util.List;
 @Step( id = "FieldMetadataAnnotation", image = "ModelAnnotation.svg",
   i18nPackageName = "org.pentaho.di.trans.steps.annotation", name = "ModelAnnotation.TransName",
   description = "ModelAnnotation.TransDescription",
-  documentationUrl = "Data/Streamlined_Data_Refinery/0B0/020/0B0",
+  documentationUrl = "Work_with_data/Using_the_Annotate_Stream_step",
   categoryDescription = "i18n:org.pentaho.di.trans.step:BaseStep.Category.Flow" )
 public class ModelAnnotationMeta extends BaseAnnotationMeta {
   private static Class<?> PKG = ModelAnnotationMeta.class; // for i18n purposes, needed by Translator2!!
