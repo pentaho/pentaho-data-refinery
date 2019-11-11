@@ -7,41 +7,49 @@
     <artifactId>pentaho-ce-jar-parent-pom</artifactId>
     <version>9.0.0.0-SNAPSHOT</version>
   </parent>
+
   <groupId>pentaho</groupId>
   <artifactId>data-refinery-pdi-plugin</artifactId>
   <version>9.0.0.0-SNAPSHOT</version>
   <packaging>bundle</packaging>
+
   <name>Pentaho Community Edition Project: ${project.artifactId}</name>
-  <description>Provides PDI job enteries for building and publishing analytic data models.
+  <description>
+    Provides PDI job enteries for building and publishing analytic data models.
     Job steps include Build Model and Publish Model.
-    Transformation steps include  Annotate Stream and Shared Dimension.</description>
+    Transformation steps include  Annotate Stream and Shared Dimension.
+  </description>
+
   <url>http://www.pentaho.com</url>
   <scm>
     <connection>scm:git:git@github.com:pentaho/${project.artifactId}.git</connection>
     <developerConnection>scm:git:git@github.com:pentaho/${project.artifactId}.git</developerConnection>
     <url>scm:git:git@github.com:pentaho/${project.artifactId}.git</url>
   </scm>
+
   <properties>
     <pdi-dataservice-plugin.version>9.0.0.0-SNAPSHOT</pdi-dataservice-plugin.version>
-    <dependency.jersey-apache-client.revision>1.19.1</dependency.jersey-apache-client.revision>
-    <dependency.apache-xmlgraphics.revision>1.8</dependency.apache-xmlgraphics.revision>
     <pentaho-metadata.version>9.0.0.0-SNAPSHOT</pentaho-metadata.version>
-    <dependency.commons.collections.revision>3.2.2</dependency.commons.collections.revision>
-    <dependency.jaxrs.revision>1.1.1</dependency.jaxrs.revision>
-    <maven-bundle-plugin.version>2.4.0</maven-bundle-plugin.version>
-    <dependency.junit.revision>4.7</dependency.junit.revision>
     <pentaho-modeler.version>9.0.0.0-SNAPSHOT</pentaho-modeler.version>
-    <dependency.mockito.revision>1.8.4</dependency.mockito.revision>
     <pentaho-osgi-bundles.version>9.0.0.0-SNAPSHOT</pentaho-osgi-bundles.version>
-    <dependency.commons.io.revision>1.4</dependency.commons.io.revision>
-    <dependency.jersey.revision>1.19.1</dependency.jersey.revision>
     <pentaho-data-access.version>9.0.0.0-SNAPSHOT</pentaho-data-access.version>
     <commons-xul.version>9.0.0.0-SNAPSHOT</commons-xul.version>
     <pdi.version>9.0.0.0-SNAPSHOT</pdi.version>
     <platform.version>9.0.0.0-SNAPSHOT</platform.version>
+
+    <dependency.jersey.revision>1.19.1</dependency.jersey.revision>
+    <dependency.jersey-apache-client.revision>1.19.1</dependency.jersey-apache-client.revision>
+    <dependency.apache-xmlgraphics.revision>1.8</dependency.apache-xmlgraphics.revision>
+    <dependency.commons.collections.revision>3.2.2</dependency.commons.collections.revision>
+    <dependency.jaxrs.revision>1.1.1</dependency.jaxrs.revision>
+    <maven-bundle-plugin.version>2.4.0</maven-bundle-plugin.version>
+    <dependency.junit.revision>4.7</dependency.junit.revision>
+    <dependency.mockito.revision>1.8.4</dependency.mockito.revision>
+    <dependency.commons.io.revision>1.4</dependency.commons.io.revision>
     <dependency.commons.lang.revision>2.6</dependency.commons.lang.revision>
     <dependency.h2.revision>1.0.78</dependency.h2.revision>
   </properties>
+
   <dependencies>
     <dependency>
       <groupId>pentaho</groupId>
@@ -51,15 +59,10 @@
     </dependency>
     <dependency>
       <groupId>pentaho</groupId>
-      <artifactId>pentaho-cache-manager-api</artifactId>
-      <version>${pentaho-osgi-bundles.version}</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>pentaho</groupId>
       <artifactId>pdi-dataservice-client-plugin</artifactId>
       <version>${pdi-dataservice-plugin.version}</version>
     </dependency>
+
     <dependency>
       <groupId>pentaho-kettle</groupId>
       <artifactId>kettle-core</artifactId>
@@ -81,6 +84,7 @@
       <artifactId>kettle-ui-swt</artifactId>
       <version>${pdi.version}</version>
     </dependency>
+
     <dependency>
       <groupId>org.pentaho</groupId>
       <artifactId>commons-xul-core</artifactId>
@@ -95,6 +99,18 @@
       <groupId>pentaho</groupId>
       <artifactId>pentaho-platform-core</artifactId>
       <version>${platform.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>pentaho</groupId>
+      <artifactId>pentaho-platform-extensions</artifactId>
+      <version>${platform.version}</version>
+      <scope>provided</scope>
+      <exclusions>
+        <exclusion>
+          <artifactId>*</artifactId>
+          <groupId>*</groupId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>org.pentaho</groupId>
@@ -122,6 +138,7 @@
         </exclusion>
       </exclusions>
     </dependency>
+
     <dependency>
       <groupId>commons-io</groupId>
       <artifactId>commons-io</artifactId>
@@ -143,6 +160,7 @@
         </exclusion>
       </exclusions>
     </dependency>
+
     <dependency>
       <groupId>com.sun.jersey.contribs</groupId>
       <artifactId>jersey-multipart</artifactId>
@@ -180,6 +198,7 @@
       <artifactId>jersey-client</artifactId>
       <version>${dependency.jersey.revision}</version>
     </dependency>
+
     <dependency>
       <groupId>javax.ws.rs</groupId>
       <artifactId>jsr311-api</artifactId>
@@ -206,6 +225,21 @@
       <artifactId>commands</artifactId>
       <version>3.3.0-I20070605-0010</version>
       <scope>compile</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.httpcomponents</groupId>
+      <artifactId>httpclient</artifactId>
+      <version>4.5.3</version>
+    </dependency>
+
+    <!-- Test Dependencies -->
+
+    <dependency>
+      <groupId>pentaho</groupId>
+      <artifactId>pentaho-cache-manager-api</artifactId>
+      <version>${pentaho-osgi-bundles.version}</version>
+      <scope>test</scope>
     </dependency>
     <dependency>
       <groupId>org.mockito</groupId>
@@ -250,17 +284,13 @@
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>org.apache.httpcomponents</groupId>
-      <artifactId>httpclient</artifactId>
-      <version>4.5.3</version>
-    </dependency>
-    <dependency>
       <groupId>org.pentaho.di.plugins</groupId>
       <artifactId>meta-inject-plugin</artifactId>
       <version>${pdi.version}</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
+
   <build>
     <plugins>
       <plugin>
@@ -289,7 +319,6 @@
       </plugin>
     </plugins>
   </build>
-
 
   <repositories>
     <repository>
