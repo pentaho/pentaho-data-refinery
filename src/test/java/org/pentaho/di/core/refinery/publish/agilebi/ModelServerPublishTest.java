@@ -288,6 +288,7 @@ public class ModelServerPublishTest {
   public void testUpdateConnection() throws Exception {
 
     doCallRealMethod().when( modelServerPublishSpy ).getClient();
+    doReturn( null ).when( modelServerPublishSpy ).getCsrfToken( any(), any(), any() );
 
     // check null response
     doReturn( null ).when( modelServerPublishSpy ).httpPost( any( WebResource.Builder.class ) );

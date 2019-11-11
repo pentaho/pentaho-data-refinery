@@ -2,7 +2,7 @@
  *
  * Pentaho Community Edition Project: data-refinery-pdi-plugin
  *
- * Copyright (C) 2002-2017 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002 - 2019 by Hitachi Vantara : http://www.pentaho.com
  *
  * *******************************************************************************
  *
@@ -19,11 +19,10 @@
  * limitations under the License.
  *
  ********************************************************************************/
-
-
 package org.pentaho.di.core.refinery.publish.agilebi;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.client.WebResource.Builder;
@@ -40,7 +39,10 @@ import org.pentaho.di.core.logging.LogChannelInterface;
 import org.pentaho.di.core.refinery.publish.model.DataSourceAclModel;
 import org.pentaho.di.core.refinery.publish.util.JAXBUtils;
 import org.pentaho.di.job.entries.publish.exception.DuplicateDataSourceException;
+import org.pentaho.platform.web.http.security.CsrfToken;
+import org.pentaho.platform.web.http.security.CsrfUtil;
 
+import javax.ws.rs.core.Cookie;
 import javax.ws.rs.core.MediaType;
 
 import java.io.InputStream;
@@ -109,22 +111,31 @@ public class ModelServerPublish extends ModelServerAction {
    * @return
    */
   protected boolean updateConnection( DatabaseConnection connection, boolean update ) throws KettleException {
-    String storeDomainUrl;
     try {
-      if ( update ) {
-        storeDomainUrl = biServerConnection.getUrl() + PLUGIN_DATA_ACCESS_API_CONNECTION_UPDATE;
-      } else {
-        storeDomainUrl = biServerConnection.getUrl() + PLUGIN_DATA_ACCESS_API_CONNECTION_ADD;
-      }
-      WebResource resource = getClient().resource( storeDomainUrl );
+      final Client client = getClient();
+
+      final String contextUrl = biServerConnection.getUrl();
+      final  String storeDomainUrl = contextUrl + ( update
+        ? PLUGIN_DATA_ACCESS_API_CONNECTION_UPDATE : PLUGIN_DATA_ACCESS_API_CONNECTION_ADD );
+
+      WebResource resource = client.resource( storeDomainUrl );
       Builder builder = resource
-          .type( MediaType.APPLICATION_JSON )
-          .entity( connection );
+        .type( MediaType.APPLICATION_JSON )
+        .entity( connection );
+
+      final CsrfToken csrfToken = getCsrfToken( client, contextUrl, storeDomainUrl );
+      if ( csrfToken != null ) {
+        builder.header( csrfToken.getHeader(), csrfToken.getToken() );
+
+        csrfToken.getCookies().forEach( cookie -> builder.cookie( Cookie.valueOf( cookie ) ) );
+      }
 
       ClientResponse resp = httpPost( builder );
+
       if ( resp == null ) {
         return false;
       }
+
       if ( resp.getStatus() == 409 ) {
         throw new DuplicateDataSourceException();
       } else if ( resp.getStatus() != 200 ) {
@@ -133,6 +144,7 @@ public class ModelServerPublish extends ModelServerAction {
     } catch ( Exception ex ) {
       throw new KettleException( ex );
     }
+
     return true;
   }
 
@@ -377,5 +389,10 @@ public class ModelServerPublish extends ModelServerAction {
   String constructAbsoluteUrl( String connectionName ) {
     String url = biServerConnection.getUrl() + DATA_ACCESS_API_CONNECTION_GET + REST_NAME_PARM + connectionName;
     return url.replace( " ", "%20" );
+  }
+
+  @VisibleForTesting
+  CsrfToken getCsrfToken( Client client, String contextUrl, String storeDomainUrl ) {
+    return CsrfUtil.getCsrfToken( client, contextUrl.replaceAll( "^(.+)/$", "$1" ), storeDomainUrl );
   }
 }
