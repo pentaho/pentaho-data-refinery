@@ -211,8 +211,10 @@ public class ModelServerPublish extends ModelServerAction {
    */
   public int publishMondrianSchema( InputStream mondrianFile, String catalogName, String datasourceInfo,
       boolean overwriteInRepos ) throws Exception {
-    String storeDomainUrl = biServerConnection.getUrl() + MONDRIAN_POST_ANALYSIS_URL;
-    WebResource resource = getClient().resource( storeDomainUrl );
+    final Client client = getClient();
+    final String contextUrl = biServerConnection.getUrl();
+    String storeDomainUrl = contextUrl + MONDRIAN_POST_ANALYSIS_URL;
+    WebResource resource = client.resource( storeDomainUrl );
     String parms = "Datasource=" + datasourceInfo + ";retainInlineAnnotations=true";
     int response = PUBLISH_FAILED;
     FormDataMultiPart part = new FormDataMultiPart();
@@ -229,6 +231,11 @@ public class ModelServerPublish extends ModelServerAction {
         FormDataContentDisposition.name( "uploadAnalysis" ).fileName( catalogName ).build() );
     try {
       Builder builder = resourceBuilder( resource, part );
+      final CsrfToken csrfToken = getCsrfToken( client, contextUrl, storeDomainUrl );
+      if ( csrfToken != null ) {
+        builder.header( csrfToken.getHeader(), csrfToken.getToken() );
+        csrfToken.getCookies().forEach( cookie -> builder.cookie( Cookie.valueOf( cookie ) ) );
+      }
       ClientResponse resp = httpPost( builder );
       String entity = null;
       if ( resp != null && resp.getStatus() == 200 ) {

@@ -326,6 +326,7 @@ public class ModelServerPublishTest {
     WebResource.Builder builder = Mockito.mock( WebResource.Builder.class );
 
     doCallRealMethod().when( modelServerPublishSpy ).getClient();
+    doReturn( null ).when( modelServerPublishSpy ).getCsrfToken( any( Client.class ), anyString(), anyString() );
 
     // check null response
     doReturn( null ).when( modelServerPublishSpy ).httpPost( any( WebResource.Builder.class ) );
