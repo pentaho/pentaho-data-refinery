@@ -2,7 +2,7 @@
  *
  * Pentaho Community Edition Project: data-refinery-pdi-plugin
  *
- * Copyright (C) 2002-2017 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2020 by Hitachi Vantara : http://www.pentaho.com
  *
  * *******************************************************************************
  *
@@ -978,7 +978,7 @@ public class JobEntryDatasourcePublishTest {
     datasourcePublishSpy.setDataSourcePublishModel( model );
     datasourcePublishSpy.execute( result, 0 );
     verify( datasourcePublishSpy )
-      .logError( eq( "\nAccess Type 'other' not recognized\n" ), isA( KettleException.class ) );
+      .logError( contains( "Access Type 'other' not recognized" ), isA( KettleException.class ) );
   }
 
   @Test
