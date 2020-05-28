@@ -2,7 +2,7 @@
  *
  * Pentaho Community Edition Project: data-refinery-pdi-plugin
  *
- * Copyright (C) 2002-2018 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2020 by Hitachi Vantara : http://www.pentaho.com
  *
  * *******************************************************************************
  *
@@ -640,7 +640,7 @@ public class JobEntryBuildModelTest {
     try {
       jobEntryBuildModel.buildXmi( null, "someStepName", "any" );
     } catch ( KettleException e ) {
-      assertEquals( msg, e.getMessage().trim() );
+      assertEquals( msg, e.getMessage().trim().replace( "\r", "" ) );
     }
   }
 
