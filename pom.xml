@@ -47,7 +47,6 @@
     <dependency.mockito.revision>1.8.4</dependency.mockito.revision>
     <dependency.commons.io.revision>1.4</dependency.commons.io.revision>
     <dependency.commons.lang.revision>2.6</dependency.commons.lang.revision>
-    <dependency.h2.revision>1.0.78</dependency.h2.revision>
   </properties>
 
   <dependencies>
@@ -253,7 +252,6 @@
     <dependency>
       <groupId>com.h2database</groupId>
       <artifactId>h2</artifactId>
-      <version>${dependency.h2.revision}</version>
       <scope>test</scope>
     </dependency>
     <dependency>
