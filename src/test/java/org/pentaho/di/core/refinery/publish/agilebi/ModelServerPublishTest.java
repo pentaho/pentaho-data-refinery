@@ -288,7 +288,6 @@ public class ModelServerPublishTest {
   public void testUpdateConnection() throws Exception {
 
     doCallRealMethod().when( modelServerPublishSpy ).getClient();
-    doReturn( null ).when( modelServerPublishSpy ).getCsrfToken( any(), any(), any() );
 
     // check null response
     doReturn( null ).when( modelServerPublishSpy ).httpPost( any( WebResource.Builder.class ) );
@@ -326,7 +325,6 @@ public class ModelServerPublishTest {
     WebResource.Builder builder = Mockito.mock( WebResource.Builder.class );
 
     doCallRealMethod().when( modelServerPublishSpy ).getClient();
-    doReturn( null ).when( modelServerPublishSpy ).getCsrfToken( any( Client.class ), anyString(), anyString() );
 
     // check null response
     doReturn( null ).when( modelServerPublishSpy ).httpPost( any( WebResource.Builder.class ) );

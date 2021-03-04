@@ -22,6 +22,8 @@
 
 package org.pentaho.di.core.refinery.publish.agilebi;
 
+import com.hitachivantara.security.web.impl.client.csrf.jaxrsv1.CsrfTokenFilter;
+import com.hitachivantara.security.web.impl.client.csrf.jaxrsv1.util.SessionCookiesFilter;
 import org.pentaho.database.IDatabaseDialect;
 import org.pentaho.database.model.IDatabaseType;
 import org.pentaho.database.service.DatabaseDialectService;
@@ -39,6 +41,8 @@ import com.sun.jersey.api.client.filter.HTTPBasicAuthFilter;
 import com.sun.jersey.api.json.JSONConfiguration;
 
 import javax.ws.rs.ext.Providers;
+import java.net.CookieManager;
+import java.net.URI;
 
 public class ModelServerAction {
 
@@ -133,8 +137,12 @@ public class ModelServerAction {
    */
   public void setBiServerConnection( BiServerConnection biServerConnection ) {
     this.biServerConnection = biServerConnection;
-    getClient()
-        .addFilter( new HTTPBasicAuthFilter( biServerConnection.getUserId(), biServerConnection.getPassword() ) );
+    setupClient( getClient(), biServerConnection );
+  }
+
+  protected void setupClient( Client client, BiServerConnection biServerConnection ) {
+    client
+      .addFilter( new HTTPBasicAuthFilter( biServerConnection.getUserId(), biServerConnection.getPassword() ) );
   }
 
   public DatabaseMeta getDatabaseMeta() {
