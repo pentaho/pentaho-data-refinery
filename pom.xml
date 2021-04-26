@@ -45,7 +45,7 @@
     <maven-bundle-plugin.version>2.4.0</maven-bundle-plugin.version>
     <dependency.junit.revision>4.7</dependency.junit.revision>
     <dependency.mockito.revision>1.8.4</dependency.mockito.revision>
-    <dependency.commons.io.revision>1.4</dependency.commons.io.revision>
+    <dependency.commons.io.revision>2.7</dependency.commons.io.revision>
     <dependency.commons.lang.revision>2.6</dependency.commons.lang.revision>
     <dependency.h2.revision>1.0.78</dependency.h2.revision>
   </properties>
