@@ -48,7 +48,6 @@
     <dependency.commons.io.revision>1.4</dependency.commons.io.revision>
     <dependency.commons.lang.revision>2.6</dependency.commons.lang.revision>
     <dependency.h2.revision>1.0.78</dependency.h2.revision>
-    <hv-security-web.version>0.3.0</hv-security-web.version>
   </properties>
 
   <dependencies>
@@ -143,13 +142,6 @@
     <dependency>
       <groupId>com.hitachivantara.security.web</groupId>
       <artifactId>csrf-token-service-client-java-jax-rs-v1</artifactId>
-      <version>${hv-security-web.version}</version>
-      <exclusions>
-        <exclusion>
-          <artifactId>*</artifactId>
-          <groupId>*</groupId>
-        </exclusion>
-      </exclusions>
     </dependency>
 
     <dependency>
