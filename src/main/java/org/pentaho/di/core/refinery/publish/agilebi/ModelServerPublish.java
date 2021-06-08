@@ -85,8 +85,8 @@ public class ModelServerPublish extends ModelServerAction {
       throw new RuntimeException( e );
     }
 
-    client.addFilter( new CsrfTokenFilter( tokenServiceUri ) );
     client.addFilter( new SessionCookiesFilter( new CookieManager() ) );
+    client.addFilter( new CsrfTokenFilter( tokenServiceUri ) );
 
     super.setupClient( client, biServerConnection );
   }

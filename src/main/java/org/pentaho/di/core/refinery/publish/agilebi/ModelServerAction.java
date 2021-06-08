@@ -22,15 +22,6 @@
 
 package org.pentaho.di.core.refinery.publish.agilebi;
 
-import com.hitachivantara.security.web.impl.client.csrf.jaxrsv1.CsrfTokenFilter;
-import com.hitachivantara.security.web.impl.client.csrf.jaxrsv1.util.SessionCookiesFilter;
-import org.pentaho.database.IDatabaseDialect;
-import org.pentaho.database.model.IDatabaseType;
-import org.pentaho.database.service.DatabaseDialectService;
-import org.pentaho.database.util.DatabaseTypeHelper;
-import org.pentaho.di.core.database.DatabaseInterface;
-import org.pentaho.di.core.database.DatabaseMeta;
-
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
@@ -39,10 +30,14 @@ import com.sun.jersey.api.client.config.ClientConfig;
 import com.sun.jersey.api.client.config.DefaultClientConfig;
 import com.sun.jersey.api.client.filter.HTTPBasicAuthFilter;
 import com.sun.jersey.api.json.JSONConfiguration;
+import org.pentaho.database.IDatabaseDialect;
+import org.pentaho.database.model.IDatabaseType;
+import org.pentaho.database.service.DatabaseDialectService;
+import org.pentaho.database.util.DatabaseTypeHelper;
+import org.pentaho.di.core.database.DatabaseInterface;
+import org.pentaho.di.core.database.DatabaseMeta;
 
 import javax.ws.rs.ext.Providers;
-import java.net.CookieManager;
-import java.net.URI;
 
 public class ModelServerAction {
 
