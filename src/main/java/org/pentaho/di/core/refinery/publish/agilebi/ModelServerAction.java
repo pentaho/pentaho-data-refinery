@@ -2,7 +2,7 @@
  *
  * Pentaho Community Edition Project: data-refinery-pdi-plugin
  *
- * Copyright (C) 2002-2018 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2021 by Hitachi Vantara : http://www.pentaho.com
  *
  * *******************************************************************************
  *
@@ -22,13 +22,6 @@
 
 package org.pentaho.di.core.refinery.publish.agilebi;
 
-import org.pentaho.database.IDatabaseDialect;
-import org.pentaho.database.model.IDatabaseType;
-import org.pentaho.database.service.DatabaseDialectService;
-import org.pentaho.database.util.DatabaseTypeHelper;
-import org.pentaho.di.core.database.DatabaseInterface;
-import org.pentaho.di.core.database.DatabaseMeta;
-
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
@@ -37,6 +30,12 @@ import com.sun.jersey.api.client.config.ClientConfig;
 import com.sun.jersey.api.client.config.DefaultClientConfig;
 import com.sun.jersey.api.client.filter.HTTPBasicAuthFilter;
 import com.sun.jersey.api.json.JSONConfiguration;
+import org.pentaho.database.IDatabaseDialect;
+import org.pentaho.database.model.IDatabaseType;
+import org.pentaho.database.service.DatabaseDialectService;
+import org.pentaho.database.util.DatabaseTypeHelper;
+import org.pentaho.di.core.database.DatabaseInterface;
+import org.pentaho.di.core.database.DatabaseMeta;
 
 import javax.ws.rs.ext.Providers;
 
@@ -133,8 +132,12 @@ public class ModelServerAction {
    */
   public void setBiServerConnection( BiServerConnection biServerConnection ) {
     this.biServerConnection = biServerConnection;
-    getClient()
-        .addFilter( new HTTPBasicAuthFilter( biServerConnection.getUserId(), biServerConnection.getPassword() ) );
+    setupClient( getClient(), biServerConnection );
+  }
+
+  protected void setupClient( Client client, BiServerConnection biServerConnection ) {
+    client
+      .addFilter( new HTTPBasicAuthFilter( biServerConnection.getUserId(), biServerConnection.getPassword() ) );
   }
 
   public DatabaseMeta getDatabaseMeta() {

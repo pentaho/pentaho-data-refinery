@@ -2,7 +2,7 @@
  *
  * Pentaho Community Edition Project: data-refinery-pdi-plugin
  *
- * Copyright (C) 2002 - 2019 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002 - 2021 by Hitachi Vantara : http://www.pentaho.com
  *
  * *******************************************************************************
  *
@@ -28,8 +28,9 @@ import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.client.WebResource.Builder;
 import com.sun.jersey.core.header.FormDataContentDisposition;
 import com.sun.jersey.multipart.FormDataMultiPart;
-
 import org.apache.commons.lang.StringUtils;
+import com.hitachivantara.security.web.impl.client.csrf.jaxrsv1.CsrfTokenFilter;
+import com.hitachivantara.security.web.impl.client.csrf.jaxrsv1.util.SessionCookiesFilter;
 import org.jfree.util.Log;
 import org.pentaho.database.model.DatabaseAccessType;
 import org.pentaho.database.model.DatabaseConnection;
@@ -39,14 +40,13 @@ import org.pentaho.di.core.logging.LogChannelInterface;
 import org.pentaho.di.core.refinery.publish.model.DataSourceAclModel;
 import org.pentaho.di.core.refinery.publish.util.JAXBUtils;
 import org.pentaho.di.job.entries.publish.exception.DuplicateDataSourceException;
-import org.pentaho.platform.web.http.security.CsrfToken;
-import org.pentaho.platform.web.http.security.CsrfUtil;
 
-import javax.ws.rs.core.Cookie;
 import javax.ws.rs.core.MediaType;
-
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.net.CookieManager;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URLEncoder;
 
 /**
@@ -62,15 +62,33 @@ public class ModelServerPublish extends ModelServerAction {
   private static final String MONDRIAN_POST_ANALYSIS_URL = "plugin/data-access/api/mondrian/postAnalysis";
   private static final String PLUGIN_DATA_ACCESS_API_CONNECTION_ADD = "plugin/data-access/api/connection/add";
   private static final String PLUGIN_DATA_ACCESS_API_CONNECTION_UPDATE = "plugin/data-access/api/connection/update";
-  private static final String PLUGIN_DATA_ACCESS_API_CONNECTION_DELETE = "plugin/data-access/api/connection/deletebyname";
+  private static final String PLUGIN_DATA_ACCESS_API_CONNECTION_DELETE =
+    "plugin/data-access/api/connection/deletebyname";
   private static final String DATA_ACCESS_API_CONNECTION_GET = "plugin/data-access/api/connection/getresponse";
+  private static final String API_CSRF_TOKEN = "api/csrf/token";
   private boolean forceOverwrite;
   private DataSourceAclModel aclModel;
   private LogChannelInterface logChannel;
 
   public ModelServerPublish( final LogChannelInterface logChannel ) {
-
     this.logChannel = logChannel;
+  }
+
+  @Override
+  protected void setupClient( Client client, BiServerConnection biServerConnection ) {
+
+    String contextUrl = biServerConnection.getUrl();
+    URI tokenServiceUri;
+    try {
+      tokenServiceUri = new URI( contextUrl + API_CSRF_TOKEN );
+    } catch ( URISyntaxException e ) {
+      throw new RuntimeException( e );
+    }
+
+    client.addFilter( new SessionCookiesFilter( new CookieManager() ) );
+    client.addFilter( new CsrfTokenFilter( tokenServiceUri ) );
+
+    super.setupClient( client, biServerConnection );
   }
 
   /**
@@ -90,12 +108,12 @@ public class ModelServerPublish extends ModelServerAction {
     connection.setName( databaseMeta.getName() );
     connection.setPassword( getDatabaseMeta().environmentSubstitute( getDatabaseMeta().getPassword() ) );
     connection.setUsername( getDatabaseMeta().environmentSubstitute( getDatabaseMeta().getUsername() ) );
-    connection.setDatabaseName( getDatabaseMeta().environmentSubstitute(  intf.getDatabaseName() ) );
+    connection.setDatabaseName( getDatabaseMeta().environmentSubstitute( intf.getDatabaseName() ) );
     connection.setDatabasePort( getDatabaseMeta().environmentSubstitute(
-            String.valueOf( intf.getAttributes().getProperty( "PORT_NUMBER" ) ) ) );
-    connection.setHostname(  getDatabaseMeta().environmentSubstitute( getDatabaseMeta().getHostname() ) );
+      String.valueOf( intf.getAttributes().getProperty( "PORT_NUMBER" ) ) ) );
+    connection.setHostname( getDatabaseMeta().environmentSubstitute( getDatabaseMeta().getHostname() ) );
     connection.setForcingIdentifiersToLowerCase(
-        "N".equals( intf.getAttributes().getProperty( "FORCE_IDENTIFIERS_TO_LOWERCASE" ) ) ? false : true );
+      "N".equals( intf.getAttributes().getProperty( "FORCE_IDENTIFIERS_TO_LOWERCASE" ) ) ? false : true );
     connection.setQuoteAllFields( "N".equals( intf.getAttributes().getProperty( "QUOTE_ALL_FIELDS" ) ) ? false : true );
     connection.setAccessType( DatabaseAccessType.NATIVE );
     connection.setExtraOptions( getDatabaseMeta().getExtraOptions() );
@@ -115,7 +133,7 @@ public class ModelServerPublish extends ModelServerAction {
       final Client client = getClient();
 
       final String contextUrl = biServerConnection.getUrl();
-      final  String storeDomainUrl = contextUrl + ( update
+      final String storeDomainUrl = contextUrl + ( update
         ? PLUGIN_DATA_ACCESS_API_CONNECTION_UPDATE : PLUGIN_DATA_ACCESS_API_CONNECTION_ADD );
 
       WebResource resource = client.resource( storeDomainUrl );
@@ -123,15 +141,7 @@ public class ModelServerPublish extends ModelServerAction {
         .type( MediaType.APPLICATION_JSON )
         .entity( connection );
 
-      final CsrfToken csrfToken = getCsrfToken( client, contextUrl, storeDomainUrl );
-      if ( csrfToken != null ) {
-        builder.header( csrfToken.getHeader(), csrfToken.getToken() );
-
-        csrfToken.getCookies().forEach( cookie -> builder.cookie( Cookie.valueOf( cookie ) ) );
-      }
-
       ClientResponse resp = httpPost( builder );
-
       if ( resp == null ) {
         return false;
       }
@@ -171,7 +181,7 @@ public class ModelServerPublish extends ModelServerAction {
    */
   public boolean deleteMetadataXmi( String domainId ) {
     return deleteEntity( biServerConnection.getUrl() + "plugin/data-access/api/datasource/metadata/domain/"
-        + domainId );
+      + domainId );
   }
 
   /**
@@ -187,7 +197,7 @@ public class ModelServerPublish extends ModelServerAction {
     try {
       WebResource resource = getClient().resource( url );
       Builder builder = resource
-          .type( MediaType.APPLICATION_JSON );
+        .type( MediaType.APPLICATION_JSON );
 
       ClientResponse resp = httpDelete( builder );
       if ( resp == null || resp.getStatus() != 200 ) {
@@ -207,35 +217,31 @@ public class ModelServerPublish extends ModelServerAction {
    * @param catalogName
    * @param datasourceInfo
    * @param overwriteInRepos
-   * @throws Exception
    */
   public int publishMondrianSchema( InputStream mondrianFile, String catalogName, String datasourceInfo,
-      boolean overwriteInRepos ) throws Exception {
+                                    boolean overwriteInRepos ) {
     final Client client = getClient();
     final String contextUrl = biServerConnection.getUrl();
     String storeDomainUrl = contextUrl + MONDRIAN_POST_ANALYSIS_URL;
-    WebResource resource = client.resource( storeDomainUrl );
+
     String parms = "Datasource=" + datasourceInfo + ";retainInlineAnnotations=true";
     int response = PUBLISH_FAILED;
     FormDataMultiPart part = new FormDataMultiPart();
     part.field( "parameters", parms, MediaType.MULTIPART_FORM_DATA_TYPE )
-        .field( "uploadAnalysis", mondrianFile, MediaType.MULTIPART_FORM_DATA_TYPE )
-        .field( "catalogName", catalogName, MediaType.MULTIPART_FORM_DATA_TYPE )
-        .field( "overwrite", overwriteInRepos ? "true" : "false", MediaType.MULTIPART_FORM_DATA_TYPE )
-        .field( "xmlaEnabledFlag", "true", MediaType.MULTIPART_FORM_DATA_TYPE );
+      .field( "uploadAnalysis", mondrianFile, MediaType.MULTIPART_FORM_DATA_TYPE )
+      .field( "catalogName", catalogName, MediaType.MULTIPART_FORM_DATA_TYPE )
+      .field( "overwrite", overwriteInRepos ? "true" : "false", MediaType.MULTIPART_FORM_DATA_TYPE )
+      .field( "xmlaEnabledFlag", "true", MediaType.MULTIPART_FORM_DATA_TYPE );
 
     addAclToRequest( part );
 
     // If the import service needs the file name do the following.
     part.getField( "uploadAnalysis" ).setContentDisposition(
-        FormDataContentDisposition.name( "uploadAnalysis" ).fileName( catalogName ).build() );
+      FormDataContentDisposition.name( "uploadAnalysis" ).fileName( catalogName ).build() );
     try {
+      WebResource resource = client.resource( storeDomainUrl );
       Builder builder = resourceBuilder( resource, part );
-      final CsrfToken csrfToken = getCsrfToken( client, contextUrl, storeDomainUrl );
-      if ( csrfToken != null ) {
-        builder.header( csrfToken.getHeader(), csrfToken.getToken() );
-        csrfToken.getCookies().forEach( cookie -> builder.cookie( Cookie.valueOf( cookie ) ) );
-      }
+
       ClientResponse resp = httpPost( builder );
       String entity = null;
       if ( resp != null && resp.getStatus() == 200 ) {
@@ -256,8 +262,8 @@ public class ModelServerPublish extends ModelServerAction {
 
   Builder resourceBuilder( final WebResource resource, final FormDataMultiPart part ) {
     return resource
-        .type( MediaType.MULTIPART_FORM_DATA_TYPE )
-        .entity( part );
+      .type( MediaType.MULTIPART_FORM_DATA_TYPE )
+      .entity( part );
   }
 
   /**
@@ -274,7 +280,7 @@ public class ModelServerPublish extends ModelServerAction {
     int response = PUBLISH_FAILED;
     FormDataMultiPart part = new FormDataMultiPart();
     part.field( "domainId", domainId, MediaType.MULTIPART_FORM_DATA_TYPE )
-        .field( "metadataFile", metadataFile, MediaType.MULTIPART_FORM_DATA_TYPE );
+      .field( "metadataFile", metadataFile, MediaType.MULTIPART_FORM_DATA_TYPE );
 
     if ( this.isForceOverwrite() ) {
       part.field( "overwrite", this.isForceOverwrite() + "", MediaType.MULTIPART_FORM_DATA_TYPE );
@@ -283,8 +289,8 @@ public class ModelServerPublish extends ModelServerAction {
     addAclToRequest( part );
 
     part.getField( "metadataFile" ).setContentDisposition(
-        FormDataContentDisposition.name( "metadataFile" )
-            .fileName( domainId ).build() );
+      FormDataContentDisposition.name( "metadataFile" )
+        .fileName( domainId ).build() );
     try {
       Builder builder = resourceBuilder( resource, part );
       ClientResponse resp = httpPut( builder );
@@ -309,7 +315,7 @@ public class ModelServerPublish extends ModelServerAction {
 
     FormDataMultiPart part = new FormDataMultiPart();
     part.field( "domainId", domainId, MediaType.MULTIPART_FORM_DATA_TYPE )
-        .field( "metadataFile", metadataFile, MediaType.MULTIPART_FORM_DATA_TYPE );
+      .field( "metadataFile", metadataFile, MediaType.MULTIPART_FORM_DATA_TYPE );
     if ( this.isForceOverwrite() ) {
       part.field( "overwrite", Boolean.toString( this.isForceOverwrite() ), MediaType.MULTIPART_FORM_DATA_TYPE );
     }
@@ -359,8 +365,8 @@ public class ModelServerPublish extends ModelServerAction {
       String storeDomainUrl = constructAbsoluteUrl( URLEncoder.encode( connectionName, "UTF-8" ) );
       WebResource resource = getClient().resource( storeDomainUrl );
       Builder builder = resource
-          .type( MediaType.APPLICATION_JSON )
-          .type( MediaType.APPLICATION_XML );
+        .type( MediaType.APPLICATION_JSON )
+        .type( MediaType.APPLICATION_XML );
       ClientResponse response = httpGet( builder );
       if ( response != null && response.getStatus() == 200 ) {
 
@@ -396,10 +402,5 @@ public class ModelServerPublish extends ModelServerAction {
   String constructAbsoluteUrl( String connectionName ) {
     String url = biServerConnection.getUrl() + DATA_ACCESS_API_CONNECTION_GET + REST_NAME_PARM + connectionName;
     return url.replace( " ", "%20" );
-  }
-
-  @VisibleForTesting
-  CsrfToken getCsrfToken( Client client, String contextUrl, String storeDomainUrl ) {
-    return CsrfUtil.getCsrfToken( client, contextUrl.replaceAll( "^(.+)/$", "$1" ), storeDomainUrl );
   }
 }
