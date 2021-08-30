@@ -2,7 +2,7 @@
  *
  * Pentaho Community Edition Project: data-refinery-pdi-plugin
  *
- * Copyright (C) 2002 - 2019 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002 - 2021 by Hitachi Vantara : http://www.pentaho.com
  *
  * *******************************************************************************
  *
