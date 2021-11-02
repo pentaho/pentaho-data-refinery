@@ -5,12 +5,12 @@
   <parent>
     <groupId>org.pentaho</groupId>
     <artifactId>pentaho-ce-jar-parent-pom</artifactId>
-    <version>9.3.0.0-SNAPSHOT</version>
+    <version>9.3.0.0-238</version>
   </parent>
 
   <groupId>pentaho</groupId>
   <artifactId>data-refinery-pdi-plugin</artifactId>
-  <version>9.3.0.0-SNAPSHOT</version>
+  <version>9.3.0.0-238</version>
   <packaging>bundle</packaging>
 
   <name>Pentaho Community Edition Project: ${project.artifactId}</name>
@@ -28,14 +28,14 @@
   </scm>
 
   <properties>
-    <pdi-dataservice-plugin.version>9.3.0.0-SNAPSHOT</pdi-dataservice-plugin.version>
-    <pentaho-metadata.version>9.3.0.0-SNAPSHOT</pentaho-metadata.version>
-    <pentaho-modeler.version>9.3.0.0-SNAPSHOT</pentaho-modeler.version>
-    <pentaho-osgi-bundles.version>9.3.0.0-SNAPSHOT</pentaho-osgi-bundles.version>
-    <pentaho-data-access.version>9.3.0.0-SNAPSHOT</pentaho-data-access.version>
-    <commons-xul.version>9.3.0.0-SNAPSHOT</commons-xul.version>
-    <pdi.version>9.3.0.0-SNAPSHOT</pdi.version>
-    <platform.version>9.3.0.0-SNAPSHOT</platform.version>
+    <pdi-dataservice-plugin.version>9.3.0.0-238</pdi-dataservice-plugin.version>
+    <pentaho-metadata.version>9.3.0.0-238</pentaho-metadata.version>
+    <pentaho-modeler.version>9.3.0.0-238</pentaho-modeler.version>
+    <pentaho-osgi-bundles.version>9.3.0.0-238</pentaho-osgi-bundles.version>
+    <pentaho-data-access.version>9.3.0.0-238</pentaho-data-access.version>
+    <commons-xul.version>9.3.0.0-238</commons-xul.version>
+    <pdi.version>9.3.0.0-238</pdi.version>
+    <platform.version>9.3.0.0-238</platform.version>
 
     <dependency.jersey.revision>1.19.1</dependency.jersey.revision>
     <dependency.jersey-apache-client.revision>1.19.1</dependency.jersey-apache-client.revision>
