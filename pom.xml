@@ -47,7 +47,7 @@
     <dependency.mockito.revision>1.8.4</dependency.mockito.revision>
     <dependency.commons.io.revision>1.4</dependency.commons.io.revision>
     <dependency.commons.lang.revision>2.6</dependency.commons.lang.revision>
-    <dependency.h2.revision>1.0.78</dependency.h2.revision>
+    <dependency.h2.revision>2.1.210</dependency.h2.revision>
   </properties>
 
   <dependencies>
