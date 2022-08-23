@@ -293,7 +293,7 @@
     </dependency>
     <dependency>
       <groupId>org.pentaho.di.plugins</groupId>
-      <artifactId>meta-inject-plugin</artifactId>
+      <artifactId>meta-inject-plugins-impl</artifactId>
       <version>${pdi.version}</version>
       <scope>test</scope>
     </dependency>
