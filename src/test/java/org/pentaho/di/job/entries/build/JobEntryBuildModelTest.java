@@ -127,7 +127,7 @@ public class JobEntryBuildModelTest {
   public void setUp() throws Exception {
 
     // DB Setup
-    String dbDir = "target/test-db/JobEntryBuildModelTest-H2-DB";
+    String dbDir = "./target/test-db/JobEntryBuildModelTest-H2-DB";
     File file = new File( dbDir + ".h2.db" );
     if ( file.exists() ) {
       file.delete();
