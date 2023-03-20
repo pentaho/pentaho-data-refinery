@@ -2,7 +2,7 @@
  *
  * Pentaho Community Edition Project: data-refinery-pdi-plugin
  *
- * Copyright (C) 2002-2017 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2023 by Hitachi Vantara : http://www.pentaho.com
  *
  * *******************************************************************************
  *
@@ -57,7 +57,7 @@ import java.util.List;
 @org.pentaho.di.core.annotations.JobEntry( id = "DATASOURCE_PUBLISH",
   i18nPackageName = "org.pentaho.di.job.entries.publish", image = "publish.svg",
   name = "JobEntryDatasourcePublish.JobName", description = "JobEntryDatasourcePublish.JobDescription",
-  documentationUrl = "Data/Streamlined_Data_Refinery/0B0/020/0D0",
+  documentationUrl = "Work_with_data/Using_the_Publish_Model_job_entry_for_SDR",
   categoryDescription = "JobCategory.Category.Modeling" )
 public class JobEntryDatasourcePublish extends JobEntryBase implements Cloneable, JobEntryInterface {
 
