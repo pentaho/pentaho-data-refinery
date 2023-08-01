@@ -46,6 +46,7 @@ import org.pentaho.di.job.JobMeta;
 import org.pentaho.di.job.entries.build.JobEntryBuildModel;
 import org.pentaho.di.job.entry.JobEntryBase;
 import org.pentaho.di.job.entry.JobEntryInterface;
+import org.pentaho.di.metastore.MetaStoreConst;
 import org.pentaho.di.repository.ObjectId;
 import org.pentaho.di.repository.Repository;
 import org.pentaho.di.ui.job.entries.common.ConnectionValidator;
@@ -379,9 +380,7 @@ public class JobEntryDatasourcePublish extends JobEntryBase implements Cloneable
     JobEntryBuildModel cloneJei = (JobEntryBuildModel) jobEntryBuildModel.clone();
     ( (VariableSpace) cloneJei ).copyVariablesFrom( this );
     cloneJei.setRepository( rep );
-    if ( rep != null ) {
-      cloneJei.setMetaStore( rep.getMetaStore() );
-    }
+    cloneJei.setMetaStore( MetaStoreConst.getDefaultMetastore() );
     cloneJei.setParentJob( this.getParentJob() );
     return cloneJei.getConnectionInfo().getDatabaseMeta();
   }
