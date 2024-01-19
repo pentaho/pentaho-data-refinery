@@ -99,7 +99,7 @@ public class MetadataInjectionModelTest {
   public void setUp() throws Exception {
 
     // DB Setup
-    String dbDir = "target/test-db/MetadataInjectionModelTest-H2-DB";
+    String dbDir = "./target/test-db/MetadataInjectionModelTest-H2-DB";
     File file = new File( dbDir + ".h2.db" );
     if ( file.exists() ) {
       file.delete();
@@ -108,7 +108,7 @@ public class MetadataInjectionModelTest {
     Database db = new Database( null, databaseMeta );
     db.connect();
     db.execStatement( "DROP TABLE IF EXISTS steel;" );
-    db.execStatement( "CREATE TABLE steel(territory VARCHAR(2147483647), sales DOUBLE, quantity DOUBLE );" );
+    db.execStatement( "CREATE TABLE steel(territory VARCHAR(1000000000), sales DOUBLE, quantity DOUBLE );" );
     db.disconnect();
 
     // Job Setup

@@ -127,7 +127,7 @@ public class JobEntryBuildModelTest {
   public void setUp() throws Exception {
 
     // DB Setup
-    String dbDir = "target/test-db/JobEntryBuildModelTest-H2-DB";
+    String dbDir = "./target/test-db/JobEntryBuildModelTest-H2-DB";
     File file = new File( dbDir + ".h2.db" );
     if ( file.exists() ) {
       file.delete();
@@ -138,12 +138,12 @@ public class JobEntryBuildModelTest {
     db.execStatement( "DROP TABLE IF EXISTS customer_test;" );
     db.execStatement( "DROP TABLE IF EXISTS sales_test;" );
     db.execStatement(
-        "CREATE TABLE customer_test(ID DOUBLE, First VARCHAR(2147483647), Last VARCHAR(2147483647),"
-            + " State VARCHAR(2147483647));" );
+        "CREATE TABLE customer_test(ID DOUBLE, First VARCHAR(1000000000), Last VARCHAR(1000000000),"
+            + " State VARCHAR(1000000000));" );
     db.execStatement(
-        "CREATE TABLE sales_test(Price VARCHAR(2147483647), Customer VARCHAR(2147483647), Date TIMESTAMP,"
-          + "\"Product Name\" VARCHAR(2147483647), \"Product SKU\" VARCHAR(2147483647),"
-          + "\"Product Category\" VARCHAR(2147483647), Quantity DOUBLE, Customer_Id DOUBLE);" );
+        "CREATE TABLE sales_test(Price VARCHAR(1000000000), Customer VARCHAR(1000000000), Date TIMESTAMP,"
+          + "\"Product Name\" VARCHAR(1000000000), \"Product SKU\" VARCHAR(1000000000),"
+          + "\"Product Category\" VARCHAR(1000000000), Quantity DOUBLE, Customer_Id DOUBLE);" );
     db.disconnect();
 
     // Job Setup
