@@ -37,7 +37,9 @@ import java.util.List;
 @Step( id = "FieldMetadataAnnotation", image = "ModelAnnotation.svg",
   i18nPackageName = "org.pentaho.di.trans.steps.annotation", name = "ModelAnnotation.TransName",
   description = "ModelAnnotation.TransDescription",
-  documentationUrl = "Work_with_data/Using_the_Annotate_Stream_step",
+  documentationUrl = "mk-95pdia003/advanced-pentaho-data-integration-topics/work-with-the-streamlined-data-refinery"
+    + "/use-the-streamlined-data-refinery/building-blocks-for-the-sdr/using-the-annotate-stream-step/use-the-annotate"
+    + "-stream-step",
   categoryDescription = "i18n:org.pentaho.di.trans.step:BaseStep.Category.Flow" )
 public class ModelAnnotationMeta extends BaseAnnotationMeta {
   private static Class<?> PKG = ModelAnnotationMeta.class; // for i18n purposes, needed by Translator2!!
