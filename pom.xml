@@ -43,9 +43,10 @@
     <dependency.commons.collections.revision>3.2.2</dependency.commons.collections.revision>
     <dependency.jaxrs.revision>1.1.1</dependency.jaxrs.revision>
     <maven-bundle-plugin.version>2.4.0</maven-bundle-plugin.version>
-    <dependency.junit.revision>4.7</dependency.junit.revision>
-    <dependency.mockito.revision>1.8.4</dependency.mockito.revision>
+    <dependency.junit.revision>4.13.2</dependency.junit.revision>
+    <dependency.mockito.revision>5.10.0</dependency.mockito.revision>
     <dependency.commons.lang.revision>2.6</dependency.commons.lang.revision>
+    <maven-surefire-plugin.argLine> --add-opens=java.base/java.lang=ALL-UNNAMED --add-opens java.base/java.nio=ALL-UNNAMED --add-opens java.base/sun.nio.ch=ALL-UNNAMED --add-opens java.base/java.util=ALL-UNNAMED </maven-surefire-plugin.argLine>
   </properties>
 
   <dependencies>
@@ -250,7 +251,7 @@
     </dependency>
     <dependency>
       <groupId>org.mockito</groupId>
-      <artifactId>mockito-all</artifactId>
+      <artifactId>mockito-core</artifactId>
       <version>${dependency.mockito.revision}</version>
       <scope>test</scope>
     </dependency>
