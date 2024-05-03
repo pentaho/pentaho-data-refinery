@@ -2,7 +2,7 @@
  *
  * Pentaho Community Edition Project: data-refinery-pdi-plugin
  *
- * Copyright (C) 2002-2017 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2024 by Hitachi Vantara : http://www.pentaho.com
  *
  * *******************************************************************************
  *
@@ -194,7 +194,7 @@ public class DataProviderHelperTest {
   }
   private ArgumentMatcher<DatabaseMeta> matchDbMeta( final String name, final String hostName, final String dbName ) {
     return new ArgumentMatcher<DatabaseMeta>() {
-      @Override public boolean matches( final Object argument ) {
+      @Override public boolean matches( final DatabaseMeta argument ) {
         DatabaseMeta actual = (DatabaseMeta) argument;
         return actual.getName().equals( name )
             && actual.getHostname().equals( hostName )

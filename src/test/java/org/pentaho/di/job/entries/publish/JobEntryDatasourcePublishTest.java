@@ -24,17 +24,15 @@ package org.pentaho.di.job.entries.publish;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
-import org.hamcrest.BaseMatcher;
-import org.hamcrest.Description;
-import org.hamcrest.Matcher;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.ArgumentMatcher;
 import org.pentaho.database.model.DatabaseAccessType;
 import org.pentaho.database.model.DatabaseConnection;
-import org.pentaho.di.core.database.BaseDatabaseMeta;
 import org.pentaho.di.core.KettleClientEnvironment;
 import org.pentaho.di.core.ProvidesDatabaseConnectionInformation;
 import org.pentaho.di.core.Result;
+import org.pentaho.di.core.database.BaseDatabaseMeta;
 import org.pentaho.di.core.database.DatabaseInterface;
 import org.pentaho.di.core.database.DatabaseMeta;
 import org.pentaho.di.core.exception.KettleException;
@@ -65,15 +63,27 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.UUID;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyBoolean;
 import static org.mockito.Mockito.anyString;
-import static org.mockito.Mockito.isA;
 import static org.mockito.Mockito.argThat;
-import static org.mockito.Mockito.*;
-import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.contains;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.isA;
 import static org.mockito.Mockito.matches;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /**
  * @author Rowell Belen
@@ -658,17 +668,13 @@ public class JobEntryDatasourcePublishTest {
     assertFalse( biServerConnection.getUrl().endsWith( "//" ) );
   }
 
-  private Matcher<DataSourceAclModel> matchesUser( final String userName ) {
-    return new BaseMatcher<DataSourceAclModel>() {
-      @Override public boolean matches( final Object item ) {
+  private ArgumentMatcher<DataSourceAclModel> matchesUser( final String userName ) {
+    return new ArgumentMatcher<DataSourceAclModel>() {
+      @Override public boolean matches( final DataSourceAclModel item ) {
         DataSourceAclModel acl = (DataSourceAclModel) item;
         return acl.getUsers().size() == 1
           && acl.getUsers().get( 0 ).equals( userName )
           && acl.getRoles() == null;
-      }
-
-      @Override public void describeTo( final Description description ) {
-
       }
     };
   }
@@ -1021,15 +1027,11 @@ public class JobEntryDatasourcePublishTest {
     datasourcePublish.saveRep( rep, null, id_jobentry );
   }
 
-  private Matcher<DataSourceAclModel> matchesEveryoneAcl() {
-    return new BaseMatcher<DataSourceAclModel>() {
-      @Override public boolean matches( final Object item ) {
+  private ArgumentMatcher<DataSourceAclModel> matchesEveryoneAcl() {
+    return new ArgumentMatcher<DataSourceAclModel>() {
+      @Override public boolean matches( final DataSourceAclModel item ) {
         DataSourceAclModel aclModel = (DataSourceAclModel) item;
         return aclModel.getRoles() == null && aclModel.getUsers() == null;
-      }
-
-      @Override public void describeTo( final Description description ) {
-
       }
     };
   }
