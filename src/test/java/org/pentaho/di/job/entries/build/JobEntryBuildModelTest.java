@@ -408,7 +408,7 @@ public class JobEntryBuildModelTest {
 
     doReturn( connectionInfo ).when( buildJobEntry ).getConnectionInfo();
     doReturn( true ).when( buildJobEntry ).useExistingModel();
-    doReturn( true ).when( buildJobEntry ).modelExists( anyString(), any( ModelServerFetcher.class ) );
+    doReturn( true ).when( buildJobEntry ).modelExists( any(), any( ModelServerFetcher.class ) );
     doReturn( modeler ).when( buildJobEntry ).getDswModeler();
 
     doReturn( null ).when( connectionInfo ).getSchemaName(); // return null schemaName

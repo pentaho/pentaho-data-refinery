@@ -2,7 +2,7 @@
  *
  * Pentaho Community Edition Project: data-refinery-pdi-plugin
  *
- * Copyright (C) 2002-2018 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2024 by Hitachi Vantara : http://www.pentaho.com
  *
  * *******************************************************************************
  *
@@ -155,7 +155,6 @@ public class ModelAnnotationStepTest extends InitializeLogging {
     rowMeta.addValueMeta( new ValueMetaString( "f1" ) );
     rowMeta.addValueMeta( new ValueMetaNumber( "f2" ) );
     when( modelAnnotation.getInputRowMeta() ).thenReturn( rowMeta );
-    doNothing().when( modelAnnotation ).putRow( rowMeta, new Object[]{} );
 
     // set up a linked group in the meta
     ModelAnnotationMeta modelAnnotationMeta = new ModelAnnotationMeta();
@@ -320,8 +319,6 @@ public class ModelAnnotationStepTest extends InitializeLogging {
     badMeta.addValueMeta( new ValueMetaString( "f2" ) );
     modelAnnotation = spy( createOneShotStep( stepDataInterface, null, null ) );
     when( modelAnnotation.getInputRowMeta() ).thenReturn( badMeta );
-    doNothing().when( modelAnnotation ).putRow( badMeta, new Object[]{} );
-
     init = modelAnnotation.init( modelAnnotationMeta, stepDataInterface );
     assertFalse( "init should fail", init );
     verify( mockLog ).logError( contains( "Aggregation type SUM is not possible for non-numeric values." ),
@@ -349,7 +346,6 @@ public class ModelAnnotationStepTest extends InitializeLogging {
     // fail. does not support maximum
     modelAnnotation = spy( createOneShotStep( stepDataInterface, null, null ) );
     when( modelAnnotation.getInputRowMeta() ).thenReturn( badMeta );
-    doNothing().when( modelAnnotation ).putRow( badMeta, new Object[]{} );
     cm.setAggregateType( AggregationType.MAXIMUM );
 
     init = modelAnnotation.init( modelAnnotationMeta, stepDataInterface );
@@ -393,7 +389,6 @@ public class ModelAnnotationStepTest extends InitializeLogging {
     StepDataInterface stepDataInterface = new ModelAnnotationData();
     ModelAnnotationManager modelAnnotationManager = mock( ModelAnnotationManager.class );
     IMetaStore metaStore = mock( IMetaStore.class );
-    when( modelAnnotationManager.readGroup( "someGroup", metaStore ) ).thenReturn( new ModelAnnotationGroup() );
     ModelAnnotationStep modelAnnotation =
       spy( createOneShotStep( stepDataInterface, metaStore, modelAnnotationManager ) );
     doNothing().when( modelAnnotation ).putRow( null, new Object[]{} );

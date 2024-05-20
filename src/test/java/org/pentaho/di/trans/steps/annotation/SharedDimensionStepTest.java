@@ -2,7 +2,7 @@
  *
  * Pentaho Community Edition Project: data-refinery-pdi-plugin
  *
- * Copyright (C) 2002-2018 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2024 by Hitachi Vantara : http://www.pentaho.com
  *
  * *******************************************************************************
  *
@@ -52,10 +52,8 @@ public class SharedDimensionStepTest extends InitializeLogging {
     when( stepMeta.getName() ).thenReturn( "someName" );
     when( transMeta.findStep( "someName" ) ).thenReturn( stepMeta );
     Job job = mock( Job.class );
-    when( trans.getParentJob() ).thenReturn( job );
     StepMetaDataCombi stepMetaDataCombi = new StepMetaDataCombi();
     stepMetaDataCombi.stepname = "step name";
-    when( trans.getSteps() ).thenReturn( Collections.singletonList( stepMetaDataCombi ) );
     SharedDimensionStep sharedDimensionStep = new SharedDimensionStep( stepMeta, stepDataInterface, 1, transMeta, trans ) {
       @Override public Object[] getRow() throws KettleException {
         return new Object[] {};
@@ -68,7 +66,6 @@ public class SharedDimensionStepTest extends InitializeLogging {
     };
     sharedDimensionStep.setLogLevel( LogLevel.BASIC );
     sharedDimensionStep.setMetaStore( metaStore );
-    when( job.getExtensionDataMap() ).thenReturn( sharedDimensionStep.getExtensionDataMap() );
     return sharedDimensionStep;
   }
 
