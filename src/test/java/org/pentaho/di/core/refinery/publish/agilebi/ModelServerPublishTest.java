@@ -2,7 +2,7 @@
  *
  * Pentaho Community Edition Project: data-refinery-pdi-plugin
  *
- * Copyright (C) 2002-2021 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2024 by Hitachi Vantara : http://www.pentaho.com
  *
  * *******************************************************************************
  *
@@ -56,7 +56,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.argThat;
+import static org.mockito.Mockito.argThat;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyBoolean;
 import static org.mockito.Mockito.anyString;
@@ -199,7 +199,7 @@ public class ModelServerPublishTest {
       // Will hit this block
     }
     verify( modelServerPublishSpy ).updateConnection( argThat( new ArgumentMatcher<DatabaseConnection>() {
-      @Override public boolean matches( Object o ) {
+      @Override public boolean matches( DatabaseConnection o ) {
         DatabaseConnection db = (DatabaseConnection) o;
         return db.getUsername().equals( username )
             && db.getPassword().equals( password )
@@ -244,7 +244,7 @@ public class ModelServerPublishTest {
     }
     verify( modelServerPublishSpy ).updateConnection( argThat( new ArgumentMatcher<DatabaseConnection>( ) {
         @Override
-        public boolean matches( Object o ) {
+        public boolean matches( DatabaseConnection o ) {
           DatabaseConnection db = (DatabaseConnection) o;
           return db.getUsername( ).equals( "SubstitutedUser" )
                   && db.getHostname( ).equals( "SubstitutedHostName" )
@@ -363,11 +363,11 @@ public class ModelServerPublishTest {
     assertEquals( ModelServerPublish.PUBLISH_SUCCESS, status );
   }
 
-  private Matcher<FormDataMultiPart> matchPart(
+  private ArgumentMatcher<FormDataMultiPart> matchPart(
       final String parameters, final Object inputStream, final String catalog,
       final String overwrite, final String xmlaEnabled ) {
-    return new BaseMatcher<FormDataMultiPart>() {
-      @Override public boolean matches( final Object item ) {
+    return new ArgumentMatcher<FormDataMultiPart>() {
+      @Override public boolean matches( final FormDataMultiPart item ) {
         FormDataMultiPart part = (FormDataMultiPart) item;
         List<BodyPart> bodyParts = part.getBodyParts();
         return bodyParts.size() == 5
@@ -377,22 +377,14 @@ public class ModelServerPublishTest {
           && bodyParts.get( 3 ).getEntity().equals( overwrite )
           && bodyParts.get( 4 ).getEntity().equals( xmlaEnabled );
       }
-
-      @Override public void describeTo( final Description description ) {
-
-      }
     };
   }
 
-  private Matcher<WebResource> matchResource( final String expectedUri ) {
-    return new BaseMatcher<WebResource>() {
-      @Override public boolean matches( final Object item ) {
+  private ArgumentMatcher<WebResource> matchResource( final String expectedUri ) {
+    return new ArgumentMatcher<WebResource>() {
+      @Override public boolean matches( final WebResource item ) {
         WebResource resource = (WebResource) item;
         return resource.getURI().toString().equals( expectedUri );
-      }
-
-      @Override public void describeTo( final Description description ) {
-
       }
     };
   }
