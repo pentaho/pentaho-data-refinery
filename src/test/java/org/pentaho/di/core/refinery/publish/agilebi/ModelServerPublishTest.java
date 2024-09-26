@@ -22,18 +22,10 @@
 
 package org.pentaho.di.core.refinery.publish.agilebi;
 
-import com.sun.jersey.api.client.Client;
-import com.sun.jersey.api.client.ClientResponse;
-import com.sun.jersey.api.client.WebResource;
-import com.sun.jersey.multipart.BodyPart;
-import com.sun.jersey.multipart.FormDataMultiPart;
-import org.hamcrest.BaseMatcher;
-import org.hamcrest.Description;
-import org.hamcrest.Matcher;
+import org.glassfish.jersey.media.multipart.BodyPart;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentMatcher;
-import org.mockito.Mockito;
 import org.pentaho.database.model.DatabaseAccessType;
 import org.pentaho.database.model.DatabaseConnection;
 import org.pentaho.database.model.IDatabaseType;
@@ -45,6 +37,12 @@ import org.pentaho.di.core.logging.LogChannelInterface;
 import org.pentaho.di.core.refinery.publish.model.DataSourceAclModel;
 import org.pentaho.di.core.refinery.publish.util.JAXBUtils;
 
+import javax.ws.rs.client.Client;
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.client.Invocation;
+import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.Response;
+import org.glassfish.jersey.media.multipart.FormDataMultiPart;
 import java.io.InputStream;
 import java.net.URLEncoder;
 import java.util.HashMap;
@@ -82,7 +80,7 @@ public class ModelServerPublishTest {
   private BiServerConnection connection;
   private Properties attributes;
   private Client client;
-  private ClientResponse clientResponse;
+  private Response clientResponse;
   private boolean overwrite;
   private LogChannelInterface logChannel;
 
@@ -102,7 +100,7 @@ public class ModelServerPublishTest {
     databaseTypeHelper = mock( DatabaseTypeHelper.class );
     databaseConnection = mock( DatabaseConnection.class );
     attributes = mock( Properties.class );
-    clientResponse = mock( ClientResponse.class );
+    clientResponse = mock( Response.class );
     logChannel = mock( LogChannelInterface.class );
 
     modelServerPublish = new ModelServerPublish( logChannel );
@@ -129,11 +127,11 @@ public class ModelServerPublishTest {
     assertNull( modelServerPublishSpy.connectionNameExists( null ) );
 
     // check null response
-    doReturn( null ).when( modelServerPublishSpy ).httpGet( any( WebResource.Builder.class ) );
+    doReturn( null ).when( modelServerPublishSpy ).httpGet( any( Invocation.Builder.class ) );
     assertNull( modelServerPublishSpy.connectionNameExists( "test" ) );
 
     // check invalid clientResponse
-    doReturn( clientResponse ).when( modelServerPublishSpy ).httpGet( any( WebResource.Builder.class ) );
+    doReturn( clientResponse ).when( modelServerPublishSpy ).httpGet( any( Invocation.Builder.class ) );
     assertNull( modelServerPublishSpy.connectionNameExists( "test" ) );
 
     // check invalid status
@@ -146,7 +144,7 @@ public class ModelServerPublishTest {
 
     // valid
     when( clientResponse.getStatus() ).thenReturn( 200 );
-    when( clientResponse.getEntity( String.class ) ).thenReturn( json );
+    when( clientResponse.readEntity( String.class ) ).thenReturn( json );
     assertNotNull( modelServerPublishSpy.connectionNameExists( "test" ) );
 
     // valid
@@ -281,7 +279,7 @@ public class ModelServerPublishTest {
 
   @Test
   public void testHttpPost() throws Exception {
-    modelServerPublishSpy.httpPost( mock( WebResource.Builder.class ) );
+    modelServerPublishSpy.httpPost( mock( Invocation.Builder.class ), mock( Entity.class ) );
   }
 
   @Test
@@ -290,12 +288,12 @@ public class ModelServerPublishTest {
     doCallRealMethod().when( modelServerPublishSpy ).getClient();
 
     // check null response
-    doReturn( null ).when( modelServerPublishSpy ).httpPost( any( WebResource.Builder.class ) );
+    doReturn( null ).when( modelServerPublishSpy ).httpPost( any( Invocation.Builder.class ), any( Entity.class ) );
     boolean success = modelServerPublishSpy.updateConnection( databaseConnection, false );
     assertFalse( success );
 
     // check invalid clientResponse
-    doReturn( clientResponse ).when( modelServerPublishSpy ).httpPost( any( WebResource.Builder.class ) );
+    doReturn( clientResponse ).when( modelServerPublishSpy ).httpPost( any( Invocation.Builder.class ), any( Entity.class ) );
     success = modelServerPublishSpy.updateConnection( databaseConnection, false );
     assertFalse( success );
 
@@ -313,7 +311,7 @@ public class ModelServerPublishTest {
   @Test
   public void testDeleteConnectionEncodesName() throws Exception {
     modelServerPublishSpy.deleteConnection( "some name" );
-    verify( client ).resource( "http://localhost:8080/pentaho/plugin/data-access/api/connection/deletebyname?name=some+name" );
+    verify( client ).target( "http://localhost:8080/pentaho/plugin/data-access/api/connection/deletebyname?name=some+name" );
   }
 
   @Test
@@ -322,22 +320,15 @@ public class ModelServerPublishTest {
     InputStream mondrianFile = mock( InputStream.class );
     String catalogName = "Catalog";
     String datasourceInfo = "Test";
-    WebResource.Builder builder = Mockito.mock( WebResource.Builder.class );
-
     doCallRealMethod().when( modelServerPublishSpy ).getClient();
 
     // check null response
-    doReturn( null ).when( modelServerPublishSpy ).httpPost( any( WebResource.Builder.class ) );
+    doReturn( null ).when( modelServerPublishSpy ).httpPost( any( Invocation.Builder.class ), any( Entity.class ) );
     int status = modelServerPublishSpy.publishMondrianSchema( mondrianFile, catalogName, datasourceInfo, true );
     assertEquals( ModelServerPublish.PUBLISH_FAILED, status );
 
     // check invalid clientResponse
-    doReturn( builder ).when( modelServerPublishSpy )
-        .resourceBuilder(
-          argThat( matchResource( "http://localhost:8080/pentaho/plugin/data-access/api/mondrian/postAnalysis" ) ),
-          argThat( matchPart(
-            "Datasource=Test;retainInlineAnnotations=true", mondrianFile, "Catalog", "true", "true" ) ) );
-    doReturn( clientResponse ).when( modelServerPublishSpy ).httpPost( builder );
+    doReturn( clientResponse ).when( modelServerPublishSpy ).httpPost( any( Invocation.Builder.class ), any( Entity.class ) );
     status = modelServerPublishSpy.publishMondrianSchema( mondrianFile, catalogName, datasourceInfo, true );
     assertEquals( ModelServerPublish.PUBLISH_FAILED, status );
 
@@ -348,17 +339,17 @@ public class ModelServerPublishTest {
 
     // valid status, invalid payload
     when( clientResponse.getStatus() ).thenReturn( 200 );
-    when( clientResponse.getEntity( String.class ) ).thenReturn( "" );
+    when( clientResponse.readEntity( String.class ) ).thenReturn( "" );
     status = modelServerPublishSpy.publishMondrianSchema( mondrianFile, catalogName, datasourceInfo, true );
     assertEquals( ModelServerPublish.PUBLISH_FAILED, status );
 
     // valid status, catalog exists
-    when( clientResponse.getEntity( String.class ) ).thenReturn( ModelServerPublish.PUBLISH_CATALOG_EXISTS + "" );
+    when( clientResponse.readEntity( String.class ) ).thenReturn( ModelServerPublish.PUBLISH_CATALOG_EXISTS + "" );
     status = modelServerPublishSpy.publishMondrianSchema( mondrianFile, catalogName, datasourceInfo, true );
     assertEquals( ModelServerPublish.PUBLISH_CATALOG_EXISTS, status );
 
     // success
-    when( clientResponse.getEntity( String.class ) ).thenReturn( ModelServerPublish.PUBLISH_SUCCESS + "" );
+    when( clientResponse.readEntity( String.class ) ).thenReturn( ModelServerPublish.PUBLISH_SUCCESS + "" );
     status = modelServerPublishSpy.publishMondrianSchema( mondrianFile, catalogName, datasourceInfo, true );
     assertEquals( ModelServerPublish.PUBLISH_SUCCESS, status );
   }
@@ -380,11 +371,11 @@ public class ModelServerPublishTest {
     };
   }
 
-  private ArgumentMatcher<WebResource> matchResource( final String expectedUri ) {
-    return new ArgumentMatcher<WebResource>() {
-      @Override public boolean matches( final WebResource item ) {
-        WebResource resource = (WebResource) item;
-        return resource.getURI().toString().equals( expectedUri );
+  private ArgumentMatcher<WebTarget> matchResource(final String expectedUri ) {
+    return new ArgumentMatcher<WebTarget>() {
+      @Override public boolean matches( final WebTarget item ) {
+        WebTarget resource = (WebTarget) item;
+        return resource.getUri().toString().equals( expectedUri );
       }
     };
   }
@@ -398,12 +389,12 @@ public class ModelServerPublishTest {
     doCallRealMethod().when( modelServerPublishSpy ).getClient();
 
     // check null response
-    doReturn( null ).when( modelServerPublishSpy ).httpPut( any( WebResource.Builder.class ) );
+    doReturn( null ).when( modelServerPublishSpy ).httpPut( any( Invocation.Builder.class ), any( Entity.class ) );
     int status = modelServerPublishSpy.publishMetaDataFile( metadataFile, domainId );
     assertEquals( ModelServerPublish.PUBLISH_FAILED, status );
 
     // check invalid clientResponse
-    doReturn( clientResponse ).when( modelServerPublishSpy ).httpPut( any( WebResource.Builder.class ) );
+    doReturn( clientResponse ).when( modelServerPublishSpy ).httpPut( any( Invocation.Builder.class ), any( Entity.class ) );
     status = modelServerPublishSpy.publishMetaDataFile( metadataFile, domainId );
     assertEquals( ModelServerPublish.PUBLISH_FAILED, status );
 
@@ -416,17 +407,17 @@ public class ModelServerPublishTest {
 
     // valid status, invalid payload
     when( clientResponse.getStatus() ).thenReturn( 200 );
-    when( clientResponse.getEntity( String.class ) ).thenReturn( "" );
+    when( clientResponse.readEntity( String.class ) ).thenReturn( "" );
     status = modelServerPublishSpy.publishMetaDataFile( metadataFile, domainId );
     assertEquals( ModelServerPublish.PUBLISH_FAILED, status );
 
     // success
-    when( clientResponse.getEntity( String.class ) ).thenReturn( ModelServerPublish.PUBLISH_SUCCESS + "" );
+    when( clientResponse.readEntity( String.class ) ).thenReturn( ModelServerPublish.PUBLISH_SUCCESS + "" );
     status = modelServerPublishSpy.publishMetaDataFile( metadataFile, domainId );
     assertEquals( ModelServerPublish.PUBLISH_SUCCESS, status );
 
     // valid status, but throw error
-    when( clientResponse.getEntity( String.class ) ).thenThrow( new RuntimeException() );
+    when( clientResponse.readEntity( String.class ) ).thenThrow( new RuntimeException() );
     status = modelServerPublishSpy.publishMetaDataFile( metadataFile, domainId );
     assertEquals( ModelServerPublish.PUBLISH_FAILED, status );
   }
@@ -443,9 +434,9 @@ public class ModelServerPublishTest {
     aclModel.addUser( "testUser" );
     modelServerPublishSpy.setAclModel( aclModel );
 
-    doReturn( clientResponse ).when( modelServerPublishSpy ).httpPut( any( WebResource.Builder.class ) );
+    doReturn( clientResponse ).when( modelServerPublishSpy ).httpPut( any( Invocation.Builder.class ), any( Entity.class ) );
     when( clientResponse.getStatus() ).thenReturn( 200 );
-    when( clientResponse.getEntity( String.class ) ).thenReturn( ModelServerPublish.PUBLISH_SUCCESS + "" );
+    when( clientResponse.readEntity( String.class ) ).thenReturn( ModelServerPublish.PUBLISH_SUCCESS + "" );
     int status = modelServerPublishSpy.publishMetaDataFile( metadataFile, domainId );
     assertEquals( ModelServerPublish.PUBLISH_SUCCESS, status );
   }
@@ -460,12 +451,12 @@ public class ModelServerPublishTest {
     doCallRealMethod().when( modelServerPublishSpy ).getClient();
 
     // check null response
-    doReturn( null ).when( modelServerPublishSpy ).httpPut( any( WebResource.Builder.class ) );
+    doReturn( null ).when( modelServerPublishSpy ).httpPut( any( Invocation.Builder.class ), any( Entity.class ) );
     int status = modelServerPublishSpy.publishDsw( metadataFile, domainId );
     assertEquals( ModelServerPublish.PUBLISH_FAILED, status );
 
     // check invalid clientResponse
-    doReturn( clientResponse ).when( modelServerPublishSpy ).httpPut( any( WebResource.Builder.class ) );
+    doReturn( clientResponse ).when( modelServerPublishSpy ).httpPut( any( Invocation.Builder.class ), any( Entity.class ) );
     status = modelServerPublishSpy.publishDsw( metadataFile, domainId );
     assertEquals( ModelServerPublish.PUBLISH_FAILED, status );
 
@@ -478,7 +469,7 @@ public class ModelServerPublishTest {
 
     // valid status - 200
     when( clientResponse.getStatus() ).thenReturn( 200 );
-    when( clientResponse.getEntity( String.class ) ).thenReturn( ModelServerPublish.PUBLISH_SUCCESS + "" );
+    when( clientResponse.readEntity( String.class ) ).thenReturn( ModelServerPublish.PUBLISH_SUCCESS + "" );
     status = modelServerPublishSpy.publishDsw( metadataFile, domainId );
     assertEquals( ModelServerPublish.PUBLISH_SUCCESS, status );
 

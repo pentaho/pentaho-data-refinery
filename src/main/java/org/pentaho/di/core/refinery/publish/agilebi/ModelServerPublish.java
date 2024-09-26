@@ -2,7 +2,7 @@
  *
  * Pentaho Community Edition Project: data-refinery-pdi-plugin
  *
- * Copyright (C) 2002 - 2021 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002 - 2024 by Hitachi Vantara : http://www.pentaho.com
  *
  * *******************************************************************************
  *
@@ -22,15 +22,9 @@
 package org.pentaho.di.core.refinery.publish.agilebi;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.sun.jersey.api.client.Client;
-import com.sun.jersey.api.client.ClientResponse;
-import com.sun.jersey.api.client.WebResource;
-import com.sun.jersey.api.client.WebResource.Builder;
-import com.sun.jersey.core.header.FormDataContentDisposition;
-import com.sun.jersey.multipart.FormDataMultiPart;
 import org.apache.commons.lang.StringUtils;
-import com.hitachivantara.security.web.impl.client.csrf.jaxrsv1.CsrfTokenFilter;
-import com.hitachivantara.security.web.impl.client.csrf.jaxrsv1.util.SessionCookiesFilter;
+import com.hitachivantara.security.web.impl.client.csrf.jaxrsv2.CsrfTokenFilter;
+import com.hitachivantara.security.web.impl.client.csrf.jaxrsv2.util.SessionCookiesFilter;
 import org.jfree.util.Log;
 import org.pentaho.database.model.DatabaseAccessType;
 import org.pentaho.database.model.DatabaseConnection;
@@ -41,7 +35,14 @@ import org.pentaho.di.core.refinery.publish.model.DataSourceAclModel;
 import org.pentaho.di.core.refinery.publish.util.JAXBUtils;
 import org.pentaho.di.job.entries.publish.exception.DuplicateDataSourceException;
 
+import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
+import org.glassfish.jersey.media.multipart.FormDataMultiPart;
+import javax.ws.rs.client.Client;
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.client.Invocation;
+import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.CookieManager;
@@ -85,8 +86,8 @@ public class ModelServerPublish extends ModelServerAction {
       throw new RuntimeException( e );
     }
 
-    client.addFilter( new SessionCookiesFilter( new CookieManager() ) );
-    client.addFilter( new CsrfTokenFilter( tokenServiceUri ) );
+    client.register( new SessionCookiesFilter( new CookieManager() ) );
+    client.register( new CsrfTokenFilter( tokenServiceUri ) );
 
     super.setupClient( client, biServerConnection );
   }
@@ -136,12 +137,11 @@ public class ModelServerPublish extends ModelServerAction {
       final String storeDomainUrl = contextUrl + ( update
         ? PLUGIN_DATA_ACCESS_API_CONNECTION_UPDATE : PLUGIN_DATA_ACCESS_API_CONNECTION_ADD );
 
-      WebResource resource = client.resource( storeDomainUrl );
-      Builder builder = resource
-        .type( MediaType.APPLICATION_JSON )
-        .entity( connection );
+      WebTarget resource = client.target( storeDomainUrl );
+      Invocation.Builder builder = resource
+        .request( MediaType.APPLICATION_JSON );
 
-      ClientResponse resp = httpPost( builder );
+      Response resp = httpPost( builder, Entity.entity( connection, MediaType.APPLICATION_JSON_TYPE ) );
       if ( resp == null ) {
         return false;
       }
@@ -195,11 +195,11 @@ public class ModelServerPublish extends ModelServerAction {
 
   protected boolean deleteEntity( String url ) {
     try {
-      WebResource resource = getClient().resource( url );
-      Builder builder = resource
-        .type( MediaType.APPLICATION_JSON );
+      WebTarget resource = getClient().target( url );
+      Invocation.Builder builder = resource
+        .request( MediaType.APPLICATION_JSON );
 
-      ClientResponse resp = httpDelete( builder );
+      Response resp = httpDelete( builder );
       if ( resp == null || resp.getStatus() != 200 ) {
         return false;
       }
@@ -239,13 +239,12 @@ public class ModelServerPublish extends ModelServerAction {
     part.getField( "uploadAnalysis" ).setContentDisposition(
       FormDataContentDisposition.name( "uploadAnalysis" ).fileName( catalogName ).build() );
     try {
-      WebResource resource = client.resource( storeDomainUrl );
-      Builder builder = resourceBuilder( resource, part );
+      WebTarget resource = client.target( storeDomainUrl );
 
-      ClientResponse resp = httpPost( builder );
+      Response resp = httpPost( resource.request( MediaType.MULTIPART_FORM_DATA_TYPE ), Entity.entity( part, MediaType.MULTIPART_FORM_DATA_TYPE ) );
       String entity = null;
       if ( resp != null && resp.getStatus() == 200 ) {
-        entity = resp.getEntity( String.class );
+        entity = resp.readEntity( String.class );
         if ( entity.equals( String.valueOf( PUBLISH_CATALOG_EXISTS ) ) ) {
           response = PUBLISH_CATALOG_EXISTS;
         } else {
@@ -260,12 +259,6 @@ public class ModelServerPublish extends ModelServerAction {
     return response;
   }
 
-  Builder resourceBuilder( final WebResource resource, final FormDataMultiPart part ) {
-    return resource
-      .type( MediaType.MULTIPART_FORM_DATA_TYPE )
-      .entity( part );
-  }
-
   /**
    * Jersey call to use the put service to load a metadataFile file into the Jcr repsoitory
    *
@@ -275,7 +268,7 @@ public class ModelServerPublish extends ModelServerAction {
    */
   public int publishMetaDataFile( InputStream metadataFile, String domainId ) throws Exception {
     String storeDomainUrl = biServerConnection.getUrl() + "plugin/data-access/api/metadata/import";
-    WebResource resource = getClient().resource( storeDomainUrl );
+    WebTarget resource = getClient().target( storeDomainUrl );
 
     int response = PUBLISH_FAILED;
     FormDataMultiPart part = new FormDataMultiPart();
@@ -292,10 +285,9 @@ public class ModelServerPublish extends ModelServerAction {
       FormDataContentDisposition.name( "metadataFile" )
         .fileName( domainId ).build() );
     try {
-      Builder builder = resourceBuilder( resource, part );
-      ClientResponse resp = httpPut( builder );
+      Response resp = httpPut( resource.request( MediaType.MULTIPART_FORM_DATA_TYPE ), Entity.entity( part, MediaType.MULTIPART_FORM_DATA_TYPE ) );
       if ( resp != null && resp.getStatus() == 200 ) {
-        if ( resp.getEntity( String.class ).equals( PUBLISH_SUCCESS + "" ) ) {
+        if ( resp.readEntity( String.class ).equals( PUBLISH_SUCCESS + "" ) ) {
           response = PUBLISH_SUCCESS;
         }
       }
@@ -311,7 +303,7 @@ public class ModelServerPublish extends ModelServerAction {
     }
 
     final String publishDswUrl = biServerConnection.getUrl() + "plugin/data-access/api/datasource/dsw/import";
-    WebResource resource = getClient().resource( publishDswUrl );
+    WebTarget resource = getClient().target( publishDswUrl );
 
     FormDataMultiPart part = new FormDataMultiPart();
     part.field( "domainId", domainId, MediaType.MULTIPART_FORM_DATA_TYPE )
@@ -326,11 +318,10 @@ public class ModelServerPublish extends ModelServerAction {
     part.field( "checkConnection", Boolean.TRUE.toString(), MediaType.MULTIPART_FORM_DATA_TYPE );
 
     try {
-      Builder builder = resourceBuilder( resource, part );
-      ClientResponse resp = httpPut( builder );
+     Response resp = httpPut( resource.request( MediaType.MULTIPART_FORM_DATA_TYPE ), Entity.entity( part, MediaType.MULTIPART_FORM_DATA_TYPE ) );
       if ( resp != null ) {
         // TODO: we can get more info from the response;
-        switch ( ClientResponse.Status.fromStatusCode( resp.getStatus() ) ) {
+        switch ( Response.Status.fromStatusCode( resp.getStatus() ) ) {
           case OK:
           case CREATED:
             return PUBLISH_SUCCESS;
@@ -363,14 +354,13 @@ public class ModelServerPublish extends ModelServerAction {
 
     try {
       String storeDomainUrl = constructAbsoluteUrl( URLEncoder.encode( connectionName, "UTF-8" ) );
-      WebResource resource = getClient().resource( storeDomainUrl );
-      Builder builder = resource
-        .type( MediaType.APPLICATION_JSON )
-        .type( MediaType.APPLICATION_XML );
-      ClientResponse response = httpGet( builder );
+      WebTarget resource = getClient().target( storeDomainUrl );
+      Invocation.Builder builder = resource
+        .request( MediaType.APPLICATION_JSON , MediaType.APPLICATION_XML );
+      Response response = httpGet( builder );
       if ( response != null && response.getStatus() == 200 ) {
 
-        String payload = response.getEntity( String.class );
+        String payload = response.readEntity( String.class );
         DatabaseConnection connection = JAXBUtils.unmarshalFromJson( payload, DatabaseConnection.class );
 
         return connection;

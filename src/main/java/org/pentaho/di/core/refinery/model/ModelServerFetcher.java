@@ -2,7 +2,7 @@
  *
  * Pentaho Community Edition Project: data-refinery-pdi-plugin
  *
- * Copyright (C) 2002-2017 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2024 by Hitachi Vantara : http://www.pentaho.com
  *
  * *******************************************************************************
  *
@@ -22,8 +22,6 @@
 
 package org.pentaho.di.core.refinery.model;
 
-import com.sun.jersey.api.client.ClientResponse;
-import com.sun.jersey.api.client.WebResource;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.pentaho.di.core.exception.KettleException;
@@ -34,7 +32,9 @@ import org.pentaho.metadata.util.XmiParser;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 
+import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpressionException;
@@ -104,12 +104,12 @@ public class ModelServerFetcher extends ModelServerAction {
   }
 
   protected List<String> fetchDatasourceIds( String path ) throws AuthorizationException, ServerException {
-    WebResource listGet = getResource( path );
-    ClientResponse response = httpGet( listGet.type( MediaType.APPLICATION_XML ) );
+    WebTarget listGet = getResource( path );
+    Response response = httpGet( listGet.request( MediaType.APPLICATION_XML ) );
     if ( isSuccess( response ) ) {
       InputStream input = null;
       try {
-        input = response.getEntity( InputStream.class );
+        input = response.readEntity( InputStream.class );
         InputSource source = new InputSource( input );
         // <List>
         //   <Item ... xsi:type="xs:string">Model.xmi</Item>
@@ -151,17 +151,17 @@ public class ModelServerFetcher extends ModelServerAction {
     } catch ( URISyntaxException e ) {
       throw new KettleException( e );
     }
-    ClientResponse response =
-        getResource( DataSourceType.ANALYSIS.getDownloadPath( encodedId ) ).get( ClientResponse.class );
+    Response response =
+        getResource( DataSourceType.ANALYSIS.getDownloadPath( encodedId ) ).request().get();
     if ( isSuccess( response ) ) {
-      if ( response.getType().toString().equals( "application/zip" ) ) {
+      if ( response.getMediaType().getType().equals( "application/zip" ) ) {
         try ( ZipInputStream zipInputStream = extractFromZip( "schema.xml", response ) ) {
           return IOUtils.toString( zipInputStream );
         } catch ( IOException e ) {
           throw new KettleException( e );
         }
       } else {
-        return response.getEntity( String.class );
+        return response.readEntity( String.class );
       }
     } else {
       switch ( response.getStatus() ) {
@@ -189,7 +189,7 @@ public class ModelServerFetcher extends ModelServerAction {
     } catch ( URISyntaxException e ) {
       throw new KettleException( e );
     }
-    ClientResponse response = getResource( DataSourceType.DSW.getDownloadPath( encodedId ) ).get( ClientResponse.class );
+    Response response = getResource( DataSourceType.DSW.getDownloadPath( encodedId ) ).request().get();
     if ( isSuccess( response ) ) {
       try ( ZipInputStream zipInputStream = extractFromZip( dswId, response ) ) {
         XmiParser parser = new XmiParser();
@@ -208,9 +208,9 @@ public class ModelServerFetcher extends ModelServerAction {
     }
   }
 
-  private ZipInputStream extractFromZip( final String fileName, final ClientResponse response ) throws KettleException {
+  private ZipInputStream extractFromZip( final String fileName, final Response response ) throws KettleException {
     try {
-      InputStream input = response.getEntity( InputStream.class );
+      InputStream input = response.readEntity( InputStream.class );
       ZipInputStream zipin = new ZipInputStream( input );
       // fileName=Model.xmi -> Model.zip[ Model.xmi, Model.mondrian.xml ]
       for ( ZipEntry entry = zipin.getNextEntry(); entry != null; entry = zipin.getNextEntry() ) {
