@@ -13,14 +13,9 @@
 
 package org.pentaho.di.core.refinery.publish.agilebi;
 
-import com.sun.jersey.api.client.Client;
-import com.sun.jersey.api.client.ClientResponse;
-import com.sun.jersey.api.client.WebResource;
-import com.sun.jersey.api.client.WebResource.Builder;
-import com.sun.jersey.api.client.config.ClientConfig;
-import com.sun.jersey.api.client.config.DefaultClientConfig;
-import com.sun.jersey.api.client.filter.HTTPBasicAuthFilter;
-import com.sun.jersey.api.json.JSONConfiguration;
+import org.glassfish.jersey.client.ClientConfig;
+import org.glassfish.jersey.client.ClientProperties;
+import org.glassfish.jersey.client.authentication.HttpAuthenticationFeature;
 import org.pentaho.database.IDatabaseDialect;
 import org.pentaho.database.model.IDatabaseType;
 import org.pentaho.database.service.DatabaseDialectService;
@@ -28,6 +23,12 @@ import org.pentaho.database.util.DatabaseTypeHelper;
 import org.pentaho.di.core.database.DatabaseInterface;
 import org.pentaho.di.core.database.DatabaseMeta;
 
+import javax.ws.rs.client.Client;
+import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.client.Invocation;
+import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.Providers;
 
 public class ModelServerAction {
@@ -65,10 +66,11 @@ public class ModelServerAction {
       ClassLoader orig = Thread.currentThread().getContextClassLoader();
       try {
         Thread.currentThread().setContextClassLoader( Providers.class.getClassLoader() );
-
-        ClientConfig clientConfig = new DefaultClientConfig();
-        clientConfig.getFeatures().put( JSONConfiguration.FEATURE_POJO_MAPPING, Boolean.TRUE );
-        this._client = Client.create( clientConfig );
+        ClientConfig clientConfig = new ClientConfig();
+        clientConfig.property("jersey.config.jsonFeature", "JacksonFeature");
+        clientConfig.property( ClientProperties.CONNECT_TIMEOUT, 2000 );
+        clientConfig.property( ClientProperties.READ_TIMEOUT, 2000 );
+        this._client = ClientBuilder.newClient( clientConfig );
       } finally {
         Thread.currentThread().setContextClassLoader( orig );
       }
@@ -92,28 +94,28 @@ public class ModelServerAction {
     }
   }
 
-  protected ClientResponse httpPut( final Builder builder ) {
-    return builder.put( ClientResponse.class );
+  protected <T> Response httpPut( final Invocation.Builder builder, final Entity<T> entity ) {
+    return builder.put( entity, Response.class );
   }
 
-  protected ClientResponse httpPost( final Builder builder ) {
-    return builder.post( ClientResponse.class );
+  protected <T> Response httpPost( final Invocation.Builder builder, final Entity<T> entity ) {
+    return builder.post( entity, Response.class );
   }
 
-  protected ClientResponse httpGet( final Builder builder ) {
-    return builder.get( ClientResponse.class );
+  protected Response httpGet( final Invocation.Builder builder ) {
+    return builder.get( Response.class );
   }
 
-  protected ClientResponse httpDelete( final Builder builder ) {
-    return builder.delete( ClientResponse.class );
+  protected Response httpDelete( final Invocation.Builder builder ) {
+    return builder.delete( Response.class );
   }
 
   protected String getUrl( final String path ) {
     return biServerConnection.getUrl() + path;
   }
 
-  protected WebResource getResource( final String path ) {
-    return getClient().resource( getUrl( path ) );
+  protected WebTarget getResource( final String path ) {
+    return getClient().target( getUrl( path ) );
   }
 
   /**
@@ -128,7 +130,7 @@ public class ModelServerAction {
 
   protected void setupClient( Client client, BiServerConnection biServerConnection ) {
     client
-      .addFilter( new HTTPBasicAuthFilter( biServerConnection.getUserId(), biServerConnection.getPassword() ) );
+      .register( HttpAuthenticationFeature.basic( biServerConnection.getUserId(), biServerConnection.getPassword() ) );
   }
 
   public DatabaseMeta getDatabaseMeta() {
@@ -142,7 +144,7 @@ public class ModelServerAction {
   /**
    * 2xx
    */
-  public boolean isSuccess( ClientResponse response ) {
+  public boolean isSuccess( Response response ) {
     return response.getStatus() >= 200 && response.getStatus() < 300;
   }
 

@@ -37,11 +37,8 @@
     <pdi.version>11.0.0.0-SNAPSHOT</pdi.version>
     <platform.version>11.0.0.0-SNAPSHOT</platform.version>
 
-    <dependency.jersey.revision>1.19.1</dependency.jersey.revision>
-    <dependency.jersey-apache-client.revision>1.19.1</dependency.jersey-apache-client.revision>
     <dependency.apache-xmlgraphics.revision>1.8</dependency.apache-xmlgraphics.revision>
     <dependency.commons.collections.revision>3.2.2</dependency.commons.collections.revision>
-    <dependency.jaxrs.revision>1.1.1</dependency.jaxrs.revision>
     <maven-bundle-plugin.version>2.4.0</maven-bundle-plugin.version>
     <dependency.junit.revision>4.13.2</dependency.junit.revision>
     <dependency.mockito.revision>5.10.0</dependency.mockito.revision>
@@ -140,7 +137,7 @@
 
     <dependency>
       <groupId>com.hitachivantara.security.web</groupId>
-      <artifactId>csrf-token-service-client-java-jax-rs-v1</artifactId>
+      <artifactId>csrf-token-service-client-java-jax-rs-v2</artifactId>
       <scope>provided</scope>
     </dependency>
 
@@ -167,47 +164,9 @@
     </dependency>
 
     <dependency>
-      <groupId>com.sun.jersey.contribs</groupId>
-      <artifactId>jersey-multipart</artifactId>
-      <version>${dependency.jersey.revision}</version>
-    </dependency>
-    <dependency>
-      <groupId>com.sun.jersey.contribs</groupId>
-      <artifactId>jersey-apache-client</artifactId>
-      <version>${dependency.jersey-apache-client.revision}</version>
-      <exclusions>
-        <exclusion>
-          <groupId>commons-httpclient</groupId>
-          <artifactId>commons-httpclient</artifactId>
-        </exclusion>
-      </exclusions>
-    </dependency>
-    <dependency>
-      <groupId>com.sun.jersey</groupId>
-      <artifactId>jersey-core</artifactId>
-      <version>${dependency.jersey.revision}</version>
-    </dependency>
-    <dependency>
-      <groupId>com.sun.jersey</groupId>
-      <artifactId>jersey-json</artifactId>
-      <version>${dependency.jersey.revision}</version>
-      <exclusions>
-        <exclusion>
-          <groupId>org.codehaus.jackson</groupId>
-          <artifactId>*</artifactId>
-        </exclusion>
-      </exclusions>
-    </dependency>
-    <dependency>
-      <groupId>com.sun.jersey</groupId>
-      <artifactId>jersey-client</artifactId>
-      <version>${dependency.jersey.revision}</version>
-    </dependency>
-
-    <dependency>
       <groupId>javax.ws.rs</groupId>
-      <artifactId>jsr311-api</artifactId>
-      <version>${dependency.jaxrs.revision}</version>
+      <artifactId>javax.ws.rs-api</artifactId>
+      <version>${javax.ws.rs-api.version}</version>
     </dependency>
     <dependency>
       <groupId>com.fasterxml.jackson.module</groupId>
@@ -216,6 +175,56 @@
     <dependency>
       <groupId>com.fasterxml.jackson.core</groupId>
       <artifactId>jackson-databind</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.glassfish.jersey.core</groupId>
+      <artifactId>jersey-server</artifactId>
+      <version>${jersey.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.glassfish.jersey.core</groupId>
+      <artifactId>jersey-client</artifactId>
+      <version>${jersey.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.glassfish.jersey.containers</groupId>
+      <artifactId>jersey-container-servlet</artifactId>
+      <version>${jersey.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.glassfish.jersey.media</groupId>
+      <artifactId>jersey-media-multipart</artifactId>
+      <version>${jersey.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.glassfish.jersey.core</groupId>
+      <artifactId>jersey-common</artifactId>
+      <version>${jersey.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.glassfish.jaxb</groupId>
+      <artifactId>jaxb-runtime</artifactId>
+      <version>2.4.0-b180830.0438</version>
+    </dependency>
+    <dependency>
+      <groupId>org.glassfish.jersey.media</groupId>
+      <artifactId>jersey-media-json-processing</artifactId>
+      <version>${jersey.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.glassfish.jersey.media</groupId>
+      <artifactId>jersey-media-json-jackson</artifactId>
+      <version>${jersey.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.glassfish.jersey.inject</groupId>
+      <artifactId>jersey-hk2</artifactId>
+      <version>${jersey.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.glassfish.jersey.ext</groupId>
+      <artifactId>jersey-spring5</artifactId>
+      <version>${jersey.version}</version>
     </dependency>
     <dependency>
       <groupId>org.osgi</groupId>

@@ -13,12 +13,8 @@
 
 package org.pentaho.di.core.refinery.publish.util;
 
-import com.sun.jersey.api.client.Client;
-import com.sun.jersey.api.client.ClientResponse;
-import com.sun.jersey.api.client.WebResource;
-import com.sun.jersey.api.client.filter.HTTPBasicAuthFilter;
-import com.sun.jersey.client.urlconnection.URLConnectionClientHandler;
-import com.sun.jersey.multipart.FormDataMultiPart;
+import org.glassfish.jersey.client.authentication.HttpAuthenticationFeature;
+import org.glassfish.jersey.media.multipart.FormDataMultiPart;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
@@ -32,18 +28,24 @@ import org.mockito.MockitoAnnotations;
 import org.pentaho.di.core.refinery.publish.agilebi.BiServerConnection;
 import org.pentaho.di.core.refinery.publish.model.ResponseStatus;
 
+import javax.ws.rs.client.Client;
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.client.Invocation;
+import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 import java.io.File;
 
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.doCallRealMethod;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -59,21 +61,21 @@ public class PublishRestUtilTest {
   @Captor ArgumentCaptor<String> restUrlCaptor;
   @Captor ArgumentCaptor<Client> clientCaptor;
   private PublishRestUtil publishRestUtil;
-  private WebResource mockWebResource;
-  private WebResource.Builder mockBuilder;
+  private WebTarget mockWebResource;
+  private Invocation.Builder mockBuilder;
 
   @Before
   public void setUp() throws Exception {
     MockitoAnnotations.initMocks( this );
     publishRestUtil = spy( new PublishRestUtil() );
 
-    mockWebResource = mock( WebResource.class );
+    mockWebResource = mock( WebTarget.class );
     doReturn( mockWebResource ).when( publishRestUtil )
         .getWebResource( any( BiServerConnection.class ), anyString(), any( Client.class ) );
 
-    mockBuilder = mock( WebResource.Builder.class );
+    mockBuilder = mock( Invocation.Builder.class );
     doReturn( mockBuilder ).when( publishRestUtil )
-        .getDefaultWebResourceBuilder( any( WebResource.class ) );
+        .getDefaultWebResourceBuilder( any( WebTarget.class ) );
   }
 
   private BiServerConnection getMockConnection() {
@@ -87,13 +89,13 @@ public class PublishRestUtilTest {
   @Test
   public void testGetAnonymousClient() {
     Client client = publishRestUtil.getAnonymousClient();
-    assertTrue( client.getHeadHandler() instanceof URLConnectionClientHandler );
+    assertNotNull( client );
   }
 
   @Test
   public void testGetAuthenticatedClient() {
-    Client client = publishRestUtil.getAuthenticatedClient( getMockConnection() );
-    assertTrue( client.getHeadHandler() instanceof HTTPBasicAuthFilter );
+  Client client = publishRestUtil.getAuthenticatedClient( getMockConnection() );
+  assertTrue( client.getConfiguration().isRegistered( HttpAuthenticationFeature.class ) );
   }
 
   @Test
@@ -105,15 +107,15 @@ public class PublishRestUtilTest {
         .getWebResource( any( BiServerConnection.class ), anyString(), any( Client.class ) );
 
     String fullUrl = connection.getUrl() + PublishRestUtil.CAN_PUBLISH_PATH;
-    WebResource resource = publishRestUtil.getWebResource( connection,
+    WebTarget resource = publishRestUtil.getWebResource( connection,
         PublishRestUtil.CAN_PUBLISH_PATH, publishRestUtil.getAuthenticatedClient( connection ) );
-    assertEquals( resource.getURI().toString(), fullUrl );
+    assertEquals( resource.getUri().toString(), fullUrl );
 
     // test missing slash in url
     connection.setUrl( "http://localhost:8181/pentaho" );
     resource = publishRestUtil.getWebResource( connection,
         PublishRestUtil.CAN_PUBLISH_PATH, publishRestUtil.getAuthenticatedClient( connection ) );
-    assertEquals( resource.getURI().toString(), fullUrl );
+    assertEquals( resource.getUri().toString(), fullUrl );
   }
 
   @Test
@@ -137,7 +139,7 @@ public class PublishRestUtilTest {
     publishRestUtil.httpGet( connection, PublishRestUtil.CAN_PUBLISH_PATH, false );
 
     verify( publishRestUtil ).getAnonymousClient();
-    verify( mockBuilder ).get( ClientResponse.class );
+    verify( mockBuilder ).get( Response.class );
   }
 
   @Test
@@ -151,7 +153,7 @@ public class PublishRestUtilTest {
     publishRestUtil.httpGet( connection, PublishRestUtil.CAN_PUBLISH_PATH, true );
 
     verify( publishRestUtil ).getAuthenticatedClient( connection );
-    verify( mockBuilder ).get( ClientResponse.class );
+    verify( mockBuilder ).get( Response.class );
   }
 
   @Test
@@ -196,12 +198,12 @@ public class PublishRestUtilTest {
   public void testCanPublish() {
 
     BiServerConnection connection = getMockConnection();
-    ClientResponse response = mock( ClientResponse.class );
+    Response response = mock( Response.class );
 
     when( publishRestUtil.httpGet( connection, PublishRestUtil.CAN_PUBLISH_PATH, true ) )
       .thenReturn( response, response, null );
     when( response.getStatus() ).thenReturn( 200, 200 );
-    when( response.getEntity( String.class ) ).thenReturn( "true", "false" );
+    when( response.readEntity( String.class ) ).thenReturn( "true", "false" );
     assertTrue( publishRestUtil.canPublish( connection ) );
     assertEquals( 200, publishRestUtil.getLastHTTPStatus() );
     assertFalse( publishRestUtil.canPublish( connection ) );
@@ -217,8 +219,8 @@ public class PublishRestUtilTest {
 
     BiServerConnection connection = getMockConnection();
 
-    ClientResponse mockResponse = mock( ClientResponse.class );
-    when( mockResponse.getEntity( String.class ) ).thenReturn( "true" );
+    Response mockResponse = mock( Response.class );
+    when( mockResponse.readEntity( String.class ) ).thenReturn( "true" );
     when( mockResponse.getStatus() ).thenReturn( 200 );
 
     doReturn( mockResponse ).when( publishRestUtil ).httpGet( connection, PublishRestUtil.CAN_PUBLISH_PATH, true );
@@ -228,7 +230,7 @@ public class PublishRestUtilTest {
     assertTrue( publishRestUtil.lastHTTPStatus == 200 );
 
     // cannot publish
-    when( mockResponse.getEntity( String.class ) ).thenReturn( "false" );
+    when( mockResponse.readEntity( String.class ) ).thenReturn( "false" );
     when( mockResponse.getStatus() ).thenReturn( 404 );
     assertFalse( publishRestUtil.canPublish( connection ) );
     assertTrue( publishRestUtil.lastHTTPStatus == 404 );
@@ -242,12 +244,12 @@ public class PublishRestUtilTest {
   public void testCanManageDatasources() {
 
     BiServerConnection connection = getMockConnection();
-    ClientResponse response = mock( ClientResponse.class );
+    Response response = mock( Response.class );
 
     when( publishRestUtil.httpGet( connection, PublishRestUtil.CAN_MANAGE_DATASOURCES, true ) )
       .thenReturn( response, response, null );
     when( response.getStatus() ).thenReturn( 200, 200 );
-    when( response.getEntity( String.class ) ).thenReturn( "true", "false" );
+    when( response.readEntity( String.class ) ).thenReturn( "true", "false" );
     assertTrue( publishRestUtil.canManageDatasources( connection ) );
     assertEquals( 200, publishRestUtil.getLastHTTPStatus() );
     assertFalse( publishRestUtil.canManageDatasources( connection ) );
@@ -263,8 +265,8 @@ public class PublishRestUtilTest {
 
     BiServerConnection connection = getMockConnection();
 
-    ClientResponse mockResponse = mock( ClientResponse.class );
-    when( mockResponse.getEntity( String.class ) ).thenReturn( "true" );
+    Response mockResponse = mock( Response.class );
+    when( mockResponse.readEntity( String.class ) ).thenReturn( "true" );
     when( mockResponse.getStatus() ).thenReturn( 200 );
 
     doReturn( mockResponse ).when( publishRestUtil )
@@ -275,12 +277,12 @@ public class PublishRestUtilTest {
     assertTrue( publishRestUtil.lastHTTPStatus == 200 );
 
     // cannot manage data sources
-    when( mockResponse.getEntity( String.class ) ).thenReturn( "false" );
+    when( mockResponse.readEntity( String.class ) ).thenReturn( "false" );
     when( mockResponse.getStatus() ).thenReturn( 404 );
     assertFalse( publishRestUtil.canManageDatasources( connection ) );
     assertTrue( publishRestUtil.lastHTTPStatus == 404 );
 
-    when( mockResponse.getEntity( String.class ) ).thenReturn( "false" );
+    when( mockResponse.readEntity( String.class ) ).thenReturn( "false" );
 
     // unknown response
     doReturn( null ).when( publishRestUtil ).httpGet( connection, PublishRestUtil.CAN_MANAGE_DATASOURCES, true );
@@ -295,7 +297,7 @@ public class PublishRestUtilTest {
     publishRestUtil.canCreate( connection );
 
     verify( publishRestUtil ).httpGet( connection, PublishRestUtil.CAN_CREATE_PATH, true );
-    verify( mockBuilder ).get( ClientResponse.class );
+    verify( mockBuilder ).get( Response.class );
   }
 
   @Test
@@ -303,8 +305,8 @@ public class PublishRestUtilTest {
 
     BiServerConnection connection = getMockConnection();
 
-    ClientResponse mockResponse = mock( ClientResponse.class );
-    when( mockResponse.getEntity( String.class ) ).thenReturn( "true" );
+    Response mockResponse = mock( Response.class );
+    when( mockResponse.readEntity( String.class ) ).thenReturn( "true" );
 
     doReturn( mockResponse ).when( publishRestUtil ).httpGet( connection, PublishRestUtil.CAN_CREATE_PATH, true );
 
@@ -312,7 +314,7 @@ public class PublishRestUtilTest {
     assertTrue( publishRestUtil.canCreate( connection ) );
 
     // cannot create
-    when( mockResponse.getEntity( String.class ) ).thenReturn( "false" );
+    when( mockResponse.readEntity( String.class ) ).thenReturn( "false" );
     assertFalse( publishRestUtil.canCreate( connection ) );
 
     // unknown response
@@ -335,8 +337,8 @@ public class PublishRestUtilTest {
 
     BiServerConnection connection = getMockConnection();
 
-    ClientResponse mockResponse = mock( ClientResponse.class );
-    when( mockResponse.getEntity( String.class ) ).thenReturn( "true" );
+    Response mockResponse = mock( Response.class );
+    when( mockResponse.readEntity( String.class ) ).thenReturn( "true" );
 
     doReturn( mockResponse ).when( publishRestUtil ).httpGet( connection, PublishRestUtil.CAN_EXECUTE_PATH, true );
 
@@ -344,7 +346,7 @@ public class PublishRestUtilTest {
     assertTrue( publishRestUtil.canExecute( connection ) );
 
     // cannot execute
-    when( mockResponse.getEntity( String.class ) ).thenReturn( "false" );
+    when( mockResponse.readEntity( String.class ) ).thenReturn( "false" );
     assertFalse( publishRestUtil.canExecute( connection ) );
 
     // unknown response
@@ -360,7 +362,7 @@ public class PublishRestUtilTest {
     publishRestUtil.isPentahoServer( connection );
 
     verify( publishRestUtil ).httpGet( connection, PublishRestUtil.PENTAHO_WEBCONTEXT_PATH, false );
-    verify( mockBuilder ).get( ClientResponse.class );
+    verify( mockBuilder ).get( Response.class );
   }
 
   @Test
@@ -369,8 +371,8 @@ public class PublishRestUtilTest {
     BiServerConnection connection = getMockConnection();
     connection.setUrl( null );
 
-    ClientResponse mockResponse = mock( ClientResponse.class );
-    when( mockResponse.getEntity( String.class ) ).thenReturn( PublishRestUtil.PENTAHO_WEBCONTEXT_MATCH );
+    Response mockResponse = mock( Response.class );
+    when( mockResponse.readEntity( String.class ) ).thenReturn( PublishRestUtil.PENTAHO_WEBCONTEXT_MATCH );
 
     doReturn( mockResponse ).when( publishRestUtil )
         .httpGet( connection, PublishRestUtil.PENTAHO_WEBCONTEXT_PATH, false );
@@ -382,7 +384,7 @@ public class PublishRestUtilTest {
     assertTrue( publishRestUtil.isPentahoServer( connection ) );
 
     // is not pentaho server
-    when( mockResponse.getEntity( String.class ) ).thenReturn( "false" );
+    when( mockResponse.readEntity( String.class ) ).thenReturn( "false" );
     assertFalse( publishRestUtil.isPentahoServer( connection ) );
 
     // unknown response
@@ -395,19 +397,19 @@ public class PublishRestUtilTest {
 
     BiServerConnection connection = getMockConnection();
 
-    publishRestUtil.httpPut( connection, "", true, null );
+    publishRestUtil.httpPut( connection, "", true, null, MediaType.APPLICATION_JSON_TYPE );
 
     verify( publishRestUtil ).getAuthenticatedClient( connection );
-    verify( mockBuilder ).put( ClientResponse.class, null );
+    verify( mockBuilder ).put( Entity.entity( null, MediaType.APPLICATION_JSON ),Response.class );
   }
 
   @Test
   public void testHttpPut() throws Exception {
 
-    publishRestUtil.httpPut( getMockConnection(), "", false, null );
+    publishRestUtil.httpPut( getMockConnection(), "", false, null, MediaType.APPLICATION_JSON_TYPE );
 
     verify( publishRestUtil ).getAnonymousClient();
-    verify( mockBuilder ).put( ClientResponse.class, null );
+    verify( mockBuilder ).put( Entity.entity( null, "application/json" ), Response.class );
   }
 
   @Test
