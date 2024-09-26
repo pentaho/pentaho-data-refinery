@@ -2,7 +2,7 @@
  *
  * Pentaho Community Edition Project: data-refinery-pdi-plugin
  *
- * Copyright (C) 2002-2017 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2024 by Hitachi Vantara : http://www.pentaho.com
  *
  * *******************************************************************************
  *
@@ -22,15 +22,10 @@
 
 package org.pentaho.di.core.refinery.publish.util;
 
-import com.sun.jersey.api.client.Client;
-import com.sun.jersey.api.client.config.ClientConfig;
+import javax.ws.rs.client.Client;
+import org.glassfish.jersey.client.ClientProperties;
 import org.junit.Assert;
 import org.junit.Test;
-import org.pentaho.di.core.KettleClientEnvironment;
-import org.pentaho.di.core.util.EnvUtil;
-
-import static org.junit.Assert.*;
-
 
 public class BaseRestUtilTest {
 
@@ -39,12 +34,12 @@ public class BaseRestUtilTest {
 
     //without property default value 2000
     Client anonymousClient = new PublishRestUtil().getAnonymousClient();
-    Assert.assertEquals( 2000, anonymousClient.getProperties().get( ClientConfig.PROPERTY_READ_TIMEOUT ) );
+    Assert.assertEquals( 2000, anonymousClient.getConfiguration().getProperty( ClientProperties.READ_TIMEOUT ) );
 
     int timeOut = 5000;
     System.setProperty( BaseRestUtil.KETTLE_DATA_REFINERY_HTTP_CLIENT_TIMEOUT, String.valueOf( timeOut ) );
     anonymousClient = new PublishRestUtil().getAnonymousClient();
-    Assert.assertEquals( timeOut, anonymousClient.getProperties().get( ClientConfig.PROPERTY_READ_TIMEOUT ) );
+    Assert.assertEquals( timeOut, anonymousClient.getConfiguration().getProperty( ClientProperties.READ_TIMEOUT ) );
   }
 
 }

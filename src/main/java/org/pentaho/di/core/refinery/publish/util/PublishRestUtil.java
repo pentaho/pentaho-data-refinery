@@ -22,12 +22,13 @@
 
 package org.pentaho.di.core.refinery.publish.util;
 
-import com.sun.jersey.api.client.ClientResponse;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.pentaho.di.core.refinery.publish.agilebi.BiServerConnection;
 import org.pentaho.di.core.refinery.publish.model.ResponseStatus;
+import javax.ws.rs.core.Response;
 
 /**
  * @author Rowell Belen
@@ -67,11 +68,11 @@ public class PublishRestUtil extends BaseRestUtil {
 
   public boolean canPublish( final BiServerConnection connection ) {
 
-    ClientResponse response = httpGet( connection, CAN_PUBLISH_PATH, true );
+    Response response = httpGet( connection, CAN_PUBLISH_PATH, true );
 
     if ( response != null ) {
       lastHTTPStatus = response.getStatus();
-      return Boolean.parseBoolean( response.getEntity( String.class ) );
+      return Boolean.parseBoolean( response.readEntity( String.class ) );
     }
     lastHTTPStatus = -1;
     return false;
@@ -79,10 +80,10 @@ public class PublishRestUtil extends BaseRestUtil {
 
   public boolean canManageDatasources( final BiServerConnection connection ) {
 
-    ClientResponse response = httpGet( connection, CAN_MANAGE_DATASOURCES, true );
+    Response response = httpGet( connection, CAN_MANAGE_DATASOURCES, true );
     if ( response != null ) {
       lastHTTPStatus = response.getStatus();
-      return Boolean.parseBoolean( response.getEntity( String.class ) );
+      return Boolean.parseBoolean( response.readEntity( String.class ) );
     }
     lastHTTPStatus = -1;
     return false;
@@ -90,9 +91,9 @@ public class PublishRestUtil extends BaseRestUtil {
 
   public boolean canCreate( final BiServerConnection connection ) {
 
-    ClientResponse response = httpGet( connection, CAN_CREATE_PATH, true );
+    Response response = httpGet( connection, CAN_CREATE_PATH, true );
     if ( response != null ) {
-      return Boolean.parseBoolean( response.getEntity( String.class ) );
+      return Boolean.parseBoolean( response.readEntity( String.class ) );
     }
 
     return false;
@@ -100,9 +101,9 @@ public class PublishRestUtil extends BaseRestUtil {
 
   public boolean canExecute( final BiServerConnection connection ) {
 
-    ClientResponse response = httpGet( connection, CAN_EXECUTE_PATH, true );
+    Response response = httpGet( connection, CAN_EXECUTE_PATH, true );
     if ( response != null ) {
-      return Boolean.parseBoolean( response.getEntity( String.class ) );
+      return Boolean.parseBoolean( response.readEntity( String.class ) );
     }
 
     return false;
@@ -115,9 +116,9 @@ public class PublishRestUtil extends BaseRestUtil {
       return false;
     }
 
-    ClientResponse response = httpGet( connection, PENTAHO_WEBCONTEXT_PATH, false );
+    Response response = httpGet( connection, PENTAHO_WEBCONTEXT_PATH, false );
     if ( response != null ) {
-      String content = response.getEntity( String.class );
+      String content = response.readEntity( String.class );
       return ( content != null ) && ( content.contains( PENTAHO_WEBCONTEXT_MATCH ) );
     }
 
