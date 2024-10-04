@@ -132,6 +132,18 @@
           <groupId>com.sun.jersey</groupId>
           <artifactId>jersey-bundle</artifactId>
         </exclusion>
+        <exclusion>
+          <groupId>com.sun.jersey</groupId>
+          <artifactId>jersey-core</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>com.sun.jersey</groupId>
+          <artifactId>jersey-client</artifactId>
+        </exclusion>
+        <exclusion>
+          <groupId>com.sun.jersey.contribs</groupId>
+          <artifactId>jersey-apache-client</artifactId>
+        </exclusion>
       </exclusions>
     </dependency>
 
