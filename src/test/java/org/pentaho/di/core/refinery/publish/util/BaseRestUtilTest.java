@@ -2,7 +2,7 @@
  *
  * Pentaho Community Edition Project: data-refinery-pdi-plugin
  *
- * Copyright (C) 2002-2017 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2024 by Hitachi Vantara : http://www.pentaho.com
  *
  * *******************************************************************************
  *
@@ -22,7 +22,7 @@
 
 package org.pentaho.di.core.refinery.publish.util;
 
-import javax.ws.rs.client.Client;
+import jakarta.ws.rs.client.Client;
 import org.glassfish.jersey.client.ClientProperties;
 import org.junit.Assert;
 import org.junit.Test;
