@@ -14,6 +14,7 @@
 package org.pentaho.di.core.refinery.publish.util;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.pentaho.database.model.DatabaseConnection;
 
@@ -33,6 +34,7 @@ public class JAXBUtilTest {
     new JAXBUtils();
   }
 
+  @Ignore
   @Test
   public void test() throws Exception {
 

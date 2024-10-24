@@ -14,8 +14,8 @@ package org.pentaho.di.core.refinery.publish.agilebi;
 
 import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang.StringUtils;
-import com.hitachivantara.security.web.impl.client.csrf.jaxrsv2.CsrfTokenFilter;
-import com.hitachivantara.security.web.impl.client.csrf.jaxrsv2.util.SessionCookiesFilter;
+import com.hitachivantara.security.web.impl.client.csrf.jaxrsv3.CsrfTokenFilter;
+import com.hitachivantara.security.web.impl.client.csrf.jaxrsv3.util.SessionCookiesFilter;
 import org.jfree.util.Log;
 import org.pentaho.database.model.DatabaseAccessType;
 import org.pentaho.database.model.DatabaseConnection;
@@ -28,12 +28,12 @@ import org.pentaho.di.job.entries.publish.exception.DuplicateDataSourceException
 
 import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
 import org.glassfish.jersey.media.multipart.FormDataMultiPart;
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.client.Invocation;
-import javax.ws.rs.client.WebTarget;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
+import jakarta.ws.rs.client.Client;
+import jakarta.ws.rs.client.Entity;
+import jakarta.ws.rs.client.Invocation;
+import jakarta.ws.rs.client.WebTarget;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.CookieManager;

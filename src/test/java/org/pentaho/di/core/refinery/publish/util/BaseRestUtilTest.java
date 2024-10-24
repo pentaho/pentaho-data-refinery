@@ -13,7 +13,7 @@
 
 package org.pentaho.di.core.refinery.publish.util;
 
-import javax.ws.rs.client.Client;
+import jakarta.ws.rs.client.Client;
 import org.glassfish.jersey.client.ClientProperties;
 import org.junit.Assert;
 import org.junit.Test;
