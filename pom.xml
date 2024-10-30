@@ -149,7 +149,7 @@
 
     <dependency>
       <groupId>com.hitachivantara.security.web</groupId>
-      <artifactId>csrf-token-service-client-java-jax-rs-v2</artifactId>
+      <artifactId>csrf-token-service-client-java-jax-rs-v3</artifactId>
       <scope>provided</scope>
     </dependency>
 
@@ -176,9 +176,9 @@
     </dependency>
 
     <dependency>
-      <groupId>javax.ws.rs</groupId>
-      <artifactId>javax.ws.rs-api</artifactId>
-      <version>${javax.ws.rs-api.version}</version>
+      <groupId>jakarta.ws.rs</groupId>
+      <artifactId>jakarta.ws.rs-api</artifactId>
+      <version>${jakarta.ws.rs-api.version}</version>
     </dependency>
     <dependency>
       <groupId>com.fasterxml.jackson.module</groupId>
@@ -235,7 +235,7 @@
     </dependency>
     <dependency>
       <groupId>org.glassfish.jersey.ext</groupId>
-      <artifactId>jersey-spring5</artifactId>
+      <artifactId>jersey-spring6</artifactId>
       <version>${jersey.version}</version>
     </dependency>
     <dependency>
@@ -283,9 +283,9 @@
       <scope>test</scope>
     </dependency>
     <dependency>
-      <groupId>javax.servlet</groupId>
-      <artifactId>javax.servlet-api</artifactId>
-      <version>3.0.1</version>
+      <groupId>jakarta.servlet</groupId>
+      <artifactId>jakarta.servlet-api</artifactId>
+      <version>${jakarta.servlet.version}</version>
       <scope>test</scope>
     </dependency>
     <dependency>

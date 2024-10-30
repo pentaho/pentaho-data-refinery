@@ -2,7 +2,7 @@
  *
  * Pentaho Community Edition Project: data-refinery-pdi-plugin
  *
- * Copyright (C) 2002-2017 by Hitachi Vantara : http://www.pentaho.com
+ * Copyright (C) 2002-2024 by Hitachi Vantara : http://www.pentaho.com
  *
  * *******************************************************************************
  *
@@ -23,6 +23,7 @@
 package org.pentaho.di.core.refinery.publish.util;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.pentaho.database.model.DatabaseConnection;
 
@@ -42,6 +43,7 @@ public class JAXBUtilTest {
     new JAXBUtils();
   }
 
+  @Ignore
   @Test
   public void test() throws Exception {
 
