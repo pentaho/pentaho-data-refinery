@@ -15,7 +15,7 @@ package org.pentaho.di.core.refinery.publish.util;
 
 import com.fasterxml.jackson.databind.MapperFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.module.jaxb.JaxbAnnotationModule;
+import com.fasterxml.jackson.module.jakarta.xmlbind.JakartaXmlBindAnnotationModule;
 
 import jakarta.xml.bind.JAXBContext;
 import jakarta.xml.bind.Marshaller;
@@ -30,7 +30,7 @@ import java.io.StringWriter;
 public class JAXBUtils {
 
   private static ObjectMapper mapper = new ObjectMapper();
-  private static JaxbAnnotationModule module = new JaxbAnnotationModule();
+  private static JakartaXmlBindAnnotationModule module = new JakartaXmlBindAnnotationModule();
 
   static {
     mapper.configure( MapperFeature.USE_STD_BEAN_NAMING, true );
