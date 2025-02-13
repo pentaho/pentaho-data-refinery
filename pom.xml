@@ -154,6 +154,7 @@
     <dependency>
       <groupId>com.hitachivantara.security.web</groupId>
       <artifactId>csrf-token-service-client-java-jax-rs-v2</artifactId>
+      <version>${hv-security-web.version}</version>
       <scope>provided</scope>
     </dependency>
 
@@ -187,6 +188,7 @@
     <dependency>
       <groupId>com.fasterxml.jackson.module</groupId>
       <artifactId>jackson-module-jaxb-annotations</artifactId>
+      <version>${fasterxml-jackson.version}</version>
     </dependency>
     <dependency>
       <groupId>org.glassfish.jersey.core</groupId>
