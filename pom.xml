@@ -74,8 +74,8 @@
       <version>${pdi.version}</version>
       <exclusions>
         <exclusion>
-          <groupId>com.sun.jersey</groupId>
-          <artifactId>jersey-bundle</artifactId>
+          <groupId>*</groupId>
+          <artifactId>*</artifactId>
         </exclusion>
       </exclusions>
     </dependency>
@@ -129,24 +129,8 @@
       <version>${pentaho-modeler.version}</version>
       <exclusions>
         <exclusion>
-          <groupId>com.google.gwt</groupId>
-          <artifactId>gwt-dev</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>com.sun.jersey</groupId>
-          <artifactId>jersey-bundle</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>com.sun.jersey</groupId>
-          <artifactId>jersey-core</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>com.sun.jersey</groupId>
-          <artifactId>jersey-client</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>com.sun.jersey.contribs</groupId>
-          <artifactId>jersey-apache-client</artifactId>
+          <groupId>*</groupId>
+          <artifactId>*</artifactId>
         </exclusion>
       </exclusions>
     </dependency>
@@ -187,7 +171,7 @@
     </dependency>
     <dependency>
       <groupId>com.fasterxml.jackson.module</groupId>
-      <artifactId>jackson-module-jaxb-annotations</artifactId>
+      <artifactId>jackson-module-jakarta-xmlbind-annotations</artifactId>
       <version>${fasterxml-jackson.version}</version>
     </dependency>
     <dependency>
@@ -201,8 +185,8 @@
       <version>${dependency.jersey.version}</version>
     </dependency>
     <dependency>
-      <groupId>org.glassfish.jersey.core</groupId>
-      <artifactId>jersey-common</artifactId>
+      <groupId>org.glassfish.jersey.inject</groupId>
+      <artifactId>jersey-hk2</artifactId>
       <version>${dependency.jersey.version}</version>
     </dependency>
     <dependency>
@@ -279,8 +263,8 @@
       <scope>test</scope>
       <exclusions>
         <exclusion>
-          <groupId>com.sun.jersey</groupId>
-          <artifactId>jersey-bundle</artifactId>
+          <groupId>org.glassfish.jersey.core</groupId>
+          <artifactId>jersey-server</artifactId>
         </exclusion>
       </exclusions>
     </dependency>

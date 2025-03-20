@@ -26,7 +26,6 @@ import javax.ws.rs.core.Response;
 
 import org.apache.commons.io.IOUtils;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
@@ -114,7 +113,6 @@ public class ModelServerFetcherTest {
     assertTrue( dswList.get( 0 ).equals( "SomeSchema" ) );
   }
 
-  @Ignore
   @Test
   public void testDownloadAnalysisFile() throws Exception {
     InputStream in = getClass().getResourceAsStream( "/SteelWheels.mondrian.xml" );
@@ -129,7 +127,6 @@ public class ModelServerFetcherTest {
     }
   }
 
-  @Ignore
   @Test
   public void testDownloadZippedAnalysisFile() throws Exception {
     InputStream in = getClass().getResourceAsStream( "/sample.zip" );
@@ -145,7 +142,6 @@ public class ModelServerFetcherTest {
     }
   }
 
-  @Ignore
   @Test
   public void testDownloadAnalysisFileNoAuth() throws Exception {
     ModelServerFetcher fetcher = createModelServerFetcher();
@@ -158,7 +154,6 @@ public class ModelServerFetcherTest {
     }
   }
 
-  @Ignore
   @Test
   public void testDownloadDswFile() throws Exception {
     InputStream in = getClass().getResourceAsStream( "/Dsw Test.zip" );
@@ -209,7 +204,9 @@ public class ModelServerFetcherTest {
     } );
     when( resp.getMediaType() ).thenReturn( new MediaType( "application", fileType ) );
     when( builder.get( Response.class ) ).thenReturn( resp );
+    when( builder.get() ).thenReturn( resp );
     when( webResource.request().get( Response.class ) ).thenReturn( resp );
+    when( webResource.request().get() ).thenReturn( resp );
     return resp;
   }
 
