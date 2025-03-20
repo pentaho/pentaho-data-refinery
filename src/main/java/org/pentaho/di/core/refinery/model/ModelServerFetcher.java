@@ -145,7 +145,7 @@ public class ModelServerFetcher extends ModelServerAction {
     Response response =
         getResource( DataSourceType.ANALYSIS.getDownloadPath( encodedId ) ).request().get();
     if ( isSuccess( response ) ) {
-      if ( response.getMediaType().getType().equals( "application/zip" ) ) {
+      if ( response.getMediaType().toString().equals( "application/zip" ) ) {
         try ( ZipInputStream zipInputStream = extractFromZip( "schema.xml", response ) ) {
           return IOUtils.toString( zipInputStream );
         } catch ( IOException e ) {
