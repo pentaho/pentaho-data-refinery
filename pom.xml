@@ -37,10 +37,7 @@
     <pdi.version>11.0.0.0-SNAPSHOT</pdi.version>
     <platform.version>11.0.0.0-SNAPSHOT</platform.version>
 
-    <dependency.jersey.version>2.44</dependency.jersey.version>
     <dependency.javax.ws.rs-api.version>2.1</dependency.javax.ws.rs-api.version>
-    <dependency.osgi-resource-locator.version>1.0.3</dependency.osgi-resource-locator.version>
-    <dependency.mimepull.version>1.9.15</dependency.mimepull.version>
     <dependency.apache-xmlgraphics.revision>1.8</dependency.apache-xmlgraphics.revision>
     <dependency.commons.collections.revision>3.2.2</dependency.commons.collections.revision>
     <maven-bundle-plugin.version>2.4.0</maven-bundle-plugin.version>
@@ -177,27 +174,27 @@
     <dependency>
       <groupId>org.glassfish.jersey.core</groupId>
       <artifactId>jersey-client</artifactId>
-      <version>${dependency.jersey.version}</version>
+      <version>${jersey-osgi.version}</version>
     </dependency>
     <dependency>
       <groupId>org.glassfish.jersey.media</groupId>
       <artifactId>jersey-media-multipart</artifactId>
-      <version>${dependency.jersey.version}</version>
+      <version>${jersey-osgi.version}</version>
     </dependency>
     <dependency>
       <groupId>org.glassfish.jersey.inject</groupId>
       <artifactId>jersey-hk2</artifactId>
-      <version>${dependency.jersey.version}</version>
+      <version>${jersey-osgi.version}</version>
     </dependency>
     <dependency>
       <groupId>org.glassfish.hk2</groupId>
       <artifactId>osgi-resource-locator</artifactId>
-      <version>${dependency.osgi-resource-locator.version}</version>
+      <version>${jersey-osgi-resource-locator}</version>
     </dependency>
     <dependency>
       <groupId>org.jvnet.mimepull</groupId>
       <artifactId>mimepull</artifactId>
-      <version>${dependency.mimepull.version}</version>
+      <version>${mimepull-osgi.version}</version>
     </dependency>
     <dependency>
       <groupId>org.osgi</groupId>
