@@ -14,15 +14,6 @@
 package org.pentaho.di.core.refinery.publish.util;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.sun.jersey.api.client.Client;
-import com.sun.jersey.api.client.ClientResponse;
-import com.sun.jersey.api.client.WebResource;
-import com.sun.jersey.api.client.config.ClientConfig;
-import com.sun.jersey.api.client.config.DefaultClientConfig;
-import com.sun.jersey.api.client.filter.HTTPBasicAuthFilter;
-import com.sun.jersey.api.json.JSONConfiguration;
-import com.sun.jersey.core.header.FormDataContentDisposition;
-import com.sun.jersey.multipart.FormDataMultiPart;
 import org.apache.http.HttpResponse;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
@@ -31,14 +22,25 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.protocol.HttpClientContext;
 import org.apache.http.impl.client.BasicCredentialsProvider;
+import org.glassfish.jersey.client.ClientProperties;
+import org.glassfish.jersey.client.authentication.HttpAuthenticationFeature;
+import org.glassfish.jersey.media.multipart.FormDataContentDisposition;
+import org.glassfish.jersey.media.multipart.FormDataMultiPart;
 import org.pentaho.di.core.Const;
 import org.pentaho.di.core.refinery.publish.agilebi.BiServerConnection;
 import org.pentaho.di.core.refinery.publish.model.ResponseStatus;
 import org.pentaho.di.core.util.EnvUtil;
 import org.pentaho.di.core.util.HttpClientManager;
 import org.pentaho.di.core.util.HttpClientUtil;
+import org.glassfish.jersey.client.ClientConfig;
 
+import javax.ws.rs.client.Client;
+import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.client.Invocation;
+import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -53,52 +55,51 @@ public abstract class BaseRestUtil {
   protected static final String KETTLE_DATA_REFINERY_HTTP_CLIENT_TIMEOUT = "KETTLE_DATA_REFINERY_HTTP_CLIENT_TIMEOUT";
 
   protected Client getAnonymousClient() {
-    ClientConfig clientConfig = new DefaultClientConfig();
-    clientConfig.getFeatures().put( JSONConfiguration.FEATURE_POJO_MAPPING, Boolean.TRUE );
-    clientConfig.getProperties().put(
-        ClientConfig.PROPERTY_READ_TIMEOUT,
-            Const.toInt( EnvUtil.getSystemProperty( KETTLE_DATA_REFINERY_HTTP_CLIENT_TIMEOUT ), 2000 ) );  // 2 sec. timeout
-    return Client.create( clientConfig );
+    ClientConfig clientConfig = new ClientConfig();
+    clientConfig.property( ClientProperties.CONNECT_TIMEOUT, Const.toInt( EnvUtil.getSystemProperty( KETTLE_DATA_REFINERY_HTTP_CLIENT_TIMEOUT ), 2000 ) );
+    clientConfig.property( ClientProperties.READ_TIMEOUT, Const.toInt( EnvUtil.getSystemProperty( KETTLE_DATA_REFINERY_HTTP_CLIENT_TIMEOUT ), 2000 ) );
+    Client client = ClientBuilder.newClient( clientConfig );
+    return client;
   }
 
   protected Client getAuthenticatedClient( final BiServerConnection connection ) {
     Client client = getAnonymousClient();
-    client.addFilter( new HTTPBasicAuthFilter( connection.getUserId(), connection.getPassword() ) );
+    client.register( HttpAuthenticationFeature.basic( connection.getUserId(), connection.getPassword() ) );
     return client;
   }
 
-  protected WebResource getWebResource( final BiServerConnection connection, final String restUrl,
+  protected WebTarget getWebResource( final BiServerConnection connection, final String restUrl,
       final Client client ) {
     final String url =
         connection.getUrl().endsWith( "/" ) ? ( connection.getUrl() + restUrl )
             : ( connection.getUrl() + "/" + restUrl );
 
-    return client.resource( url );
+    return client.target( url );
   }
 
-  protected ClientResponse httpGet( final BiServerConnection connection, final String restUrl, boolean authenticate ) {
+  protected Response httpGet( final BiServerConnection connection, final String restUrl, boolean authenticate ) {
 
     Client client = getAnonymousClient();
     if ( authenticate ) {
       client = getAuthenticatedClient( connection );
     }
 
-    WebResource resource = getWebResource( connection, restUrl, client );
-    WebResource.Builder builder = getDefaultWebResourceBuilder( resource );
-    return builder.get( ClientResponse.class );
+    WebTarget resource = getWebResource( connection, restUrl, client );
+    Invocation.Builder builder = getDefaultWebResourceBuilder( resource );
+    return builder.get( Response.class );
   }
 
-  protected ClientResponse httpPut( final BiServerConnection connection, final String restUrl,
-      final boolean authenticate, final Object requestEntity ) {
+  protected Response httpPut( final BiServerConnection connection, final String restUrl,
+      final boolean authenticate, final Object requestEntity, final MediaType mediaType) {
 
     Client client = getAnonymousClient();
     if ( authenticate ) {
       client = getAuthenticatedClient( connection );
     }
 
-    WebResource resource = getWebResource( connection, restUrl, client );
-    WebResource.Builder builder = getDefaultWebResourceBuilder( resource );
-    return builder.put( ClientResponse.class, requestEntity );
+    WebTarget resource = getWebResource( connection, restUrl, client );
+    Invocation.Builder builder = getDefaultWebResourceBuilder( resource );
+    return builder.put( Entity.entity( requestEntity, mediaType ), Response.class );
   }
 
   protected FormDataMultiPart createFileUploadRequest( final File file, final String repositoryPath ) throws Exception {
@@ -175,10 +176,9 @@ public abstract class BaseRestUtil {
     return HttpClientUtil.responseToString( response );
   }
 
-  protected WebResource.Builder getDefaultWebResourceBuilder( WebResource webResource ) {
-    return webResource
-        .type( MediaType.APPLICATION_JSON )
-        .type( MediaType.APPLICATION_XML )
+  protected Invocation.Builder getDefaultWebResourceBuilder( WebTarget webTarget ) {
+    return webTarget
+        .request( MediaType.APPLICATION_JSON , MediaType.APPLICATION_XML )
         .accept( MediaType.WILDCARD );
   }
 

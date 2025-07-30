@@ -32,7 +32,7 @@ package org.pentaho.di.core.refinery.publish.agilebi;
 
 import java.io.Serializable;
 
-import javax.xml.bind.annotation.XmlRootElement;
+import jakarta.xml.bind.annotation.XmlRootElement;
 
 import org.pentaho.di.core.Const;
 import org.pentaho.di.core.util.StringUtil;
