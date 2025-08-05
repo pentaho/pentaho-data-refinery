@@ -32,7 +32,7 @@ import java.util.List;
   description = "ModelAnnotation.TransDescription",
   documentationUrl = "pdia-data-integration/advanced-topics-pentaho-data-integration-overview/" +
           "work-with-the-streamlined-data-refinery/use-the-streamlined-data-refinery/" +
-          "building-blocks-for-the-sdr/using-the-annotate-stream-step/use-the-annotate-stream-s",
+          "building-blocks-for-the-sdr/using-the-annotate-stream-step/use-the-annotate-stream-step",
   categoryDescription = "i18n:org.pentaho.di.trans.step:BaseStep.Category.Flow" )
 public class ModelAnnotationMeta extends BaseAnnotationMeta {
   private static Class<?> PKG = ModelAnnotationMeta.class; // for i18n purposes, needed by Translator2!!
