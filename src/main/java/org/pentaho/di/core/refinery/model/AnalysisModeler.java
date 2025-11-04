@@ -25,6 +25,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 
+import javax.xml.XMLConstants;
 import javax.xml.transform.Source;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerConfigurationException;
@@ -84,6 +85,9 @@ public class AnalysisModeler {
   private String transformSchema( final String schema, final String modelName, final String tableName )
     throws TransformerException {
     TransformerFactory factory = TransformerFactory.newInstance();
+    factory.setFeature( XMLConstants.FEATURE_SECURE_PROCESSING, true );
+    factory.setAttribute( XMLConstants.ACCESS_EXTERNAL_DTD, "" );
+    factory.setAttribute( XMLConstants.ACCESS_EXTERNAL_STYLESHEET, "" );
     Source xslt = new StreamSource( new StringReader( constructXsltForSwap( modelName, tableName ) ) );
     Transformer transformer = factory.newTransformer( xslt );
     Source text = new StreamSource( new StringReader( schema ) );
