@@ -30,7 +30,7 @@ import java.util.List;
 @Step( id = "FieldMetadataAnnotation", image = "ModelAnnotation.svg",
   i18nPackageName = "org.pentaho.di.trans.steps.annotation", name = "ModelAnnotation.TransName",
   description = "ModelAnnotation.TransDescription",
-  documentationUrl = "https://docs.pentaho.com/pdia/advanced-topics-pentaho-data-integration-overview/" +
+  documentationUrl = "https://docs.pentaho.com/pdia-admin/pdia-11.0-admin/pdi/extracting-data-into-pdi/" +
           "work-with-the-streamlined-data-refinery/use-the-streamlined-data-refinery/" +
           "building-blocks-for-the-sdr/using-the-annotate-stream-step",
   categoryDescription = "i18n:org.pentaho.di.trans.step:BaseStep.Category.Flow" )
