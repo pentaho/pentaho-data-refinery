@@ -33,7 +33,8 @@ import java.util.List;
 @Step( id = "CreateSharedDimensions", image = "SharedDimensions.svg",
     i18nPackageName = "org.pentaho.di.trans.steps.annotation", name = "SharedDimension.TransName",
     description = "SharedDimension.TransDescription",
-    documentationUrl = "Data/Streamlined_Data_Refinery/0B0/020/0C0",
+    documentationUrl = "pdia-data-integration/extracting-data-into-pdi/work-with-the-streamlined-data-refinery/" +
+            "use-the-streamlined-data-refinery/building-blocks-for-the-sdr/using-the-shared-dimension-step-for-sdr",
     categoryDescription = "i18n:org.pentaho.di.trans.step:BaseStep.Category.Flow" )
 public class SharedDimensionMeta extends BaseAnnotationMeta {
 
