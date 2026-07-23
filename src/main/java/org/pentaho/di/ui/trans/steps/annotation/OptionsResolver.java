@@ -14,7 +14,7 @@
 
 package org.pentaho.di.ui.trans.steps.annotation;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.pentaho.agilebi.modeler.models.annotations.AnnotationType;
 import org.pentaho.agilebi.modeler.models.annotations.ModelAnnotation;
 import org.pentaho.agilebi.modeler.models.annotations.ModelAnnotationGroup;

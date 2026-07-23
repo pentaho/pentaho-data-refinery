@@ -14,7 +14,7 @@
 
 package org.pentaho.di.core.refinery.publish.model;
 
-import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.commons.text.StringEscapeUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -69,7 +69,7 @@ public class DataSourceAclModel {
     if ( users != null ) {
       for ( String user : users ) {
         builder.append( "  <aces>" );
-        builder.append( "    <recipient>" ).append( StringEscapeUtils.escapeXml( user ) ).append( "</recipient>" );
+        builder.append( "    <recipient>" ).append( StringEscapeUtils.escapeXml10( user ) ).append( "</recipient>" );
         builder.append( "    <recipientType>0</recipientType>" );
         builder.append( "    <permissions>4</permissions>" );
         builder.append( "    <modifiable>false</modifiable>" );
@@ -79,7 +79,7 @@ public class DataSourceAclModel {
     if ( roles != null ) {
       for ( String role : roles ) {
         builder.append( "  <aces>" );
-        builder.append( "    <recipient>" ).append( StringEscapeUtils.escapeXml( role ) ).append( "</recipient>" );
+        builder.append( "    <recipient>" ).append( StringEscapeUtils.escapeXml10( role ) ).append( "</recipient>" );
         builder.append( "    <recipientType>1</recipientType>" );
         builder.append( "    <permissions>4</permissions>" );
         builder.append( "    <modifiable>false</modifiable>" );

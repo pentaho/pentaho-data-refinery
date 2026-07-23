@@ -14,7 +14,7 @@
 package org.pentaho.di.core.refinery.publish.agilebi;
 
 import com.google.common.annotations.VisibleForTesting;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import com.hitachivantara.security.web.impl.client.csrf.jaxrsv2.CsrfTokenFilter;
 import com.hitachivantara.security.web.impl.client.csrf.jaxrsv2.util.SessionCookiesFilter;
 import org.jfree.util.Log;
